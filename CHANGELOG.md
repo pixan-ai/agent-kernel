@@ -11,6 +11,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 ### Fixed
 
 - `screen.sh` returned the agent's screen one word per line: Claude Code places words with cursor-column moves, which were read as new lines. Seen on a live agent; checked against a real Claude Code screen.
+- An install the agent chained with other commands on one line (`uv pip install … 2>&1 | tail; cd … && python …`) was recorded but never reinstalled at start, because only a line that was nothing but the install was replayed. Each part of the line is now taken on its own; only the installs are replayed. Seen on a live agent.
 
 ## [0.1.0] - 2026-11-15
 

@@ -48,7 +48,8 @@ case "${1:-}" in
     mkdir -p /data/bin /data/tools
     ! command -v uv > /dev/null || [ -x /data/tools/venv/bin/python ] || uv venv -q --python /usr/bin/python3 /data/tools/venv || echo "install-lock: no Python environment (not fatal)" >&2
     [ -s "$LOG" ] || exit 0
-    jq -r '.command // empty' "$LOG" | grep -E -- "$REPLAY" | awk '!seen[$0]++' | while IFS= read -r c; do
+    # The agent chains commands on one line: take each part on its own, without its redirections, and keep the installs.
+    jq -r '.command // empty' "$LOG" | sed -E 's/ [0-9]*>(&[0-9]+|[^ ]*)//g' | tr ';|&' '\n' | sed -E 's/^ +| +$//g' | grep -E -- "$REPLAY" | awk '!seen[$0]++' | while IFS= read -r c; do
       read -ra w <<<"$c"; "${w[@]}" < /dev/null > /dev/null 2>&1 && echo "install-lock: reinstalled: $c" >&2 || echo "install-lock: could not reinstall (not fatal): $c" >&2
     done ;;
   *) sed -n '2,8p' "$0" >&2; exit 2 ;;
