@@ -8,6 +8,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 - **Plan limits.** The status line keeps the figures Claude Code gives it (5-hour and weekly use of the subscription) and shows them on the agent's screen; the watchdog tells the owner once when one passes 80%. A scheduled job or a nightly dream stopped by a limit now tells the owner why: Claude gives that reason on standard output, which the job's failure notice left out, and a failed dream only went to the log.
 
+### Fixed
+
+- `screen.sh` returned the agent's screen one word per line: Claude Code places words with cursor-column moves, which were read as new lines. Seen on a live agent; checked against a real Claude Code screen.
+
 ## [0.1.0] - 2026-11-15
 
 First tagged version. Lab / alpha: what was verified on a real host, and what was not, is at the end of each document under `docs/`.
