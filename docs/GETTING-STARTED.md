@@ -67,6 +67,7 @@ A fixed-price server suits several agents better than per-minute billing, and a 
 | "Tu compañero X está en …" / "¿Qué está haciendo X?" | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
 | "Recuerda que …" / "¿Qué recuerdas de …?" | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
 | "Cada día a las 9 publica en el grupo -100… lo más relevante de ayer" | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
+| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
 | "Haz super-usuario a 123456789" | That person can also give it instructions in its groups | [GROUPS.md](GROUPS.md) |
 | "Mándame el archivo …" | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
 | "Anota en tu CLAUDE.md que …" | Its own lasting instructions (name, role, tone) | |
@@ -79,7 +80,7 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 - **When the Claude plan runs low** you get one notice at 80% of the 5-hour or the weekly limit, and the reason if a job or the nightly memory is stopped by it. With an API key there are no such figures and no notice.
 - **Every change to its settings** (a group, a super-user, a job, a fellow agent) reaches you as a private notice, whoever asked for it.
 - **If you turned on the optional sleep** ([SLEEP.md](SLEEP.md)), the first message after a quiet period takes a few seconds longer.
-- **In groups** it answers when addressed or when a message is for everyone, and stays silent otherwise. Only you and the super-users give it instructions there.
+- **In groups** it answers when addressed or when a message is for everyone, and stays silent otherwise. Anyone there may ask it for ordinary work (transcribe, read a document, search, summarise); only you and the super-users can make it install something, change its settings, schedule jobs, act on other agents or share what is private.
 
 ## 7. Before you rely on it
 
@@ -148,15 +149,15 @@ Decided on 2026-11-12, built with a lock in `bin/install-lock.sh`. Not yet tried
 | "baja elevenlabs" / "instala python-pptx" | `uv pip install elevenlabs` | `/data/tools/venv` (run with `/data/tools/venv/bin/python`) |
 | "instala la herramienta ruff" | `uv tool install ruff` | `/data/bin`, on the agent's `PATH` |
 | "aprende a hacer un PowerPoint" | writes a skill | `/data/workspace/.claude/skills/` |
-| "instala ffmpeg" | `uv pip install imageio-ffmpeg==0.8.1`, then a link to its `ffmpeg` in `/data/bin` | `/data/tools/venv`, `/data/bin/ffmpeg` (about 165 MB on the volume) |
 
-It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("transcribe esta nota de voz", "¿qué se ve en este video?"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
+It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("haz una gráfica", "lee este código QR"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
 
-`ffmpeg` is not in the image because it would add about 450 MB to every agent. The recipe above uses the static build that the `imageio-ffmpeg` package carries (FFmpeg 9.0.2 in 0.8.1, pinned by version), with no root and no system libraries. It handles voice notes (Opus) and video frames.
 
 **What the owner sees.** A private Telegram message after every install: "🧰 Installed at the request of NAME: COMMAND". Every install is also a line in `/data/tools.json` (when, who by name and id, the tool, the command). Ask "¿qué tienes instalado?" to see the list.
 
 **Only that agent.** An install applies to the agent that ran it. To have it on other agents, the super-user asks each of them; there is no fleet-wide install.
+
+**Google Docs.** A document shared by link is downloaded through its export address; a private one needs the Google connector, which this deployment does not enable.
 
 **After a restart or a new image.** Everything lives on the volume, so it stays. At every start, `start.sh` makes the Python environment if it is missing and reinstalls the recorded `uv pip install`, `uv tool install` and `bun add -g` lines. A line that fails is logged and the start goes on. Other kinds of commands are never replayed.
 
@@ -182,13 +183,15 @@ Every agent gets these, ready for its skills (decided 2026-11-12):
 | Python 3 (`python3`) | Python Software Foundation | Most skills: PowerPoint, Excel, PDFs, charts, ElevenLabs and other APIs |
 | `uv`, `uvx` | Astral | Installing Python packages and tools, fast and isolated (pinned by version and checksum) |
 | `pdftotext` and the rest of `poppler-utils` | Poppler (freedesktop.org) | Reading PDFs |
-| `pandoc` | John MacFarlane and contributors | Converting between Word, Markdown, HTML and PDF |
+| `pandoc` | John MacFarlane and contributors | Writing Word, PowerPoint, Markdown and HTML (not PDF) |
+| `whisper-ctranslate2` with the Whisper `small` model | Softcatalà; model by OpenAI, converted by Systran | Voice notes and audio to text, offline (decided 2026-11-15) |
+| `markitdown` | Microsoft | PDF, Word, Excel, PowerPoint, HTML and CSV to text |
+| `ffmpeg` (static build from `imageio-ffmpeg`) | FFmpeg developers | Video frames and audio conversion |
 | `unzip` | Info-ZIP | Opening zip files and skill packages |
 | Time zones (`tzdata`) | IANA | Jobs and logs in the `TZ` you set; already in the Debian base |
 
-Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Python packages (for example `python-pptx`) are not in the image: they are installed per agent. These tools add about 300 MB to the image, most of it `pandoc`.
+Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages (for example `python-pptx`) are not in the image: they are installed per agent. Voice and documents add about 1.2 GB (the Whisper model is about 480 MB of it); the tools of 2026-11-12 added about 300 MB to the image, most of it `pandoc`.
 
-Not in the image on purpose: `ffmpeg` (voice notes, audio, video frames). With its libraries it would add about 450 MB to every agent. An agent that needs it installs it on a super-user's request, without root (see the self-improvement section).
 
 ## If something is wrong
 
