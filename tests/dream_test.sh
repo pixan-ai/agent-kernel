@@ -14,6 +14,7 @@ echo "$CLAUDE_CONFIG_DIR" > /data/claude-config-dir; printf '%s' "$*" > /data/cl
 case "${CLAUDE_STUB:-ok}" in ok) ;; quiet) echo "Not logged in"; exit 1 ;; *) echo boom >&2; exit 1 ;; esac  # quiet: like the real one, the reason on stdout
 echo "- Ana prefers mornings" > /data/workspace/MEMORY.md
 EOF2
+printf '#!/usr/bin/env bash\necho "$1" >> /data/notified\n' > "$STUBS/notify.sh"
 chmod 755 "$STUBS"/*
 fresh() {
   mkdir -p /data/workspace; find /data -mindepth 1 -delete; mkdir -p /data/workspace /data/cron "$P"
@@ -53,6 +54,7 @@ check "...and is tried again at the next start" absent /data/cron/last-dream
 check "...and the start log says why" grep -q "dream: failed.*boom" /data/dream-log
 check "...without stopping the agent from starting" rc 0
 fresh; dream CLAUDE_STUB=quiet
+check "...and the owner is told: a dream that fails night after night must not go unseen" grep -q "Not logged in" /data/notified
 check "Claude gives its reason on standard output, not as an error: the start log still says why" grep -q "dream: failed.*Not logged in" /data/dream-log
 
 fresh; rm "$P/s1.jsonl"; dream

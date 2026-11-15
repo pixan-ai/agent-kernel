@@ -76,6 +76,7 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 ## 6. What to expect day to day
 
 - **Every night at 4:00** the agent restarts, consolidates the day into its memory and begins a new conversation. It is away for a minute or two. The next day it knows what it kept, not the literal wording of yesterday.
+- **When the Claude plan runs low** you get one notice at 80% of the 5-hour or the weekly limit, and the reason if a job or the nightly memory is stopped by it. With an API key there are no such figures and no notice.
 - **Every change to its settings** (a group, a super-user, a job, a fellow agent) reaches you as a private notice, whoever asked for it.
 - **If you turned on the optional sleep** ([SLEEP.md](SLEEP.md)), the first message after a quiet period takes a few seconds longer.
 - **In groups** it answers when addressed or when a message is for everyone, and stays silent otherwise. Only you and the super-users give it instructions there.
@@ -200,4 +201,5 @@ Not in the image on purpose: `ffmpeg` (voice notes, audio, video frames). With i
 | A job's answer came to you instead of the group | The agent is no longer in that group; tell it to join again |
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`: the public address is missing or wrong ([SLEEP.md](SLEEP.md)) |
+| "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |

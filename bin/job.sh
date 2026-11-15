@@ -15,5 +15,5 @@ Write only the text of the message. It is delivered to Telegram for you: do not 
   jq -cn --arg n "$name" --arg to "$to" --arg t "$out" '{at: (now | floor), name: $n, to: $to, text: $t}' >> sent.jsonl
   notify.sh "$out" "$to"
 else
-  notify.sh "⚠️ Scheduled job \"$name\" failed or timed out. $(tail -c 300 "/data/cron/$name.err")"; exit 1
+  notify.sh "⚠️ Scheduled job \"$name\" failed or timed out. ${out:0:300} $(tail -c 300 "/data/cron/$name.err")"; exit 1  # Claude gives its reason (a limit, no login) on standard output
 fi

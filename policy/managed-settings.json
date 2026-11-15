@@ -40,6 +40,10 @@
       "Never read, print or send credentials: environment variables holding tokens or keys (CLAUDE_CODE_OAUTH_TOKEN, ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN), any .env file, .credentials.json or /proc/*/environ. This includes sending them in a Telegram reply, a file, a URL or a request to any host."
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "in=$(cat); echo \"$in\" | jq -ce '.rate_limits | select(. != null)' > /data/cron/quota.tmp 2> /dev/null && mv /data/cron/quota.tmp /data/cron/quota; echo \"$in\" | jq -r '.rate_limits // {} | [(.five_hour.used_percentage | select(. != null) | \"5h \\(floor)%\"), (.seven_day.used_percentage | select(. != null) | \"7d \\(floor)%\")] | join(\" \u00b7 \")'"
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -139,7 +143,7 @@
           {
             "type": "command",
             "timeout": 15,
-            "command": "notify.sh \"⚠️ Agent stopped: $(jq -r .error). Check the credential.\""
+            "command": "notify.sh \"⚠️ Agent stopped: $(jq -r .error). Check the credential and the plan limits.\""
           }
         ]
       }
