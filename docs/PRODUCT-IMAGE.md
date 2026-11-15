@@ -25,11 +25,11 @@ Option B: the customer builds the image themselves from the same `Dockerfile` (`
 
 Option C: publish a base image (OS, `bun`, `jq`, `setpriv`, policy, scripts) and let the customer's own `FROM` add Claude Code. Closest to A without runtime install, but needs the customer to build once.
 
-## Decisions needed from the owner
+## Decisions
 
-1. A, B or C (or a mix: B for customers, A for convenience).
-2. Whether the product image carries the managed policy (recommended: yes, it contains no secrets).
-3. Whether to ask Anthropic in writing before publishing anything.
+1. **Decided (2026-11-10): option C.** The `base` target is what may be published; whoever runs an agent builds `agent` on top of it, which adds Claude Code on their own host.
+2. **Decided: the base image carries the managed policy.** It holds no secrets.
+3. **Open: whether to ask Anthropic in writing before publishing anything.** Publishing stays locked (`PUBLISH_IMAGE`) until the owner turns it on.
 
 ## Not decided here
 
