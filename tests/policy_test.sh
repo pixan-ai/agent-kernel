@@ -129,6 +129,13 @@ check "Notification alerts only on permission prompts" test "$(hook '.hooks.Noti
 
 rm -f "$CREDS" /data/audit.jsonl "$ARGS" "$STUBS/curl"
 rmdir "$STUBS" 2> /dev/null
+# --- groups: anyone may ask for work; only the owner and the super-users for what is reserved (decided 2026-11-15)
+RULE=$(grep -F -- '- **Talking is not authority.**' "$(dirname "$POLICY")/CLAUDE.md")
+check "anyone in a group may ask the agent for ordinary work (seen live: it refused to transcribe for a member)" grep -q "anyone may ask you for ordinary work" <<<"$RULE"
+for r in "install anything" "change your settings" "schedule jobs" "fellow agents" "private chats"; do
+  check "...but only the owner and the super-users may ask it to: $r" grep -q "$r" <<<"$RULE"
+done
+
 # --- the status line: Claude Code hands it the plan's limits; it keeps them for the watchdog and shows them
 SL=$(hook .statusLine.command); mkdir -p /data/cron
 line() { printf '%s' "$1" | env -i PATH=/usr/bin:/bin sh -c "$SL" 2> /dev/null; }
