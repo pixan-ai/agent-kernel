@@ -97,7 +97,7 @@ bin/dream.sh                  the daily dream: consolidate memory, then a clean 
 bin/doorbell.sh               the opt-in sleep: wait for Telegram to announce a message (see docs/SLEEP.md)
 bin/doorbell.js               the listener Telegram calls while the agent sleeps
 bin/backup.sh                 nightly encrypted backup, and restore onto an empty volume (see docs/BACKUP.md)
-bin/watchdog.sh               tells the owner about a message left unanswered, and restarts when the Telegram plugin is gone
+bin/watchdog.sh               tells the owner about a message left unanswered and a plan limit past 80%, and restarts when the Telegram plugin is gone
 bin/notify.sh                 one Telegram message to the owner
 bin/denials.sh                loaded policy + tool errors from the latest session
 bin/install-lock.sh           the install lock: only a super-user can make the agent install (see docs/GETTING-STARTED.md)
