@@ -29,7 +29,7 @@ Claude Code's own in-session scheduler is disabled (`CLAUDE_CODE_DISABLE_CRON=1`
 ## Verified on Railway (2026-11-10)
 
 - A job the bot scheduled itself ran three minutes later with the subscription token, headless, next to the interactive session, and its message reached the owner.
-- The bot then answered "what did you just send me?" correctly from `sent.md`, and removed the one-off line from the crontab.
+- The bot then answered "what did you just send me?" correctly from the record of deliveries (then `sent.md`; now `sent.jsonl`, shown to it by a hook), and removed the one-off line from the crontab.
 - Times follow `TZ` (Supercronic logs in -06:00; the message said 9:01 CST).
 - After a redeploy the bot continued the conversation (it listed the attachments sent the night before).
 
