@@ -57,7 +57,7 @@ jobs:
           docker run --rm --entrypoint sh pixan-kernel-spike:ci -ec 'test "$(id -u)" = 1001
             claude --version; bun --version; jq --version; curl --version; age --version; rclone version
             supercronic -version; ssh -V; script --version; realpath --version; tini --version
-            whisper-ctranslate2 --help; markitdown --help; ffmpeg -version; pandoc --version
+            whisper-ctranslate2 --help; markitdown --help; ffmpeg -version; pandoc --version; typst --version; python-docs -c 'import docx, pptx, openpyxl'
             python3 --version; uv --version; uvx --version; pdftotext -v; pandoc --version; unzip -v
             test -e /usr/share/zoneinfo/America/Mexico_City; UV_PYTHON_DOWNLOADS=never uv venv -q /tmp/venv' > /dev/null
       # Voice notes and documents, as the agent's user and with no network: nothing may be downloaded at use.

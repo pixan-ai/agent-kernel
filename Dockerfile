@@ -7,7 +7,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Second line: tools for skills (python3: documents and APIs; poppler-utils: PDFs; pandoc: Word and Markdown; unzip: archives).
 # tzdata is already in the base image.
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git jq procps openssh-server openssh-client tini rclone age \
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git jq procps openssh-server openssh-client tini rclone age xz-utils \
     python3 poppler-utils pandoc unzip \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -u 1001 agent && mkdir -p /data /opt/seed /run/sshd && chown agent:agent /data /opt/seed
@@ -22,16 +22,25 @@ ARG UV_VERSION=0.13.8 UV_SHA256=5acfd9177cfecf0bf87578f059728215ccc884388988f55f
 RUN curl -fsSL -o /tmp/uv.tgz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
  && echo "${UV_SHA256}  /tmp/uv.tgz" | sha256sum -c - && tar -xzf /tmp/uv.tgz -C /usr/local/bin --strip-components=1 --no-same-owner && rm /tmp/uv.tgz
 
-# Every agent hears voice notes and reads documents out of the box (decided 2026-11-15; this reverses "no ffmpeg in the image").
-# One environment, all pinned: whisper-ctranslate2 (voice to text), markitdown (PDF, Word, Excel, PowerPoint to text) and the static
-# ffmpeg that imageio-ffmpeg carries (video frames). The Whisper model is baked in, pinned by revision: nothing is downloaded at use.
-ARG WHISPER_CT2=0.5.9 MARKITDOWN=0.1.9 IMAGEIO_FFMPEG=0.8.1 WHISPER_MODEL_REV=536b0662742c02347bc0e980a01041f333bce120
+# Every agent hears voice notes, reads documents and makes them, out of the box (decided 2026-11-15; this reverses "no ffmpeg in the image").
+# One environment, all pinned: whisper-ctranslate2 (voice to text), markitdown (PDF, Word, Excel, PowerPoint to text), python-docx,
+# python-pptx and openpyxl (making them; run with `python-docs`) and the static ffmpeg that imageio-ffmpeg carries (video frames).
+# The Whisper model is baked in, pinned by revision: nothing is downloaded at use.
+ARG WHISPER_CT2=0.5.9 MARKITDOWN=0.1.9 IMAGEIO_FFMPEG=0.8.1 WHISPER_MODEL_REV=536b0662742c02347bc0e980a01041f333bce120 \
+    PYTHON_DOCX=1.2.0 PYTHON_PPTX=1.0.2 OPENPYXL=3.1.5
 RUN UV_TOOL_DIR=/opt/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install --no-cache --python /usr/bin/python3 "whisper-ctranslate2==${WHISPER_CT2}" \
       --with "markitdown[pdf,docx,pptx,xlsx,xls]==${MARKITDOWN}" --with "imageio-ffmpeg==${IMAGEIO_FFMPEG}" --with-executables-from markitdown \
+      --with "python-docx==${PYTHON_DOCX}" --with "python-pptx==${PYTHON_PPTX}" --with "openpyxl==${OPENPYXL}" \
  && P=/opt/tools/whisper-ctranslate2/bin/python \
  && ln -s "$($P -c 'import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg \
+ && printf '#!/bin/sh\nexec %s "$@"\n' $P > /usr/local/bin/python-docs && chmod 755 /usr/local/bin/python-docs \
  && $P -c "from huggingface_hub import snapshot_download as d; d('Systran/faster-whisper-small', revision='${WHISPER_MODEL_REV}', local_dir='/opt/models/whisper-small')" \
  && rm -rf /opt/models/whisper-small/.cache
+
+# Typst makes PDFs (`typst compile`), with its own fonts: one binary, no LaTeX. Pinned by version and checksum.
+ARG TYPST_VERSION=0.15.1 TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
+RUN curl -fsSL -o /tmp/typst.tar.xz "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+ && echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c - && tar -xJf /tmp/typst.tar.xz -C /usr/local/bin --strip-components=1 --no-same-owner --wildcards '*/typst' && rm /tmp/typst.tar.xz
 
 # Managed policy: owned by root, not editable by the agent, highest precedence in Claude Code.
 COPY policy/ /etc/claude-code/
