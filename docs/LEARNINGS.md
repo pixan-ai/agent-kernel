@@ -73,6 +73,7 @@ Rule: a stub must demand what the real thing demands.
 - **Cost is memory, not CPU.** Idle agents cost almost as much as busy ones until they are stopped (*measured*: an agent asleep used a quarter of the memory of one always on).
 - **A session that never ends gets more expensive with every message.** The dream ends it once a day.
 - **A pasted credential can arrive truncated.** The start log prints its length and prefix, never its value.
+- **An agent out of quota fails without a word.** For two days the nightly dream failed with nothing in the log, most likely on a used-up subscription that several agents share. Now the owner is warned at 80% and told the reason when a job or a dream is stopped.
 - **A sleep that cannot be woken is worse than no sleep.** If the wake-up call cannot be registered, the agent stays awake.
 
 ## Method

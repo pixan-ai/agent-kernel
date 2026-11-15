@@ -11,7 +11,7 @@ cat > "$STUBS/claude" <<'EOF'
 #!/usr/bin/env bash
 # Stub Claude: record where it keeps its config, then behave as CLAUDE_STUB says.
 echo "$CLAUDE_CONFIG_DIR" > /data/claude-config-dir; printf '%s' "${@: -1}" > /data/claude-prompt
-case "${CLAUDE_STUB:-ok}" in ok) echo "five AI headlines";; echo) echo "${@: -1}"; echo "noise on stderr" >&2;; fail) echo "boom" >&2; exit 1;; hang) sleep 30;; esac
+case "${CLAUDE_STUB:-ok}" in ok) echo "five AI headlines";; echo) echo "${@: -1}"; echo "noise on stderr" >&2;; fail) echo "boom" >&2; exit 1;; limit) echo "Claude usage limit reached"; exit 1;; hang) sleep 30;; esac
 EOF
 cat > "$STUBS/curl" <<'EOF'
 #!/usr/bin/env bash
@@ -48,6 +48,8 @@ check "the job's session is told to write the message, not to send it" grep -q "
 : > /data/curl-args; job CLAUDE_STUB=fail
 check "...but its failure goes to the owner, never to the group" bash -c 'grep -q "chat_id=42" /data/curl-args && ! grep -q "chat_id=-1001" /data/curl-args'
 check "...with the error, which never travels with a normal answer" grep -q "boom" /data/curl-args
+: > /data/curl-args; job CLAUDE_STUB=limit
+check "a job stopped by the plan's limit: the owner reads the reason, which Claude gives on standard output" grep -q "usage limit reached" /data/curl-args
 
 fresh; job CLAUDE_STUB=fail
 check "a failing job alerts the owner" sent_to_owner 'Scheduled job "news" failed'
@@ -56,6 +58,23 @@ check "...and records nothing as sent" test ! -e /data/workspace/sent.jsonl
 
 fresh; job CLAUDE_STUB=hang JOB_TIMEOUT=1
 check "a hung job is killed at its timeout and the owner is alerted" sent_to_owner 'Scheduled job "news" failed'
+
+# --- the plan's limits: the status line hook leaves the latest figures; the watchdog tells the owner once
+fresh; echo '{"five_hour":{"used_percentage":41.2},"seven_day":{"used_percentage":63}}' > /data/cron/quota
+env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "quota: under 80% of every limit -> nothing is said" test ! -s /data/curl-args
+echo '{"five_hour":{"used_percentage":41.2},"seven_day":{"used_percentage":86.7}}' > /data/cron/quota
+env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "quota: a limit passes 80% -> the owner is told which one and how much" sent_to_owner "weekly 86%"
+: > /data/curl-args; env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "...once, not every five minutes" test ! -s /data/curl-args
+echo '{"five_hour":{"used_percentage":3},"seven_day":{"used_percentage":12}}' > /data/cron/quota
+env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+echo '{"five_hour":{"used_percentage":91},"seven_day":{"used_percentage":12}}' > /data/cron/quota
+env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "...and again after the limit has reset and filled up once more" sent_to_owner "5-hour 91%"
+fresh; env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "quota: no figures yet (an API key, or nothing asked so far) -> nothing is said" test ! -s /data/curl-args
 
 # --- watchdog: Claude up, Telegram plugin gone
 printf '#!/usr/bin/env bash\n[ "${CLAUDE_UP:-1}" = 1 ]\n' > "$STUBS/pgrep"; printf '#!/usr/bin/env bash\necho "$*" >> /data/pkill-args\n' > "$STUBS/pkill"; chmod 755 "$STUBS/pgrep" "$STUBS/pkill"

@@ -129,6 +129,13 @@ check "Notification alerts only on permission prompts" test "$(hook '.hooks.Noti
 
 rm -f "$CREDS" /data/audit.jsonl "$ARGS" "$STUBS/curl"
 rmdir "$STUBS" 2> /dev/null
+# --- the status line: Claude Code hands it the plan's limits; it keeps them for the watchdog and shows them
+SL=$(hook .statusLine.command); mkdir -p /data/cron
+line() { printf '%s' "$1" | env -i PATH=/usr/bin:/bin sh -c "$SL" 2> /dev/null; }
+check "the status line shows how much of each limit is used" test "$(line '{"rate_limits":{"five_hour":{"used_percentage":41.2},"seven_day":{"used_percentage":63}}}')" = "5h 41% · 7d 63%"
+check "...and keeps the figures where the watchdog reads them" test "$(jq -c .seven_day.used_percentage /data/cron/quota)" = 63
+check "...and without figures (an API key) it shows nothing and keeps the last ones" test -z "$(line '{"model":{}}')" -a -s /data/cron/quota
+
 # --- the reply tool is pre-approved (no classifier, no delay), so a hook decides which files it may attach.
 R='.hooks.PreToolUse[] | select(.matcher == "mcp__plugin_telegram_telegram__reply") | .hooks[0].command'
 attach() { run_hook "$R" "{\"tool_input\":{\"text\":\"hi\",\"files\":[\"$1\"]}}"; }
