@@ -32,9 +32,9 @@ RUN UV_TOOL_DIR=/opt/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install --no-c
       --with "markitdown[pdf,docx,pptx,xlsx,xls]==${MARKITDOWN}" --with "imageio-ffmpeg==${IMAGEIO_FFMPEG}" --with-executables-from markitdown \
       --with "python-docx==${PYTHON_DOCX}" --with "python-pptx==${PYTHON_PPTX}" --with "openpyxl==${OPENPYXL}" \
  && P=/opt/tools/whisper-ctranslate2/bin/python \
- && ln -s "$($P -c 'import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg \
- && printf '#!/bin/sh\nexec %s "$@"\n' $P > /usr/local/bin/python-docs && chmod 755 /usr/local/bin/python-docs \
- && $P -c "from huggingface_hub import snapshot_download as d; d('Systran/faster-whisper-small', revision='${WHISPER_MODEL_REV}', local_dir='/opt/models/whisper-small')" \
+ && ln -s "$("$P" -c 'import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg \
+ && printf '#!/bin/sh\nexec %s "$@"\n' "$P" > /usr/local/bin/python-docs && chmod 755 /usr/local/bin/python-docs \
+ && "$P" -c "from huggingface_hub import snapshot_download as d; d('Systran/faster-whisper-small', revision='${WHISPER_MODEL_REV}', local_dir='/opt/models/whisper-small')" \
  && rm -rf /opt/models/whisper-small/.cache
 
 # Typst makes PDFs (`typst compile`), with its own fonts: one binary, no LaTeX. Pinned by version and checksum.
