@@ -23,6 +23,9 @@ printf '\033[1;1HHello \033[31mred\033[0m\r\n\033[2;1HWorld\033]0;title\007\033[
 check "screen: cursor moves split lines; colors, titles, CRs and blank lines are dropped" \
   test "$("$SCREEN")" = $'Hello red\nWorld\nlast'
 
+printf 'thought\033[9Gfor\033[13G1s)\033[2;1H5h\033[1C9%%' > /data/tui.log
+check "screen: a move along the line is a space, not a new line (seen live: one word per line)" test "$("$SCREEN")" = $'thought for 1s)\n5h 9%'
+
 seq 1 40 | sed 's/^/line /' > /data/tui.log
 check "screen: shows the last 30 lines by default" test "$("$SCREEN" | wc -l)" = 30
 check "screen: the first of them is line 11" test "$("$SCREEN" | head -1)" = "line 11"
