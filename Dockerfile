@@ -5,7 +5,7 @@ FROM oven/bun:1-debian@sha256:93d5032fe06d163427822dc1598f420363759bb18155c9cc90
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Unpinned apt packages on purpose: pinned Debian versions vanish from the mirror; Dependabot bumps the base image.
 # Second line: tools for skills (python3: documents and APIs; poppler-utils: PDFs; pandoc: Word and Markdown; unzip: archives).
-# tzdata is already in the base image. No ffmpeg: about 450 MB; an agent that needs it installs it (docs/GETTING-STARTED.md).
+# tzdata is already in the base image.
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git jq procps openssh-server openssh-client tini rclone age \
     python3 poppler-utils pandoc unzip \
@@ -21,6 +21,17 @@ RUN curl -fsSL -o /usr/local/bin/supercronic "https://github.com/aptible/supercr
 ARG UV_VERSION=0.13.8 UV_SHA256=5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
 RUN curl -fsSL -o /tmp/uv.tgz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
  && echo "${UV_SHA256}  /tmp/uv.tgz" | sha256sum -c - && tar -xzf /tmp/uv.tgz -C /usr/local/bin --strip-components=1 --no-same-owner && rm /tmp/uv.tgz
+
+# Every agent hears voice notes and reads documents out of the box (decided 2026-11-15; this reverses "no ffmpeg in the image").
+# One environment, all pinned: whisper-ctranslate2 (voice to text), markitdown (PDF, Word, Excel, PowerPoint to text) and the static
+# ffmpeg that imageio-ffmpeg carries (video frames). The Whisper model is baked in, pinned by revision: nothing is downloaded at use.
+ARG WHISPER_CT2=0.5.9 MARKITDOWN=0.1.9 IMAGEIO_FFMPEG=0.8.1 WHISPER_MODEL_REV=536b0662742c02347bc0e980a01041f333bce120
+RUN UV_TOOL_DIR=/opt/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install --no-cache --python /usr/bin/python3 "whisper-ctranslate2==${WHISPER_CT2}" \
+      --with "markitdown[pdf,docx,pptx,xlsx,xls]==${MARKITDOWN}" --with "imageio-ffmpeg==${IMAGEIO_FFMPEG}" --with-executables-from markitdown \
+ && P=/opt/tools/whisper-ctranslate2/bin/python \
+ && ln -s "$($P -c 'import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg \
+ && $P -c "from huggingface_hub import snapshot_download as d; d('Systran/faster-whisper-small', revision='${WHISPER_MODEL_REV}', local_dir='/opt/models/whisper-small')" \
+ && rm -rf /opt/models/whisper-small/.cache
 
 # Managed policy: owned by root, not editable by the agent, highest precedence in Claude Code.
 COPY policy/ /etc/claude-code/

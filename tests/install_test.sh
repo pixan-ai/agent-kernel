@@ -61,12 +61,13 @@ check "the agent can read the install record: the Read tool is allowed on it" jq
 turn 777 ana
 check "a super-user named with config.sh admin is a super-user here too" allows Bash "uv tool install ruff"
 
-# What the agent is told, and the ffmpeg recipe in it (ffmpeg is not in the image): installs, under the lock, and replayable.
+# What the agent is told; and a two-step install of its own (a package, then a link in /data/bin): under the lock, and replayable.
 RULES=$(dirname "$POLICY")/CLAUDE.md
 check "the agent is told to name a missing tool and why, and never to install system packages" \
   bash -c 'grep -q "say which tool and why" "$0" && grep -q "Never system packages (\`apt\`)" "$0"' "$RULES"
-mapfile -t R < <(grep -F -- '- `ffmpeg`, without root:' "$RULES" | grep -o '`[^`]*`' | tr -d '`' | sed 1d)
-check "...with a pinned recipe for ffmpeg without root" test "${R[0]:-}" = "uv pip install imageio-ffmpeg==0.8.1" -a -n "${R[1]:-}"
+check "...and that audio and document tools are in the image, not to be installed again" \
+  bash -c 'grep -q "whisper-ctranslate2 --model_directory /opt/models/whisper-small" "$0" && grep -q "markitdown FILE" "$0" && grep -q "Do not install these again" "$0"' "$RULES"
+R=("uv pip install imageio-ffmpeg==0.8.1" 'ln -sf "$(/data/tools/venv/bin/python -c "import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())")" /data/bin/ffmpeg')
 check "...which a super-user's request lets through, both steps" bash -c '"$0" Bash "$1" && "$0" Bash "$2"' allows "${R[0]:-}" "${R[1]:-}"
 turn 999 pepe
 check "...and anyone else's does not" bash -c '! "$0" Bash "$1" && ! "$0" Bash "$2"' allows "${R[0]:-}" "${R[1]:-}"
