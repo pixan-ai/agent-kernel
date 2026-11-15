@@ -7,6 +7,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 ### Added
 
 - **Every agent hears voice notes and reads documents out of the box** (decided 2026-11-15; this reverses the 2026-11-12 decision to keep `ffmpeg` out of the image). The `base` image adds, pinned: `whisper-ctranslate2` with the Whisper `small` model baked in (voice to text, offline), `markitdown` (PDF, Word, Excel, PowerPoint, HTML and CSV to text) and a static `ffmpeg` (video frames). About 1.2 GB more. CI checks them as the agent's user with no network (`tests/media_test.sh`). The agent is told they are there, and how to download a Google Docs link that is shared publicly.
+- Guide: what a group member who is not a super-user may ask for (since #74), and that voice notes and documents work with no setup.
 - **Plan limits.** The status line keeps the figures Claude Code gives it (5-hour and weekly use of the subscription) and shows them on the agent's screen; the watchdog tells the owner once when one passes 80%. A scheduled job or a nightly dream stopped by a limit now tells the owner why: Claude gives that reason on standard output, which the job's failure notice left out, and a failed dream only went to the log.
 
 ### Changed
