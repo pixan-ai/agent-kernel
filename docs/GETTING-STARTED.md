@@ -67,7 +67,8 @@ A fixed-price server suits several agents better than per-minute billing, and a 
 | "Tu compañero X está en …" / "¿Qué está haciendo X?" | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
 | "Recuerda que …" / "¿Qué recuerdas de …?" | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
 | "Cada día a las 9 publica en el grupo -100… lo más relevante de ayer" | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
-| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
+| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start |
+| "Hazme un Excel / Word / PowerPoint / PDF con …" | It makes the file and sends it to you | | [What the image contains](#what-the-image-contains) |
 | "Haz super-usuario a 123456789" | That person can also give it instructions in its groups | [GROUPS.md](GROUPS.md) |
 | "Mándame el archivo …" | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
 | "Anota en tu CLAUDE.md que …" | Its own lasting instructions (name, role, tone) | |
@@ -183,14 +184,16 @@ Every agent gets these, ready for its skills (decided 2026-11-12):
 | Python 3 (`python3`) | Python Software Foundation | Most skills: PowerPoint, Excel, PDFs, charts, ElevenLabs and other APIs |
 | `uv`, `uvx` | Astral | Installing Python packages and tools, fast and isolated (pinned by version and checksum) |
 | `pdftotext` and the rest of `poppler-utils` | Poppler (freedesktop.org) | Reading PDFs |
-| `pandoc` | John MacFarlane and contributors | Writing Word, PowerPoint, Markdown and HTML (not PDF) |
+| `pandoc` | John MacFarlane and contributors | Quick Word, Markdown and HTML from text |
+| `python-docs`: Python with `openpyxl`, `python-docx`, `python-pptx` | Open-source projects of those names | Making Excel, Word and PowerPoint files with layout (decided 2026-11-15) |
+| `typst` | Typst GmbH | Making PDFs, with its own fonts, no LaTeX |
 | `whisper-ctranslate2` with the Whisper `small` model | Softcatalà; model by OpenAI, converted by Systran | Voice notes and audio to text, offline (decided 2026-11-15) |
 | `markitdown` | Microsoft | PDF, Word, Excel, PowerPoint, HTML and CSV to text |
 | `ffmpeg` (static build from `imageio-ffmpeg`) | FFmpeg developers | Video frames and audio conversion |
 | `unzip` | Info-ZIP | Opening zip files and skill packages |
 | Time zones (`tzdata`) | IANA | Jobs and logs in the `TZ` you set; already in the Debian base |
 
-Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages (for example `python-pptx`) are not in the image: they are installed per agent. Voice and documents add about 1.2 GB (the Whisper model is about 480 MB of it); the tools of 2026-11-12 added about 300 MB to the image, most of it `pandoc`.
+Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages (for example `python-pptx`) are not in the image: they are installed per agent. Voice and documents add about 1.3 GB (the Whisper model is about 480 MB of it); the tools of 2026-11-12 added about 300 MB to the image, most of it `pandoc`.
 
 
 ## If something is wrong

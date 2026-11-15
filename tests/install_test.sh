@@ -66,7 +66,7 @@ RULES=$(dirname "$POLICY")/CLAUDE.md
 check "the agent is told to name a missing tool and why, and never to install system packages" \
   bash -c 'grep -q "say which tool and why" "$0" && grep -q "Never system packages (\`apt\`)" "$0"' "$RULES"
 check "...and that audio and document tools are in the image, not to be installed again" \
-  bash -c 'grep -q "whisper-ctranslate2 --model_directory /opt/models/whisper-small" "$0" && grep -q "markitdown FILE" "$0" && grep -q "Do not install these again" "$0"' "$RULES"
+  bash -c 'grep -q "whisper-ctranslate2 --model_directory /opt/models/whisper-small" "$0" && grep -q "markitdown FILE" "$0" && grep -q "python-docs" "$0" && grep -q "typst compile" "$0" && grep -q "Do not install these again" "$0"' "$RULES"
 R=("uv pip install imageio-ffmpeg==0.8.1" 'ln -sf "$(/data/tools/venv/bin/python -c "import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())")" /data/bin/ffmpeg')
 check "...which a super-user's request lets through, both steps" bash -c '"$0" Bash "$1" && "$0" Bash "$2"' allows "${R[0]:-}" "${R[1]:-}"
 turn 999 pepe
