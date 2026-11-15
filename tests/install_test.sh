@@ -72,10 +72,14 @@ check "...nor with a glob or quotes (audit)" bash -c '! "$0" Bash "touch /data/c
 for c in 'echo "admin 999" >> /data/settings' "echo x >> /data/sett[i]ngs" "echo '* * * * * job.sh x' >> /data/cron/jobs" "echo evil > /data/cron/prompts/news"; do
   check "...nor the settings or the jobs by hand, even for the owner: $c" refuses Bash "$c"
 done
+check "...nor with a path that climbs out of the workspace (advisor review)" refuses Write /data/workspace/../cron/prompts/news
 check "...nor with the file tools" bash -c '! "$0" Write /data/settings && ! "$0" Edit /data/cron/jobs && ! "$0" Write /data/cron/prompts/news' allows
 check "the owner may name a super-user (config.sh tells the owner)" allows Bash "config.sh admin 999"
 check "the agent can read the install record: the Read tool is allowed on it" jq -e '.permissions.allow | index("Read(//data/tools.json)") != null' "$POLICY"
 turn 999 pepe
+for c in 'config.sh "ad"min 999' 'con\fig.sh admin 999' 'u""v pip install x' 'p\ip install x'; do
+  check "...nor with quotes or escapes inside the words: $c" refuses Bash "$c"
+done
 check "someone else may not have a super-user named, here or on a fellow agent (audit)" bash -c '! "$0" Bash "config.sh admin 999" && ! "$0" Bash "peer.sh look junior \"admin 999\""' allows
 turn 777 ana
 check "a super-user named with config.sh admin is a super-user here too" allows Bash "uv tool install ruff"

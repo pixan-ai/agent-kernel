@@ -32,7 +32,8 @@ uses_only() { local c; c=$(field .tool_input.command | plain)
   ! grep -qE -- '\$\(|`|<\(' <<<"$c" || ! grep -qE -- "$WHERE" <<<"$c" || return 1
   tr ';&|(' '\n' <<<"$c" | sed -E 's/^ +//; s#^([A-Za-z_][A-Za-z0-9_]*=[^ ]* +)*/data/(bin|tools/venv/bin)/[A-Za-z0-9._-]+( |$)##' \
     | grep -vE '^(ls|cat|head|tail|file|stat|du|wc|which|readlink)( [^<>]*)?$' | grep -qE -- "$WHERE" && return 1; return 0; }
-install() { grep -qE -- "$INSTALL" <<<"$(field .tool_input.command)" || in_place || ! uses_only; }
+cmd() { field .tool_input.command; field .tool_input.command | plain; }  # as typed, and without quotes and escapes
+install() { grep -qE -- "$INSTALL" <<<"$(cmd)" || in_place || ! uses_only; }
 wrote() { grep -qE -- "$WRITE" <<<"$(field .tool_input.command)" || in_place; }
 case "${1:-}" in
   turn)
@@ -48,9 +49,9 @@ case "${1:-}" in
     grep -qxF "OWNER_TELEGRAM_ID=$id" /data/config/channels/telegram/.env 2> /dev/null || grep -qxF "admin $id" /data/settings 2> /dev/null || exit 0
     jq -n --arg s "$(field .session_id)" --arg id "$id" --arg u "$who" '{session: $s, id: $id, user: $u}' > "$OK" ;;
   check)
-    ! grep -qE -- "$KEPT" <<<"$(printf '%s %s' "$(field .tool_input.command)" "$(field '.tool_input.file_path // .tool_input.notebook_path')" | plain)" ||
+    ! grep -qE -- "$KEPT" <<<"$(printf '%s %s' "$(field .tool_input.command)" "$(realpath -m -- "$(field '.tool_input.file_path // .tool_input.notebook_path')")" | plain)" ||
       { echo "The settings, the jobs and the install record are kept by the policy: change them with config.sh, read the record with the Read tool." >&2; exit 2; }
-    ! grep -qE -- '(config|peer)\.sh[^;&|]*admin' <<<"$(field .tool_input.command)" || open ||
+    ! grep -qE -- '(config|peer)\.sh[^;&|]*admin' <<<"$(cmd)" || open ||
       { echo "Only the owner or a super-user can name a super-user. Say so, and do not try another way." >&2; exit 2; }
     ! install || open || { echo "Only the owner or a super-user can ask for an install (packages, tools, skills, /data/bin, /data/tools). Say so, and do not try another way." >&2; exit 2; } ;;
   record)
