@@ -12,10 +12,10 @@ set -euo pipefail
 F=/data/settings; TG=/data/config/channels/telegram; J=/data/cron/jobs; B=$(dirname "$(readlink -f "$0")")
 mkdir -p /data/cron/prompts; touch $F $J
 case "${1:-} ${2:-}" in
-  "show ") exec cat $F $J ;;
+  "show ") cat $F $J; grep -r . /data/cron/prompts || true; exit ;;  # the jobs' prompts as FILE:TEXT
   "job "*) [[ $2 =~ ^([0-9*/,-]+\ ){4}[0-9*/,-]+$ && ${3:-} =~ ^[A-Za-z0-9_-]+$ && -n ${4:-} ]] || { echo 'use: job "M H D M W" NAME "PROMPT" [GROUP_ID]' >&2; exit 2; }
     [ -z "${5:-}" ] || grep -qxF "group $5" $F || { echo "a job can deliver to the owner or to a group this agent is in" >&2; exit 2; }
-    printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; set -- job "$3 ($2)" ;;
+    printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
   "apply ") ;;
   "group "*|"admin "*) [[ $2 =~ ^-?[0-9]+$ ]] || { echo "an id is a number" >&2; exit 2; }; grep -qxF "$1 $2" $F || echo "$1 $2" >> $F ;;
   "peer "*) [[ $2 =~ ^[A-Za-z0-9_]+=[A-Za-z0-9.-]+$ ]] || { echo "use NAME=HOST" >&2; exit 2; }; grep -qxF "peer $2" $F || echo "peer $2" >> $F ;;
@@ -30,5 +30,5 @@ esac
 jq -n --arg o "$OWNER_TELEGRAM_ID" --rawfile f $F '($f | split("\n") | map(split(" "))) as $l
   | ($l | map(select(.[0] == "group") | .[1])) as $gs
   | {dmPolicy: "allowlist", allowFrom: ([$o] + $gs), groups: ($gs | map({key: ., value: {requireMention: false, allowFrom: []}}) | from_entries), pending: {}}' > $TG/access.json.tmp && mv $TG/access.json.tmp $TG/access.json
-[ "$1" = apply ] || echo "ok: $1 $2. Groups: $(jq -c '.groups | keys' $TG/access.json)"
-[ "$1" = apply ] || "$B/notify.sh" "⚙️ Setting changed${SSH_CONNECTION:+ by a fellow agent}: $1 $2. To undo it, ask me to drop $2." || echo "could not notify the owner" >&2
+[ "$1" = apply ] || echo "ok: $1 $2${D:-}. Groups: $(jq -c '.groups | keys' $TG/access.json)"
+[ "$1" = apply ] || "$B/notify.sh" "⚙️ Setting changed${SSH_CONNECTION:+ by a fellow agent}: $1 $2${D:-}. To undo it, ask me to drop $2." || echo "could not notify the owner" >&2

