@@ -12,7 +12,7 @@ The host's variables are for installation: credentials, the owner, keys. Day-to-
 
 Super-users also decide what the agent installs (packages, tools, skills): see [GETTING-STARTED.md](GETTING-STARTED.md#self-improvement-installing-skills-and-tools).
 
-`TELEGRAM_GROUP_IDS` still works: `start.sh` adds it to the same file at every start.
+`TELEGRAM_GROUP_IDS` still works, on the first start only: `start.sh` seeds the file from it when there is none. After that the file is the one source, so a group removed by chat does not come back at the next restart.
 
 ## One agent setting another's groups
 

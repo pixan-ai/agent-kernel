@@ -14,7 +14,7 @@ Tell the agent in private: "join the group -1001234567890". It applies the chang
 
 | Variable | Meaning |
 |---|---|
-| `TELEGRAM_GROUP_IDS` | Group chat ids the bot may take part in, separated by spaces, e.g. `-1001234567890` |
+| `TELEGRAM_GROUP_IDS` | Group chat ids the bot may take part in, separated by spaces, e.g. `-1001234567890`. Read on the first start only; after that the agent keeps the list |
 
 `start.sh` rebuilds the plugin's `access.json` from the settings at every start. In a listed group the bot receives every message, from every member, **without needing a mention**: it decides from the content whether it is being addressed (its instructions tell it to stay silent otherwise).
 

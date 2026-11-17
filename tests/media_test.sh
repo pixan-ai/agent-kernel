@@ -10,6 +10,7 @@ F=$(dirname "$(readlink -f "$0")")/fixtures; T=$(mktemp -d)
 says() { grep -qi "$2" <<<"$1"; }
 
 check "runs as the agent's own user" test "$(id -u)" = 1001
+check "text is UTF-8 (accents and emoji in file names and output)" test "${LANG:-}" = C.UTF-8
 out=$(whisper-ctranslate2 --model_directory /opt/models/whisper-small --compute_type int8 --language es --output_dir "$T" "$F/hola.ogg" 2>&1)
 check "a voice note is transcribed, offline, with the model in the image" says "$out" "hola"
 for f in doc.docx hoja.xlsx pres.pptx; do

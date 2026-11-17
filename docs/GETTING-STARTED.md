@@ -108,7 +108,7 @@ Set once, at installation. Changing one restarts the agent.
 | `TZ` | `UTC` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
 | `ANTHROPIC_MODEL` | Claude's default | Pin the model | |
 | `CLAUDE_FLAGS` | empty | Extra flags for `claude`, e.g. `--advisor claude-opus-5-5` | |
-| `TELEGRAM_GROUP_IDS` | empty | Groups to join from the first start (the same as telling the agent) | [GROUPS.md](GROUPS.md) |
+| `TELEGRAM_GROUP_IDS` | empty | Groups to join at the first start (the same as telling the agent); read only while `/data/settings` does not exist yet | [GROUPS.md](GROUPS.md) |
 | `IDLE_SLEEP_MINUTES` | empty = always on | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
 | `DOORBELL_URL` | `https://` + `RAILWAY_PUBLIC_DOMAIN` | Public address Telegram calls to wake a sleeping agent. Needed outside Railway | [SLEEP.md](SLEEP.md) |
 | `RAILWAY_PUBLIC_DOMAIN` | set by Railway | Not yours to set: Railway provides it when the service has a public domain | [SLEEP.md](SLEEP.md) |
