@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
+
 ## [0.1.0] - 2026-11-15
 
 First tagged version. Lab / alpha: what was verified on a real host, and what was not, is at the end of each document under `docs/`.

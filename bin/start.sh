@@ -33,7 +33,7 @@ config.sh apply
 # A revoked or mistyped bot token would leave the bot mute with no error anywhere: ask Telegram once (the answer also tells the agent its own bot name, see the SessionStart hook). Only a clear 401 stops the start; a network hiccup does not. The URL goes through stdin so the token is not in a process list.
 code=$(printf 'url = "https://api.telegram.org/bot%s/getMe"\n' "$TELEGRAM_BOT_TOKEN" | curl -sS -K - -o "$TG/me.json" -w '%{http_code}' -m 10 2>/dev/null || true)
 [ "$code" != 401 ] || { echo "Telegram rejected TELEGRAM_BOT_TOKEN (HTTP 401): create a new one with BotFather" >&2; exit 1; }
-unset TELEGRAM_BOT_TOKEN RCLONE_CONF BACKUP_AGE_KEY  # from here on only private files hold them (the plugin, the hooks and the scripts read those)
+unset TELEGRAM_BOT_TOKEN RCLONE_CONF BACKUP_AGE_KEY  # Claude and what it runs do not inherit them; the start environment in /proc still holds them (THREAT-MODEL.md)
 # Nobody is at the screen: pre-accept onboarding, the API key (if one is used) and trust for the workspace folder.
 # Auth: ANTHROPIC_API_KEY (Console, billed per use) or CLAUDE_CODE_OAUTH_TOKEN (subscription, from `claude setup-token`).
 [ -s "$CFG/.claude.json" ] || echo '{}' > "$CFG/.claude.json"

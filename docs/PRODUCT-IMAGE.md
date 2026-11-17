@@ -15,7 +15,7 @@ Build the agent: `docker build -t my-agent .` Build only the base: `docker build
 
 ## Why the product image has no Claude Code
 
-Anthropic's documentation says a product that preinstalls Claude Code needs Commercial Terms, an unmodified binary, and each end user's own credentials. This project is open source and sells consulting, not software, so it should not redistribute the binary at all.
+Anthropic's documentation says a product that preinstalls Claude Code needs Commercial Terms, an unmodified binary, and each end user's own credentials. This project is open source and does not redistribute the binary at all.
 
 ## How the product image gets Claude Code
 

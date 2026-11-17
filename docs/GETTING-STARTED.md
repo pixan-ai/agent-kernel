@@ -12,8 +12,10 @@ After the installation everything else is done **by talking to the agent**: addi
 
 ## 2. Get the Claude credential (your computer, 3 minutes)
 
-- **Subscription (recommended):** install Claude Code, run `claude` once and log in, then run `claude setup-token` in the terminal (not inside Claude). Keep the token that starts with `sk-ant-oat01-`.
-- **API key instead:** create one in the [Anthropic console](https://console.anthropic.com/). Billed per use.
+Which one: a **subscription for a personal agent**, the one you talk to yourself; an **API key for an agent that serves groups or clients**. Anthropic's terms assume ordinary, individual use of a subscription, and ask products and services to use API keys ([legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)). An agent set up for someone else runs on that person's own credential, in their own host account; nobody else keeps or bills it.
+
+- **Subscription (personal agent):** install Claude Code, run `claude` once and log in, then run `claude setup-token` in the terminal (not inside Claude). Keep the token that starts with `sk-ant-oat01-`.
+- **API key (groups, clients):** create one in the [Anthropic console](https://console.anthropic.com/). Billed per use.
 
 Copy the value with a copy button, not by selecting text: a truncated token gives a bot that shows "typing…" and never answers.
 
@@ -175,7 +177,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 ## Self-improvement: installing skills and tools
 
-Decided on 2026-11-12, built with a lock in `bin/install-lock.sh`. Not yet tried on a live agent.
+Decided on 2026-11-12, built with a lock in `bin/install-lock.sh`. Seen working on a live agent on 2026-11-13.
 
 **Who.** Only the owner or a super-user ([SETTINGS.md](SETTINGS.md)) can make the agent install something. The owner counts as one more super-user. Anyone else who asks is refused by a hook, not only by the agent's judgment.
 
@@ -212,6 +214,8 @@ It runs at once, with no approval step. You do not need to know the tool's name:
 The rules common to every agent (`/etc/claude-code/`) come with the image and cannot be changed from inside.
 
 ## What the image contains
+
+The image is built for 64-bit Intel and AMD (`linux/amd64`); ARM servers and Apple Silicon Macs are not supported.
 
 Every agent gets these, ready for its skills (decided 2026-11-12):
 

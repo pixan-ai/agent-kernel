@@ -1,6 +1,7 @@
 services:
   agent:
     build: .
+    platform: linux/amd64  # the image downloads amd64 binaries
     env_file: .env
     environment:
       TZ: ${TZ:-UTC}
