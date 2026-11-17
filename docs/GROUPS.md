@@ -30,10 +30,10 @@ Tell the agent in private: "join the group -1001234567890". It applies the chang
 - Everything written in the group enters the agent's session: more usage on the owner's Claude plan, in proportion to how busy the group is.
 - Other members read the bot's answers, so do not use a group with people who should not see them.
 - With several bots hearing each other, each one's messages enter the others' sessions: more usage, and a risk of bots answering each other in a loop. The instructions tell each agent to answer only when addressed and never to reply to a fellow bot's reply by default.
-- Until this version only the owner and listed ids were heard in a group. `TELEGRAM_GROUP_SENDERS` and `config.sh sender` no longer exist; old `sender` lines in `/data/settings` are ignored.
 
 ## Verified
 
 - In CI: the generated `access.json` for no groups, and for listed groups (open to every member); the owner's id reaching the session.
 - On Railway (2026-11-11), reported by the owner: in a real group, two agents each read and answered ordinary members, super-users and each other.
+- On Railway (2026-11-17): an agent declined a fellow bot's request to write into its tools folder, saying only the owner or a super-user may ask.
 - Not verified: that a member who is not a super-user is refused when asking for a setting change or private information.

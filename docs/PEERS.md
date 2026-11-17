@@ -1,6 +1,6 @@
 # Peer view: one agent looks at another
 
-Opt-in. Lets a fellow agent (or its owner, through it) see what this agent is doing, and add or drop its Telegram groups and super-users ([SETTINGS.md](SETTINGS.md)). Nothing else. It is the mechanism used in the earlier pixan stacks (SSH with a forced command), rebuilt with standard tools and no extra code beyond `bin/peer.sh`.
+Opt-in. Lets a fellow agent (or its owner, through it) see what this agent is doing, and add or drop its Telegram groups and super-users ([SETTINGS.md](SETTINGS.md)). Nothing else. It is SSH with a forced command, built with standard tools and no extra code beyond `bin/peer.sh`.
 
 ## What a peer can do
 
@@ -36,6 +36,6 @@ Set `PEERS` on the agent that looks, as `name=host` pairs separated by spaces, f
 
 ## Verified
 
-- In CI, inside the image, with a real server and client: a listed key sees the screen; other commands, chained commands and shell requests are refused; an unlisted key sees nothing.
+- In CI, inside the image, with a real server and client: a listed key sees the screen; other commands, chained commands, shells, terminals and tunnels are refused; an unlisted key sees nothing.
 - On Railway (2026-11-10): one agent read the other's screen and status over the private network (`agent2.railway.internal`).
 - Not verified yet on Railway: `transcript` against a real session file, and names from `PEERS`.

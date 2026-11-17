@@ -6,6 +6,7 @@
 
 ## Checklist
 
-- [ ] `shellcheck bin/*.sh`, `jq empty policy/managed-settings.json`, `hadolint Dockerfile` pass
+- [ ] A test that fails without the change, and passes with it
+- [ ] The checks listed in CONTRIBUTING.md pass
 - [ ] No credentials in the diff
 - [ ] Code added is justified, or code was removed

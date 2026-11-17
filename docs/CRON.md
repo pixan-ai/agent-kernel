@@ -8,12 +8,12 @@ Jobs survive restarts and redeploys because they are lines in a file on the volu
 |---|---|
 | `config.sh job "M H D M W" NAME "PROMPT"` | How a job is added: by the agent, when the owner asks in chat. Validates the schedule and the name, tells the owner. `config.sh drop NAME` removes it |
 | `/data/cron/jobs`, `/data/cron/prompts/NAME` | The agent's jobs (`SCHEDULE job.sh NAME`) and their prompts, on the volume |
-| `bin/system.cron` | The image's own jobs (the daily recycle at 04:00, and `watchdog.sh` every five minutes). Root-owned, replaced by every image update |
+| `bin/system.cron` | The image's own jobs (the nightly backup at 03:30, the daily recycle at 04:00, and `watchdog.sh` every five minutes). Root-owned, replaced by every image update |
 | `/data/cron/crontab` | What Supercronic runs: the image's jobs plus the agent's, rebuilt by `config.sh apply` at every start and after every change. **Only well-formed `job.sh NAME` lines are copied**: anything else written into the files never runs |
 | `job.sh NAME` | Runs the prompt in a separate Claude session (`claude -p`), which only writes the message; the script sends it to the owner in private, or to a group the agent is in if the job was given one (`config.sh job … GROUP_ID`). Failures always go to the owner. It alerts the owner if it fails, exceeds `JOB_TIMEOUT` (default 900 s) or Telegram refuses the delivery. A one-off (a fixed day and month) removes itself once delivered |
 | `/data/workspace/sent.jsonl` | One line per delivery (when, job, destination, text; last 500). A `UserPromptSubmit` hook shows the agent its last five deliveries of the last 24 hours, each cut at 400 characters, with every message it receives, so "explain the first item" works. The file is also there for the agent to read |
 
-Why the filter: a cron line runs outside Claude Code, with no permission check, no hook and no audit record. Limiting cron to `job.sh` keeps every scheduled action inside a Claude session under the managed policy. On hosts without a hard floor the agent's shell could still rewrite these files; the filter removes the documented, easy path, and a restart restores the image's jobs.
+Why the filter: a cron line runs outside Claude Code, with no permission check, no hook and no transcript. Limiting cron to `job.sh` keeps every scheduled action inside a Claude session under the managed policy. On hosts without a hard floor the agent's shell could still rewrite these files; the filter removes the documented, easy path, and a restart restores the image's jobs.
 
 ## Why a separate session, with its own config directory
 
@@ -37,6 +37,12 @@ Claude Code's own in-session scheduler is disabled (`CLAUDE_CODE_DISABLE_CRON=1`
 
 - A job added with `config.sh job` ran, delivered in private, and was dropped by the agent afterwards; another delivered to a group the agent is in.
 - The `UserPromptSubmit` hook fires for messages that arrive through the Telegram channel: asked what context came with the owner's message, the agent described the note and the delivery it listed. A follow-up question about a job's message ("even if it is completely cut off?") was answered correctly with no other context.
+
+## Verified on Railway (2026-11-17)
+
+- A delivery Telegram refused (a group the bot is not in) reached the owner as "could not be delivered", and was not recorded as sent.
+- A one-off reminder was delivered and then removed itself; the notice of a new job carried its schedule, destination and text.
+- A job meant for a group the agent has not joined is refused when it is scheduled.
 
 ## Not verified yet
 
