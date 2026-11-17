@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Added
 
+- Every agent has the advisor on from its first start: the policy sets `advisorModel` to `opus`, so Claude can ask a stronger model for advice at key moments of a task. On a subscription its use counts toward the plan's limits. Experimental in Claude Code; `CLAUDE_FLAGS=--advisor MODEL` still picks another model for one agent.
 - The settings for a one-click Railway template, in docs/DEPLOY-RAILWAY.md (service, volume, variables with their descriptions), checked against the guide by `docs_test`. The template itself is made and published from the Railway dashboard.
 - A release can also publish the image to Docker Hub, same digest, signed there too, when `DOCKERHUB_REPOSITORY` and its two secrets are set (docs/RELEASING.md). Publishing stays locked by `PUBLISH_IMAGE`.
 - `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/pixan-kernel-spike/`: the software the image carries, its licences, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
