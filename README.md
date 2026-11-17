@@ -71,7 +71,7 @@ Defense in depth, each layer using an official mechanism:
 2. **Managed policy**: root-owned file; `deny` rules, enforced on Claude's file tools only, for credentials and for writes to the config, plugin and policy paths (a shell command can still write them, see below).
 3. **Permission classifier (auto mode)**: reviews every action that is not explicitly allowed.
 4. **Never waits for a person**: `permissions.denyInsteadOfPrompting` denies any call that would need an approval prompt; the agent is told and carries on. Nothing is ever allowed by it.
-5. **Hooks**: every tool call, failure and denial adds one short line to `/data/audit.jsonl` (when, event, tool, mode, error; the last 10000 are kept, the full detail is in the session transcript); credential failures alert the owner on Telegram.
+5. **Hooks**: credential failures alert the owner on Telegram; what each tool call did is in the session transcript.
 6. **Container**: non-root user (uid 1001), one volume, no secrets baked into the image.
 
 Known limits (read before trusting it):
@@ -99,7 +99,6 @@ bin/doorbell.js               the listener Telegram calls while the agent sleeps
 bin/backup.sh                 nightly encrypted backup, and restore onto an empty volume (see docs/BACKUP.md)
 bin/watchdog.sh               tells the owner about a message left unanswered and a plan limit past 80%, and restarts when the Telegram plugin is gone
 bin/notify.sh                 one Telegram message to the owner
-bin/denials.sh                loaded policy + tool errors from the latest session
 bin/install-lock.sh           the install lock: only a super-user can make the agent install (see docs/GETTING-STARTED.md)
 policy/managed-settings.json  the managed policy and hooks
 bin/system.cron               the image's own scheduled jobs (daily recycle, watchdog, nightly backup)

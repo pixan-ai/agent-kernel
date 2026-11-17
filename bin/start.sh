@@ -14,8 +14,9 @@ fi
 # Then log a sanity check without printing any part of it.
 T="${CLAUDE_CODE_OAUTH_TOKEN:-}"; T="${T//[[:space:]]/}"; [ -z "$T" ] || export CLAUDE_CODE_OAUTH_TOKEN="$T"; [ -z "$T" ] || echo "oauth token: ${#T} chars, starts with sk-ant-oat01-: $([[ "$T" == sk-ant-oat01-* ]] && echo yes || echo NO)" >&2
 CFG=/data/config; TG=$CFG/channels/telegram; WS=/data/workspace
-# Backups (docs/BACKUP.md): the storage credentials go to a private file. An empty volume with BACKUP_AGE_KEY set is restored from the newest backup.
-(umask 077; mkdir -p /data/ssh; [ -z "${RCLONE_CONF:-}" ] || printf '%s\n' "$RCLONE_CONF" > /data/ssh/rclone.conf)
+# Private keys go to /data/ssh: the backup storage credentials (docs/BACKUP.md) and the key to look at fellow agents (docs/PEERS.md).
+(umask 077; mkdir -p /data/ssh; [ -z "${RCLONE_CONF:-}" ] || printf '%s\n' "$RCLONE_CONF" > /data/ssh/rclone.conf; [ -z "${PEER_SSH_KEY:-}" ] || printf '%s\n' "$PEER_SSH_KEY" > /data/ssh/peer_key)
+# An empty volume with BACKUP_AGE_KEY set is restored from the newest backup.
 [ -e "$CFG/.claude.json" ] || [ -z "${BACKUP_AGE_KEY:-}" ] || backup.sh restore || echo "restore failed: starting with an empty volume" >&2
 mkdir -p "$WS" "$TG/inbox"; rm -f "$TG/bot.pid"  # a new container has no old poller, and a stale pid can name a recycled process
 cp -rn /opt/seed/config/. "$CFG"/
@@ -44,11 +45,9 @@ cd "$WS"
 # Opt-in via SCREEN_MIRROR, the seconds between copies: copy the readable screen to the service log when it changes. Off by default: the screen holds the owner's conversation.
 [ -z "${SCREEN_MIRROR:-}" ] || (prev=; while sleep "$SCREEN_MIRROR"; do cur=$(screen.sh 25 2>/dev/null || true); [ "$cur" = "$prev" ] || { printf '%s\n----\n' "$cur" >&2; prev=$cur; }; done) &
 # script = the pty; tail keeps stdin open; stty avoids a 0x0 terminal. The screen is kept in /data/tui.log (see screen.sh).
-# Opt-in peer view (docs/PEERS.md): fellow agents whose public keys are listed may read this agent's screen; PEER_SSH_KEY lets this one look at others.
-(umask 077; mkdir -p /data/ssh; [ -z "${PEER_SSH_KEY:-}" ] || printf '%s\n' "$PEER_SSH_KEY" > /data/ssh/peer_key)
+# Opt-in peer view (docs/PEERS.md): fellow agents whose public keys are listed may read this agent's screen.
 [ -z "${PEER_PUBLIC_KEYS:-}" ] || peer.sh serve
-# The audit log keeps its last 10000 events and the record of job deliveries its last 500 (the screen log is overwritten at every start).
-[ ! -f /data/audit.jsonl ] || { tail -n 10000 /data/audit.jsonl > /data/audit.tmp && mv /data/audit.tmp /data/audit.jsonl; }
+# The record of job deliveries keeps its last 500 (the screen log is overwritten at every start).
 [ ! -f "$WS/sent.jsonl" ] || { tail -n 500 "$WS/sent.jsonl" > "$WS/sent.tmp" && mv "$WS/sent.tmp" "$WS/sent.jsonl"; }
 # Scheduled jobs: config.sh apply (above) built /data/cron/crontab from the image's jobs and the agent's. If the last heartbeat is old, say so: jobs due meanwhile did not run.
 [ ! -e /data/cron/alive ] || [ -e /data/idle ] || (( $(date +%s) - $(stat -c %Y /data/cron/alive) < 300 )) || notify.sh "Back online. I was down from $(date -r /data/cron/alive '+%F %H:%M') to $(date '+%H:%M'); jobs scheduled in between did not run." || true

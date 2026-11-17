@@ -16,6 +16,6 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Output of bin/screen.sh and bin/denials.sh
+      label: Output of bin/screen.sh
       description: Remove tokens, keys and chat ids before pasting.
       render: shell

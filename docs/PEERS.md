@@ -8,7 +8,6 @@ Opt-in. Lets a fellow agent (or its owner, through it) see what this agent is do
 |---|---|
 | `screen` (default) | The last readable lines of this agent's Claude Code screen |
 | `status` | Whether Claude is running and the last heartbeat |
-| `denials` | The loaded policy checks and the latest tool errors |
 | `transcript` | The last 40 messages of the latest conversation: what the owner wrote and what the agent answered (each cut at 600 characters). No tool results |
 | `group ID`, `admin ID`, `drop ID` | Changes this agent's groups and super-users through its own `config.sh`; this agent's owner is told |
 | anything else | Refused |

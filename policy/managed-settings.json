@@ -23,9 +23,7 @@
       "Read(//proc/**)",
       "Bash(printenv)",
       "Bash(printenv *)",
-      "Bash(env)",
-      "Bash(rm -rf /)",
-      "Bash(rm -rf /*)"
+      "Bash(env)"
     ],
     "allow": [
       "ToolSearch",
@@ -119,15 +117,6 @@
     ],
     "PostToolUse": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -c '{at: (now | todate), event: .hook_event_name, tool: .tool_name, mode: .permission_mode, error: ((.error // .reason // \"\") | tostring | .[0:200])}' >> /data/audit.jsonl",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
           {
@@ -150,28 +139,7 @@
         ]
       }
     ],
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "timeout": 15,
-            "command": "notify.sh \"⏸ Agent is waiting for a permission: $(jq -r .message)\""
-          }
-        ]
-      }
-    ],
     "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -c '{at: (now | todate), event: .hook_event_name, tool: .tool_name, mode: .permission_mode, error: ((.error // .reason // \"\") | tostring | .[0:200])}' >> /data/audit.jsonl",
-            "timeout": 5
-          }
-        ]
-      },
       {
         "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
@@ -182,18 +150,6 @@
           }
         ]
       }
-    ],
-    "PermissionDenied": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -c '{at: (now | todate), event: .hook_event_name, tool: .tool_name, mode: .permission_mode, error: ((.error // .reason // \"\") | tostring | .[0:200])}' >> /data/audit.jsonl",
-            "timeout": 5
-          }
-        ]
-      }
     ]
-  },
-  "promptSuggestionEnabled": false
+  }
 }
