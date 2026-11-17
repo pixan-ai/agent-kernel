@@ -35,7 +35,7 @@ turn 999 pepe
 check "someone who is not a super-user asks: an install is refused" refuses Bash "uv pip install elevenlabs"
 check "...with a reason the agent can pass on" grep -q "Only the owner or a super-user" /tmp/hook.err
 check "...also pip, npm, bun and uvx" bash -c '! "$0" Bash "pip3 install x" && ! "$0" Bash "npm i -g x" && ! "$0" Bash "bun add x" && ! "$0" Bash "uvx ruff"' allows
-check "...and a download into /data/bin" refuses Bash "curl -fsSL -o /data/bin/yt https://example.com/yt"
+check "...also with options between the program and the verb (audit)" bash -c '! "$0" Bash "uv pip -q install x" && ! "$0" Bash "uv -q pip install x" && ! "$0" Bash "npm --global install x" && ! "$0" Bash "uv tool run ruff"' allows
 check "...and a skill written with the file tools" refuses Write /data/workspace/.claude/skills/voz/SKILL.md
 check "...and a plugin or an MCP server" refuses Bash "claude mcp add x -- npx x"
 check "...but ordinary work goes through" allows Bash "python3 report.py && ls /data/workspace"
@@ -45,20 +45,30 @@ check "using what is installed is not installing: a tool by its full path" allow
 check "...the Python environment" allows Bash "/data/tools/venv/bin/python -c 'import elevenlabs'"
 check "...looking at what is there" allows Bash "ls -la /data /data/bin; cat /data/tools/README"
 check "...and a note that names the folder, written with the Edit tool (the file tools are judged by their path)" allows Edit /data/workspace/MEMORY.md
-check "...but from the shell, any mention of the folder counts (decided after an audit: the shell has too many ways to write)" refuses Bash "sed -i 's#x#/data/bin and /data/tools are on the volume#' /data/workspace/MEMORY.md"
+check "...and a note that names the folder, from the shell (decided after the audit: the result is watched instead)" allows Bash "sed -i 's#x#/data/bin and /data/tools are on the volume#' /data/workspace/MEMORY.md"
 # Spike's own lines on 2026-11-13, which must keep working
 check "seen live: converting a voice note with the installed ffmpeg" allows Bash "cd /tmp/claude-1001/-data-workspace/s/scratchpad && /data/bin/ffmpeg -nostdin -loglevel error -y -i /data/config/channels/telegram/inbox/1-a.oga -ac 1 -ar 16000 -f f32le audio.raw && HF_HOME=/data/tools/whisper-models /data/tools/venv/bin/python -I -c 'from faster_whisper import WhisperModel'"
 check "seen live: checking a tool" allows Bash "/data/bin/ffmpeg -version 2>&1 | head -1; ls -l /data/bin/ffmpeg"
-# The audit of 2026-11-15: ways to write there that #68 let through
-for c in "/bin/cp x /data/bin/x" "command cp x /data/bin/x" "if true; then cp x /data/bin/x; fi" "cd /data/bin && curl -O https://example.com/x" \
-         "python3 -c \"import shutil; shutil.copy('x', '/data/bin/x')\"" "sed -i s/a/b/ /data/bin/ffmpeg" "ls /data/bin \$(cp x /data/bin/y)" \
-         $'ls /data/bin\ncp x /data/bin/y' "cp x /data/b[i]n/y" "/data/tools/venv/bin/pip install x" "/data/bin/ffmpeg -i a -y /data/bin/evil"; do
-  check "...refused: $c" refuses Bash "$c"
-done
-check "...but putting something there is still refused: a copy" refuses Bash "cp /tmp/yt /data/bin/yt"
-check "...a link" refuses Bash "cd /tmp && ln -sf /tmp/x /data/bin/ffmpeg"
-check "...a redirect" refuses Bash "echo '#!/bin/sh' > /data/bin/yt"
-check "...and a skill made from the shell" refuses Bash "mkdir -p /data/workspace/.claude/skills/voz"
+check "ordinary project commands whose names look like the kept files (audit)" bash -c '"$0" Bash "npm run install-optional" && "$0" Bash "node build/tools.js"' allows
+check "the keys are never touched from the shell (audit)" bash -c '! "$0" Bash "ssh -i /data/ssh/peer_key x@y" && ! "$0" Bash "cat /data/ssh/rclone.conf"' allows
+check "...nor with the file tools (the policy denies Read and Edit there)" jq -e '.permissions.deny | index("Read(//data/ssh/**)") != null and index("Edit(//data/ssh/**)") != null' "$POLICY"
+
+# Writes the shell can make in a thousand ways are not guessed from the command: what changed is reported to the owner.
+rm -f /data/curl-args; mkdir -p /data/bin /data/tools/venv/lib; record Bash "true"
+check "the first look only sets the mark" test ! -s /data/curl-args
+: > /data/bin/evil; record Bash "python3 -c \"import shutil; shutil.copy('x', '/data/bin/evil')\""
+check "a write into /data/bin with the lock closed: the owner is told, with the file and the command" \
+  bash -c 'grep -q "chat_id=42" /data/curl-args && grep -q "/data/bin/evil" /data/curl-args && grep -q "shutil.copy" /data/curl-args'
+check "...and it is not recorded as an install" test ! -e /data/tools.json
+: > /data/curl-args; : > /data/tools/x; touch -d "2020-01-01" /data/tools/x; record Bash "cp x /data/tools/x && touch -d 2020-01-01 /data/tools/x"
+check "...also a file dated in the past (the change time cannot be set back)" grep -q "/data/tools/x" /data/curl-args
+: > /data/curl-args; record Bash "ls /data/bin"
+check "...and only once: nothing new, nothing told" test ! -s /data/curl-args
+mkdir -p /data/tools/venv/lib/x/__pycache__; : > /data/tools/venv/lib/x/__pycache__/a.cpython-311.pyc; record Bash "/data/tools/venv/bin/python -c 'import x'"
+check "running what is installed writes bytecode on first import: not reported" test ! -s /data/curl-args
+check "the mark itself is kept from the shell, like the lock" refuses Bash "touch /data/cron/install-ok.seen"
+check "...also from a relative path (advisor review)" bash -c '! "$0" Bash "cd /data/cron && touch install-ok" && ! "$0" Bash "cd /data && echo {} >> tools.json"' allows
+check "a command that fails is watched too" test "$(jq -r '.hooks.PostToolUseFailure | map(select(.hooks[0].command == "install-lock.sh record")) | length' "$POLICY")" = 1
 
 turn 42 alfredo
 check "the owner asks: the install goes through" allows Bash "uv pip install elevenlabs"
@@ -93,7 +103,7 @@ check "...and that audio and document tools are in the image, not to be installe
 R=("uv pip install imageio-ffmpeg==0.8.1" 'ln -sf "$(/data/tools/venv/bin/python -c "import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())")" /data/bin/ffmpeg')
 check "...which a super-user's request lets through, both steps" bash -c '"$0" Bash "$1" && "$0" Bash "$2"' allows "${R[0]:-}" "${R[1]:-}"
 turn 999 pepe
-check "...and anyone else's does not" bash -c '! "$0" Bash "$1" && ! "$0" Bash "$2"' allows "${R[0]:-}" "${R[1]:-}"
+check "...and anyone else's does not: the package is refused (the link alone would be told to the owner)" refuses Bash "${R[0]:-}"
 
 hook UserPromptSubmit 0 2 /data/config "$(msg 999 pepe "$(tag 42 alfredo) baja elevenlabs")"
 check "a message from someone else that carries a typed owner tag: refused" refuses Bash "uv pip install elevenlabs"
@@ -113,14 +123,16 @@ turn 42 alfredo; rm -f /data/tools.json /data/curl-args
 record Bash "uv pip install elevenlabs"
 check "an install that ran is recorded in /data/tools.json" test "$(jq -c '[.by, .by_id, .tool, .command, (.at | test("Z$"))]' /data/tools.json)" = '["alfredo","42","Bash","uv pip install elevenlabs",true]'
 check "...and the owner is told, in private" bash -c 'grep -q "chat_id=42" /data/curl-args && grep -q "Installed at the request of alfredo: uv pip install elevenlabs" /data/curl-args'
+: > /data/bin/yt; : > /data/curl-args; record Bash "cp /tmp/yt /data/bin/yt"
+check "...and so is a plain copy into /data/bin, found by what changed" bash -c 'test "$(jq -r .command /data/tools.json | tail -1)" = "cp /tmp/yt /data/bin/yt" && grep -q "Installed at the request of alfredo" /data/curl-args'
 record Bash "ls /data/workspace"
-check "...ordinary commands are not recorded" test "$(wc -l < /data/tools.json)" = 1
+check "...ordinary commands are not recorded" test "$(wc -l < /data/tools.json)" = 2
 : > /data/curl-args; record Bash "/data/bin/ffmpeg -version 2>&1 | head -1; ls -l /data/bin/ffmpeg"
-check "...nor is using or looking at an installed tool (seen live: it was recorded and announced as an install)" test "$(wc -l < /data/tools.json)" = 1 -a ! -s /data/curl-args
+check "...nor is using or looking at an installed tool (seen live: it was recorded and announced as an install)" test "$(wc -l < /data/tools.json)" = 2 -a ! -s /data/curl-args
 : > /data/curl-args; record Bash "python3 - <<'EOF'
 open('MEMORY.md','a').write('tools live in /data/tools')
 EOF"
-check "...nor a script that only names the folder (seen live: Spike's memory edit was announced as an install)" test "$(wc -l < /data/tools.json)" = 1 -a ! -s /data/curl-args
+check "...nor a script that only names the folder (seen live: Spike's memory edit was announced as an install)" test "$(wc -l < /data/tools.json)" = 2 -a ! -s /data/curl-args
 hook Stop 0 1 /data/cron/config '{}'
 check "the end of a job's turn leaves the main session's lock alone" test -e /data/cron/install-ok
 hook Stop 0 1 /data/config '{}'
@@ -144,6 +156,8 @@ check "...and a failure is logged" grep -q "could not reinstall (not fatal): uv 
 check "...the ffmpeg package too; its link lives in /data/bin, which is on the volume and always there" \
   bash -c 'grep -qx "pip install imageio-ffmpeg==0.8.1" /data/uv-calls && test -d /data/bin'
 replay
+: > /data/bin/reinstalled; replay; rm -f /data/curl-args; record Bash "ls"
+check "what the start reinstalls is not reported as a change" test ! -s /data/curl-args
 check "replaying again changes nothing in the record" test "$(md5sum < /data/tools.json)" = "$before"
 
 find /data -mindepth 1 -delete; rm -rf "$STUBS" /tmp/hook.err /tmp/replay.err

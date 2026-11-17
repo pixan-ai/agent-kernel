@@ -10,12 +10,14 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - A new container removes the plugin's `bot.pid` left by the last one, so a recycled process id is never taken for an old poller.
 - The crash-loop brake measured from before the doorbell wait, so after a long sleep a Claude that died at once restarted without the 60 s pause.
 - The image sets `LANG=C.UTF-8`; it had no locale.
+- Install lock, after the audit of 2026-11-17: package managers with options before the verb (`uv pip -q install`) and `uv tool run` are refused like the rest; the keys in `/data/ssh` are kept from the shell; the lock and the record are kept also by a relative path (`cd /data/cron && touch install-ok`); `npm run install-optional` and `node build/tools.js` are no longer refused.
 - A job whose delivery Telegram refused (the bot removed from the group, a group renumbered) was recorded as sent and nobody was told. It is now sent first, recorded only if it went, and the owner is told otherwise.
 - The agent could widen its own policy: a settings file of its own (`/data/config/settings.json`, `/data/workspace/.claude/settings.json`) could add hooks and `allow` rules, which Claude Code merges with the managed ones. The policy now sets `allowManagedHooksOnly` and `allowManagedPermissionRulesOnly`.
 - A scheduled job or the dream started and ended the "message waiting" mark of the main conversation: a job's end of turn erased a real waiting message (no alert after ten minutes), and a long job raised a false one. Both hooks now skip the jobs' own sessions.
 
 ### Changed
 
+- Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.
 - Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
 
 ## [0.1.0] - 2026-11-15
