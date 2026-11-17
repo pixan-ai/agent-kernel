@@ -107,7 +107,7 @@ Set once, at installation. Changing one restarts the agent.
 | `OWNER_TELEGRAM_ID` | required | The owner: the only private chat, and who gets every notice | step 1 |
 | `TZ` | `UTC` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
 | `ANTHROPIC_MODEL` | Claude's default | Pin the model | |
-| `CLAUDE_FLAGS` | empty | Extra flags for `claude`, e.g. `--advisor claude-opus-5-5` | |
+| `CLAUDE_FLAGS` | empty | Extra flags for `claude`. The advisor is already on for every agent (`advisorModel: opus` in the policy); `--advisor MODEL` here picks another one for this agent | |
 | `TELEGRAM_GROUP_IDS` | empty | Groups to join at the first start (the same as telling the agent); read only while `/data/settings` does not exist yet | [GROUPS.md](GROUPS.md) |
 | `IDLE_SLEEP_MINUTES` | empty = always on | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
 | `DOORBELL_URL` | `https://` + `RAILWAY_PUBLIC_DOMAIN` | Public address Telegram calls to wake a sleeping agent. Needed outside Railway | [SLEEP.md](SLEEP.md) |
