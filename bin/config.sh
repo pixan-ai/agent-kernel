@@ -20,7 +20,8 @@ case "${1:-} ${2:-}" in
   "group "*|"admin "*) [[ $2 =~ ^-?[0-9]+$ ]] || { echo "an id is a number" >&2; exit 2; }; grep -qxF "$1 $2" $F || echo "$1 $2" >> $F ;;
   "peer "*) [[ $2 =~ ^[A-Za-z0-9_]+=[A-Za-z0-9.-]+$ ]] || { echo "use NAME=HOST" >&2; exit 2; }; grep -qxF "peer $2" $F || echo "peer $2" >> $F ;;
   "drop "?*) grep -vE " ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))(=.*)?$" $F > $F.tmp || true; mv $F.tmp $F
-    grep -vE " job\.sh ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))$" $J > $J.tmp || true; mv $J.tmp $J ;;
+    grep -vE " job\.sh ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))$" $J > $J.tmp || true; mv $J.tmp $J
+    [[ ! $2 =~ ^[A-Za-z0-9_-]+$ ]] || rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to" ;;
   *) sed -n '2,10p' "$0" >&2; exit 2 ;;
 esac
 # What supercronic runs: the image's jobs, then the agent's, and of those only well-formed job.sh lines. Anything else in the file never runs.
