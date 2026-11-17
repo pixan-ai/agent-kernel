@@ -1,4 +1,6 @@
 {
+  "allowManagedHooksOnly": true,
+  "allowManagedPermissionRulesOnly": true,
   "channelsEnabled": true,
   "disableClaudeAiConnectors": true,
   "permissions": {
