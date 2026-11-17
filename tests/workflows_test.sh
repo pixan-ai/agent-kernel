@@ -36,6 +36,11 @@ done
 check "CI cancels a pull request's older run when a new push arrives (audit, B9)" bash -c 'grep -q "^concurrency:" "$0" && grep -q "cancel-in-progress: \${{ github.event_name == .pull_request. }}" "$0"' .github/workflows/ci.yml
 check "CI runs ShellCheck on the policy's hook commands too (audit, B6)" grep -q "shellcheck -s sh" .github/workflows/ci.yml
 
+# Versions the Dockerfile pins by hand: a weekly workflow compares each with upstream (audit of 2026-11-17, M10).
+for v in $(sed -n '/^ARG /{:a;/\\$/{N;ba};p}' Dockerfile | grep -oE '[A-Z][A-Z0-9_]+=' | tr -d = | grep -v '_SHA256$'); do
+  check "the pins workflow watches $v" grep -q "$v=" .github/workflows/pins.yml
+done
+
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
 blocks() { grep -q 'image-ref: pixan-kernel-spike:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
 check "CI fails on a fixable CRITICAL vulnerability in the publishable image" blocks

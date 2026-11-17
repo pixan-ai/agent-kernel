@@ -1,0 +1,48 @@
+name: Pinned versions
+
+# Dependabot watches the actions and the base image; this watches the versions the Dockerfile pins by hand (ARG lines).
+# Once a week it compares each with the latest upstream release and keeps one issue open listing the ones behind.
+on:
+  schedule:
+    - cron: "23 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare the Dockerfile's pins with upstream, and keep the issue up to date
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          arg() { grep -oE "(^| )$1=[^ ]+" Dockerfile | head -1 | cut -d= -f2 | sed 's/^v//'; }
+          latest() { case $1 in
+            gh:*) gh api "repos/${1#gh:}/releases/latest" --jq .tag_name | sed 's/^v//' ;;
+            pypi:*) curl -fsS "https://pypi.org/pypi/${1#pypi:}/json" | jq -r .info.version ;;
+            npm:*) curl -fsS "https://registry.npmjs.org/${1#npm:}/latest" | jq -r .version ;;
+            hf:*) curl -fsS "https://huggingface.co/api/models/${1#hf:}" | jq -r .sha ;;
+          esac; }
+          for p in SUPERCRONIC_VERSION=gh:aptible/supercronic UV_VERSION=gh:astral-sh/uv TYPST_VERSION=gh:typst/typst \
+                   WHISPER_CT2=pypi:whisper-ctranslate2 MARKITDOWN=pypi:markitdown IMAGEIO_FFMPEG=pypi:imageio-ffmpeg \
+                   PYTHON_DOCX=pypi:python-docx PYTHON_PPTX=pypi:python-pptx OPENPYXL=pypi:openpyxl \
+                   WHISPER_MODEL_REV=hf:Systran/faster-whisper-small CLAUDE_CODE_VERSION=npm:@anthropic-ai/claude-code; do
+            a=$(arg "${p%%=*}"); l=$(latest "${p#*=}") || l=
+            if [ -z "$l" ]; then echo "- \`${p%%=*}\`: could not read ${p#*=}"; elif [ "$a" != "$l" ]; then echo "- \`${p%%=*}\`: $a → $l (${p#*=})"; fi
+          done > behind.md
+          cat behind.md
+          n=$(gh issue list --state open --search 'in:title "Pinned versions behind"' --json number --jq '.[0].number // empty')
+          if [ ! -s behind.md ]; then [ -z "$n" ] || gh issue close "$n" --comment "Every pin is at the latest release."; exit 0; fi
+          { echo "These versions pinned in the Dockerfile are behind the latest upstream release:"; echo; cat behind.md; echo
+            echo "A pin with a checksum changes with it: update both, then THIRD-PARTY.md, and let CI build and test the image."; } > body.md
+          if [ -n "$n" ]; then gh issue edit "$n" --body-file body.md; else gh issue create --title "Pinned versions behind" --body-file body.md; fi
