@@ -19,3 +19,23 @@ Notes:
 - Railway bills per minute for CPU and memory. Long polling keeps a Serverless service awake, so leave Serverless off, unless you use the opt-in sleep (`IDLE_SLEEP_MINUTES`), which needs it on ([SLEEP.md](SLEEP.md)).
 - Use a dedicated bot token. Do not reuse one that another process polls.
 - Rotate the API key if it is ever pasted into a chat, log or screenshot.
+
+## The one-click template
+
+A Railway template does steps 1 to 3 for whoever deploys: they only paste the three values. The owner of this repository creates and publishes it from the Railway dashboard; the settings to enter are these, kept here so they can be checked against the code.
+
+1. Railway dashboard → workspace settings → **Templates** → **New Template** (Railway's docs: "Create a Template", starting from scratch), and add a service from the GitHub repository `pixan-ai/pixan-kernel-spike` (branch `main`).
+2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`.
+3. Add a **volume** mounted at `/data`.
+4. **Variables**: the three credentials with no default, so the deployer is asked for them, and each with its description (the composer's labels may differ from these words; the values must not):
+
+| Variable | Default | Description shown to the deployer |
+|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | none, required | Your bot's token from @BotFather. Use a new bot that nothing else polls. |
+| `OWNER_TELEGRAM_ID` | none, required | Your numeric Telegram id (ask @userinfobot). Only you can talk to the agent at first. |
+| `CLAUDE_CODE_OAUTH_TOKEN` | none, required | From `claude setup-token`, for a personal agent on your subscription. For an agent that serves groups or clients, delete this and set `ANTHROPIC_API_KEY` instead (see the guide). |
+| `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
+| `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
+
+5. Template name `Pixan agent`, description "A personal Claude Code agent on Telegram, with memory, scheduled jobs and voice notes", and the README as the overview. **Publish**.
+6. Deploy it once into a new project with real values and send the bot a message. Then add the template's link to the guide (docs/GETTING-STARTED.md, "Railway (the quick way)").
