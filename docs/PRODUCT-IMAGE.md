@@ -29,7 +29,8 @@ Option C: publish a base image (OS, `bun`, `jq`, `setpriv`, policy, scripts) and
 
 1. **Decided (2026-11-10): option C.** The `base` target is what may be published; whoever runs an agent builds `agent` on top of it, which adds Claude Code on their own host.
 2. **Decided: the base image carries the managed policy.** It holds no secrets.
-3. **Open: whether to ask Anthropic in writing before publishing anything.** Publishing stays locked (`PUBLISH_IMAGE`) until the owner turns it on.
+3. **Open: the `ffmpeg` in the base image (since 2026-11-15) is the static build `imageio-ffmpeg` 0.8.1 carries, configured with `--enable-gpl --enable-version3` and x264, x265 and xvid: GPLv3.** The Python wrapper is BSD-2-Clause. Publishing the image means meeting GPLv3 for that binary (its licence and a way to its source). Kept in the image by decision; to settle before publishing.
+4. **Open: whether to ask Anthropic in writing before publishing anything.** Publishing stays locked (`PUBLISH_IMAGE`) until the owner turns it on.
 
 ## Not decided here
 

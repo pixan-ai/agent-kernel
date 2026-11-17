@@ -55,6 +55,8 @@ check "...and the start log says why" grep -q "dream: failed.*boom" /data/dream-
 check "...without stopping the agent from starting" rc 0
 fresh; dream CLAUDE_STUB=quiet
 check "...and the owner is told: a dream that fails night after night must not go unseen" grep -q "Not logged in" /data/notified
+dream CLAUDE_STUB=quiet
+check "a dream that keeps failing tells the owner once a day, not at every start or wake (audit)" test "$(grep -c "Not logged in" /data/notified)" = 1
 check "Claude gives its reason on standard output, not as an error: the start log still says why" grep -q "dream: failed.*Not logged in" /data/dream-log
 
 fresh; rm "$P/s1.jsonl"; dream

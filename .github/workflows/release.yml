@@ -70,8 +70,8 @@ jobs:
   publish:
     name: Publish, sign and attest
     needs: acceptance
-    # Locked: the image contains Claude Code (all rights reserved). Publish only after deciding the product image
-    # (docs/RELEASING.md) and setting the repository variable PUBLISH_IMAGE to true.
+    # Locked: publishes only the base target (no Claude Code). Open questions before turning it on: asking Anthropic in writing, and
+    # the GPLv3 ffmpeg build in the image (docs/PRODUCT-IMAGE.md). Then set the repository variable PUBLISH_IMAGE to true.
     if: startsWith(github.ref, 'refs/tags/v') && vars.PUBLISH_IMAGE == 'true'
     runs-on: ubuntu-latest
     permissions:

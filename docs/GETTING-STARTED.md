@@ -67,8 +67,8 @@ A fixed-price server suits several agents better than per-minute billing, and a 
 | "Tu compañero X está en …" / "¿Qué está haciendo X?" | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
 | "Recuerda que …" / "¿Qué recuerdas de …?" | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
 | "Cada día a las 9 publica en el grupo -100… lo más relevante de ayer" | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
-| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start |
-| "Hazme un Excel / Word / PowerPoint / PDF con …" | It makes the file and sends it to you | | [What the image contains](#what-the-image-contains) |
+| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
+| "Hazme un Excel / Word / PowerPoint / PDF con …" | It makes the file and sends it to you | [What the image contains](#what-the-image-contains) |
 | "Haz super-usuario a 123456789" | That person can also give it instructions in its groups | [GROUPS.md](GROUPS.md) |
 | "Mándame el archivo …" | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
 | "Anota en tu CLAUDE.md que …" | Its own lasting instructions (name, role, tone) | |
@@ -136,6 +136,42 @@ Applied at once, kept on the volume, and confirmed to the owner in private. The 
 | Something to remember | "recuerda que …" | "olvida que …" |
 
 "¿Qué ajustes tienes?" lists them ([SETTINGS.md](SETTINGS.md)).
+
+## Who can ask the agent for what
+
+In plain words, for whoever runs an agent.
+
+**The owner** is you: the Telegram account in `OWNER_TELEGRAM_ID`. Only you can talk to the agent in private.
+
+**Super-users** are people you trust to run the agent with you. You name them by telling the agent "haz super-usuario a 123456789"; a super-user can name others. They give instructions in the groups the agent is in.
+
+**Everyone else in a group** can ask for ordinary work: answer a question, transcribe a voice note, read a document, search, summarise, make a file. Since 2026-11-15 the agent does this for any member.
+
+**Only you and the super-users** can make the agent:
+
+- install a package, a tool or a skill ("instala …", "aprende a …");
+- change its settings: groups, super-users, fellow agents;
+- schedule jobs;
+- look at or change a fellow agent;
+- share anything from your private chats, its memory or its files.
+
+When someone else asks for one of these, the agent says that you or a super-user has to ask. Installing and naming super-users are also refused by a hook, not only by the agent's judgment; the rest rests on its instructions ([THREAT-MODEL.md](THREAT-MODEL.md)).
+
+**To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Voice, documents and office files need nothing: every agent has them.
+
+**What gets blocked, and why.** Installed tools live in two folders on the agent's disk. From the shell, the agent may run and read what is there, but any other command that touches those folders is refused unless you or a super-user asked in that message. Its settings, jobs and install record cannot be written by hand at all, not even on your request: they change only through the agent's own settings command, which always tells you.
+
+**What you receive in private**, whoever made the change:
+
+| Notice | When |
+|---|---|
+| ⚙️ Setting changed: … | A group, super-user, fellow agent or job was added or removed |
+| 🧰 Installed at the request of NAME: … | Something was installed |
+| ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |
+| ⚠️ Tonight's memory consolidation failed | The nightly memory failed (at most once a day) |
+| ⚠️ Scheduled job … failed | A job failed, with the reason |
+| ⚠️ Tonight's backup failed | The nightly backup could not be sent (only when backups are on) |
+| ⏳ I received a message more than 10 minutes ago … | A message is still unanswered |
 
 ## Self-improvement: installing skills and tools
 

@@ -23,7 +23,7 @@ RUN curl -fsSL -o /tmp/uv.tgz "https://github.com/astral-sh/uv/releases/download
  && echo "${UV_SHA256}  /tmp/uv.tgz" | sha256sum -c - && tar -xzf /tmp/uv.tgz -C /usr/local/bin --strip-components=1 --no-same-owner && rm /tmp/uv.tgz
 
 # Every agent hears voice notes, reads documents and makes them, out of the box (decided 2026-11-15; this reverses "no ffmpeg in the image").
-# One environment, all pinned: whisper-ctranslate2 (voice to text), markitdown (PDF, Word, Excel, PowerPoint to text), python-docx,
+# One environment, the packages named here pinned (their dependencies are resolved at build time): whisper-ctranslate2 (voice to text), markitdown (PDF, Word, Excel, PowerPoint to text), python-docx,
 # python-pptx and openpyxl (making them; run with `python-docs`) and the static ffmpeg that imageio-ffmpeg carries (video frames).
 # The Whisper model is baked in, pinned by revision: nothing is downloaded at use.
 ARG WHISPER_CT2=0.5.9 MARKITDOWN=0.1.9 IMAGEIO_FFMPEG=0.8.1 WHISPER_MODEL_REV=536b0662742c02347bc0e980a01041f333bce120 \
