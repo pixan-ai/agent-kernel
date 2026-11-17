@@ -4,6 +4,18 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.
+- Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
+
+### Removed
+
+- `bin/denials.sh` and `peer.sh look NAME denials`: the transcript (`peer.sh look NAME transcript`) and the screen show the same.
+- The audit log `/data/audit.jsonl` and its three hooks: the session transcript already holds every tool call.
+- The `Notification` hook for permission prompts: with `denyInsteadOfPrompting` nothing prompts.
+- The `Bash(rm -rf /)` deny rules (a pattern that any spelling escapes) and `promptSuggestionEnabled` in the policy (the image's environment already sets it).
+
 ### Fixed
 
 - A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
@@ -16,11 +28,6 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - A job whose delivery Telegram refused (the bot removed from the group, a group renumbered) was recorded as sent and nobody was told. It is now sent first, recorded only if it went, and the owner is told otherwise.
 - The agent could widen its own policy: a settings file of its own (`/data/config/settings.json`, `/data/workspace/.claude/settings.json`) could add hooks and `allow` rules, which Claude Code merges with the managed ones. The policy now sets `allowManagedHooksOnly` and `allowManagedPermissionRulesOnly`.
 - A scheduled job or the dream started and ended the "message waiting" mark of the main conversation: a job's end of turn erased a real waiting message (no alert after ten minutes), and a long job raised a false one. Both hooks now skip the jobs' own sessions.
-
-### Changed
-
-- Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.
-- Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
 
 ## [0.1.0] - 2026-11-15
 

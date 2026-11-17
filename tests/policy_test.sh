@@ -27,7 +27,7 @@ run_hook() {  # run_hook JQ-PATH-TO-COMMAND STDIN-JSON: runs the hook with an em
 
 check "the policy is valid JSON" setting .
 check "the agent's instructions are managed: next to the policy, out of its reach" test -s "$(dirname "$POLICY")/CLAUDE.md"
-for expr in '.allowManagedHooksOnly == true' '.allowManagedPermissionRulesOnly == true' '.channelsEnabled == true' '.disableClaudeAiConnectors == true' '.promptSuggestionEnabled == false' \
+for expr in '.allowManagedHooksOnly == true' '.allowManagedPermissionRulesOnly == true' '.channelsEnabled == true' '.disableClaudeAiConnectors == true' \
             '.permissions.denyInsteadOfPrompting == true' '.permissions.disableBypassPermissionsMode == "disable"' \
             '.skipDangerousModePermissionPrompt == null'; do
   check "policy: $expr" setting "$expr"
@@ -41,7 +41,7 @@ for rule in 'Read(**/.env)' 'Read(**/.env.*)' 'Edit(//etc/claude-code/**)' 'Edit
 done
 check "auto mode keeps the built-in rules and forbids leaking credentials" \
   setting '.autoMode.hard_deny | (index("$defaults") != null) and (map(test("credential"; "i")) | any)'
-for event in PreToolUse SessionStart UserPromptSubmit Stop PostToolUse PostToolUseFailure PermissionDenied StopFailure Notification; do
+for event in PreToolUse SessionStart UserPromptSubmit Stop PostToolUse PostToolUseFailure StopFailure; do
   check "policy has a $event hook" setting ".hooks.$event | length > 0"
 done
 mapfile -t cmds < <(jq -r '.hooks[][].hooks[].command' "$POLICY")
@@ -114,16 +114,8 @@ check "...which never appears on a command line" off_the_command_line "123:abc"
 check "...addressed to the owner" sent "chat_id=42"
 check "...saying what failed" sent "authentication_failed"
 
-rm -f "$ARGS"
-check "Notification hook runs" run_hook '.hooks.Notification[0].hooks[0].command' '{"message":"Claude needs your permission to use Bash"}'
-check "...and relays the permission prompt to the owner" sent "Claude needs your permission to use Bash"
-check "...through the bot API" on_stdin "https://api.telegram.org/bot123:abc/sendMessage"
-
-: > /data/audit.jsonl
-check "PostToolUse hook runs" run_hook '.hooks.PostToolUse[0].hooks[0].command' '{"hook_event_name":"PostToolUse","tool_name":"Bash","permission_mode":"auto","tool_input":{"command":"SECRET-COMMAND"},"tool_response":"LONG-OUTPUT"}'
-check "...and appends one short line: when, which event, which tool, which mode" test "$(tail -1 /data/audit.jsonl | jq -c '[.event, .tool, .mode, (.at | length > 10)]')" = '["PostToolUse","Bash","auto",true]'
-check "...without the tool's input or output (the transcript already has them)" bash -c '! grep -qE "SECRET-COMMAND|LONG-OUTPUT" /data/audit.jsonl'
-check "the three audit hooks write the same record" test "$(jq -r '[.hooks.PostToolUse, .hooks.PostToolUseFailure, .hooks.PermissionDenied] | map(.[0].hooks[0].command) | unique | length' "$POLICY")" = 1
+check "nothing is written to an audit log any more (decision of 2026-11-17: the transcript has it all)" bash -c '! grep -q audit.jsonl "$0"' "$POLICY"
+check "...and there is no permission-prompt alert: nothing ever prompts (denyInsteadOfPrompting)" setting '(.hooks.Notification == null) and (.hooks.PermissionDenied == null)'
 
 matcher=$(hook '.hooks.StopFailure[0].matcher')
 matches() { grep -Eqx -- "$matcher" <<<"$1"; }
@@ -131,9 +123,8 @@ unmatched() { ! matches "$1"; }
 check "StopFailure alerts on authentication_failed" matches authentication_failed
 check "StopFailure alerts on billing_error" matches billing_error
 check "StopFailure stays quiet on a rate limit" unmatched rate_limit
-check "Notification alerts only on permission prompts" test "$(hook '.hooks.Notification[0].matcher')" = permission_prompt
 
-rm -f "$CREDS" /data/audit.jsonl "$ARGS" "$STUBS/curl"
+rm -f "$CREDS" "$ARGS" "$STUBS/curl"
 rmdir "$STUBS" 2> /dev/null
 # --- groups: anyone may ask for work; only the owner and the super-users for what is reserved (decided 2026-11-15)
 RULE=$(grep -F -- '- **Talking is not authority.**' "$(dirname "$POLICY")/CLAUDE.md")

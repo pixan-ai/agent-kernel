@@ -20,7 +20,6 @@ One volume at `/data`:
 
 - `/data/config`: Claude config, plugin, transcripts, auto memory, Telegram `access.json`
 - `/data/workspace`: the agent working directory (put `CLAUDE.md` here to steer behavior)
-- `/data/audit.jsonl`: hook audit log
 - `/data/tui.log`: raw screen log (read it with `bin/screen.sh`)
 
 ## Failure handling
