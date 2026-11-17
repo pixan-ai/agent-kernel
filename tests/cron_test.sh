@@ -17,6 +17,7 @@ cat > "$STUBS/curl" <<'EOF'
 #!/usr/bin/env bash
 # Stub Telegram: record the arguments and the config read from stdin.
 printf '%s\n' "$*" >> /data/curl-args; cat >> /data/curl-stdin
+[ ! -e /data/telegram-refuses ] || ! grep -qF -- "$(cat /data/telegram-refuses)" <<<"$*" || exit 22  # like curl -f on an HTTP 400
 EOF
 chmod 755 "$STUBS"/*
 fresh() {
@@ -50,6 +51,10 @@ check "...but its failure goes to the owner, never to the group" bash -c 'grep -
 check "...with the error, which never travels with a normal answer" grep -q "boom" /data/curl-args
 : > /data/curl-args; job CLAUDE_STUB=limit
 check "a job stopped by the plan's limit: the owner reads the reason, which Claude gives on standard output" grep -q "usage limit reached" /data/curl-args
+: > /data/curl-args; rm -f /data/workspace/sent.jsonl; echo "chat_id=-1001" > /data/telegram-refuses; job
+check "Telegram refuses the delivery (audit, A3): the owner is told, naming the job and where it was going" bash -c 'grep "chat_id=42" /data/curl-args | grep -q "news.*-1001"'
+check "...and it is not recorded as sent" test ! -s /data/workspace/sent.jsonl
+rm -f /data/telegram-refuses
 
 fresh; job CLAUDE_STUB=fail
 check "a failing job alerts the owner" sent_to_owner 'Scheduled job "news" failed'
