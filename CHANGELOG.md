@@ -29,6 +29,12 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - The agent could widen its own policy: a settings file of its own (`/data/config/settings.json`, `/data/workspace/.claude/settings.json`) could add hooks and `allow` rules, which Claude Code merges with the managed ones. The policy now sets `allowManagedHooksOnly` and `allowManagedPermissionRulesOnly`.
 - A scheduled job or the dream started and ended the "message waiting" mark of the main conversation: a job's end of turn erased a real waiting message (no alert after ten minutes), and a long job raised a false one. Both hooks now skip the jobs' own sessions.
 
+### Changed
+
+- Tests and CI, after the audit of 2026-11-17: the eight changes the audit made to the code on purpose, which no test caught (the 4:00 recycle, the idle watcher, the five-minute downtime threshold, no terminal and no tunnel over the peer view, the bot token left out of backups, the keep-awake while asleep with jobs, the 80% plan alert), now each fail a test; ffmpeg must make a real frame; CI runs ShellCheck on the policy's hook commands; every workflow job has a time limit, and a new push to a pull request cancels its older CI run.
+- Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.
+- Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
+
 ## [0.1.0] - 2026-11-15
 
 First tagged version. Lab / alpha: what was verified on a real host, and what was not, is at the end of each document under `docs/`.

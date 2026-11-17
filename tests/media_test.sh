@@ -23,6 +23,6 @@ check "an Excel file is made with Python, and reads back" bash -c 'python-docs -
 check "a Word file is made with Python, and reads back" bash -c 'python-docs -c "import docx; d=docx.Document(); d.add_heading(\"mango\"); d.save(\"$0/a.docx\")" && markitdown "$0/a.docx" | grep -q mango' "$T"
 check "a PowerPoint file is made with Python, and reads back" bash -c 'python-docs -c "import pptx; p=pptx.Presentation(); s=p.slides.add_slide(p.slide_layouts[0]); s.shapes.title.text=\"mango\"; p.save(\"$0/a.pptx\")" && markitdown "$0/a.pptx" | grep -q mango' "$T"
 check "a PDF is made from Markdown, offline, and reads back" bash -c 'printf "# Informe\n\nVentas de **mango**: 12\n" | pandoc -t typst -o "$0/a.typ" && typst compile "$0/a.typ" "$0/a.pdf" && pdftotext "$0/a.pdf" - | grep -q mango' "$T"
-check "video frames can be taken: ffmpeg is on the path" bash -c 'ffmpeg -hide_banner -version > /dev/null'
+check "video frames can be taken: ffmpeg makes a real frame (audit, B6)" bash -c 'ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc=size=64x48 -frames:v 1 "$0/frame.png" && test -s "$0/frame.png"' "$T"
 rm -rf "$T"
 echo "$FAILS failed"; exit $((FAILS > 0))

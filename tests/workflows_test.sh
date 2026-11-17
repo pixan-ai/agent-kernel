@@ -30,6 +30,12 @@ check "Claude Code is installed only after the base target" test -z "$(sed '/^FR
 
 check "the container's PID 1 is tini, which forwards signals to the entrypoint" grep -qE '^ENTRYPOINT \["tini", "-g", "--", "/usr/local/bin/start.sh"\]$' Dockerfile
 
+for f in .github/workflows/*.yml; do
+  check "$f: every job has a time limit (audit, B9)" test "$(grep -c 'runs-on:' "$f")" = "$(grep -c 'timeout-minutes:' "$f")"
+done
+check "CI cancels a pull request's older run when a new push arrives (audit, B9)" bash -c 'grep -q "^concurrency:" "$0" && grep -q "cancel-in-progress: \${{ github.event_name == .pull_request. }}" "$0"' .github/workflows/ci.yml
+check "CI runs ShellCheck on the policy's hook commands too (audit, B6)" grep -q "shellcheck -s sh" .github/workflows/ci.yml
+
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
 blocks() { grep -q 'image-ref: pixan-kernel-spike:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
 check "CI fails on a fixable CRITICAL vulnerability in the publishable image" blocks

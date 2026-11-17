@@ -84,6 +84,9 @@ env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
 echo '{"five_hour":{"used_percentage":91},"seven_day":{"used_percentage":12}}' > /data/cron/quota
 env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
 check "...and again after the limit has reset and filled up once more" sent_to_owner "5-hour 91%"
+fresh; echo '{"five_hour":{"used_percentage":80.2},"seven_day":{"used_percentage":12}}' > /data/cron/quota
+env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
+check "quota: told from 80% on, not later (audit, M9)" sent_to_owner "5-hour 80%"
 fresh; env PATH="$STUBS:$BIN:$PATH" "$BIN/watchdog.sh" > /dev/null 2>&1
 check "quota: no figures yet (an API key, or nothing asked so far) -> nothing is said" test ! -s /data/curl-args
 
@@ -110,6 +113,7 @@ check "unanswered: a message left 15 minutes without an end of turn -> the owner
 : > /data/curl-args; dog; dog
 check "...once, not every five minutes" test ! -s /data/curl-args
 check "the daily recycle's command (pkill) exists" test -x /usr/bin/pkill
+check "the daily recycle is at 4:00, after the 3:30 backup (audit, M9)" bash -c 'grep -qx "0 4 \* \* \* pkill -x script" "$0" && grep -qx "30 3 \* \* \* backup.sh" "$0"' "$BIN/system.cron"
 if command -v supercronic > /dev/null; then
   check "the image's crontab is valid for supercronic" supercronic -quiet -test "$BIN/system.cron"
 fi

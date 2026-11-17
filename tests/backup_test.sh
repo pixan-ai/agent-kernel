@@ -26,6 +26,8 @@ check "not configured -> does nothing, quietly" one_file 0
 backup
 check "a backup is one file at the storage provider" one_file 1
 check "...that nobody can read without the owner's key" unreadable
+no_bot_token() { ! { age -d -i "$W/key" "$(find "$R" -name '*.tar.gz.age' | head -1)" | tar -tz | grep -q 'channels/telegram/.env'; }; }
+check "...and that leaves out the bot token, which the variables rebuild (audit, M9)" no_bot_token
 
 wipe; mkdir -p /data/config/channels/telegram; printf 'TELEGRAM_BOT_TOKEN=123:SECRET\nOWNER_TELEGRAM_ID=42\n' > /data/config/channels/telegram/.env
 wrong_key_fails() { ! restore "$OTHER" && absent /data/workspace/notes.md; }

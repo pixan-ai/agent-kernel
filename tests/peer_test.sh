@@ -37,6 +37,11 @@ check "...and the status" sees status "claude: "
 check "...but cannot run anything else" refused "cat /etc/passwd"
 check "...not even by chaining after an allowed word" refused "screen; cat /etc/passwd"
 check "...and gets no shell" no_shell
+peer_ssh() { timeout 10 setpriv --reuid=1001 --regid=1001 --init-groups env HOME=/home/agent ssh -i /data/ssh/peer_key -p 2222 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$@" < /dev/null 2>&1; }
+no_terminal() { grep -q "PTY allocation request failed" <<<"$(peer_ssh -tt agent@localhost screen)"; }
+no_tunnel() { grep -q "remote port forwarding failed" <<<"$(peer_ssh -o ExitOnForwardFailure=yes -N -R 0:127.0.0.1:2222 agent@localhost)"; }
+check "...no terminal (audit, M9)" no_terminal
+check "...and no tunnel through it (audit, M9)" no_tunnel
 check "the server's files are private to the agent" test "$(stat -c %a /data/ssh/host_key)" = 600
 by_name() { agent env PEERS="Other=nowhere.invalid Junior=localhost" "$BIN/peer.sh" look junior status 2>&1 | grep -q "claude: "; }
 check "a peer can be addressed by its name in PEERS, whatever the case" by_name
