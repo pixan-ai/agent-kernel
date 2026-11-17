@@ -7,6 +7,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 ### Added
 
 - The settings for a one-click Railway template, in docs/DEPLOY-RAILWAY.md (service, volume, variables with their descriptions), checked against the guide by `docs_test`. The template itself is made and published from the Railway dashboard.
+- A release can also publish the image to Docker Hub, same digest, signed there too, when `DOCKERHUB_REPOSITORY` and its two secrets are set (docs/RELEASING.md). Publishing stays locked by `PUBLISH_IMAGE`.
 - `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/pixan-kernel-spike/`: the software the image carries, its licences, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
 - A weekly workflow (`pins.yml`) compares every version the Dockerfile pins by hand (supercronic, uv, Typst, the Python packages, the Whisper model, Claude Code) with its latest upstream release, and keeps one issue open listing those behind. Dependabot already watched the actions and the base image.
 
