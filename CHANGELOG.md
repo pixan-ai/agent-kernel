@@ -6,6 +6,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
+- The owner's notice of a new job now says where it goes and how its prompt starts, and `config.sh show` lists the jobs' prompts.
 - A group removed by chat came back at the next restart while it was still in `TELEGRAM_GROUP_IDS`: the variable now seeds `/data/settings` on the first start only.
 - A new container removes the plugin's `bot.pid` left by the last one, so a recycled process id is never taken for an old poller.
 - The crash-loop brake measured from before the doorbell wait, so after a long sleep a Claude that died at once restarted without the 60 s pause.

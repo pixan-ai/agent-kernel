@@ -15,6 +15,8 @@ Write only the text of the message. It is delivered to Telegram for you: do not 
   # Sent first, recorded only if Telegram took it: a refused delivery (bot removed, group renumbered) is told to the owner.
   notify.sh "$out" "$to" || { notify.sh "⚠️ Scheduled job \"$name\" could not be delivered to ${to:-the owner}."; exit 1; }
   jq -cn --arg n "$name" --arg to "$to" --arg t "$out" '{at: (now | floor), name: $n, to: $to, text: $t}' >> sent.jsonl
+  # A one-off (a fixed day and month) is done once delivered: remove it, or it would come back next year.
+  ! grep -qE "^[^ ]+ [^ ]+ [0-9]+ [0-9]+ [^ ]+ job\.sh $name$" /data/cron/jobs 2> /dev/null || config.sh drop "$name" > /dev/null || true
 else
   notify.sh "⚠️ Scheduled job \"$name\" failed or timed out. ${out:0:300} $(tail -c 300 "/data/cron/$name.err")"; exit 1  # Claude gives its reason (a limit, no login) on standard output
 fi
