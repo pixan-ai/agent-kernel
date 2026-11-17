@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/pixan-kernel-spike/`: the software the image carries, its licences, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
+
 ### Changed
 
 - Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.

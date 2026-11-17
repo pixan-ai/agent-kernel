@@ -56,4 +56,12 @@ check "no document or script mentions consulting" bash -c '! grep -rniI --exclud
 # Which Claude credential: Anthropic's terms keep subscriptions for ordinary, individual use (audit of 2026-11-17, A5).
 check "the guide recommends an API key for an agent that serves groups or clients" grep -q "API key for an agent that serves groups or clients" docs/GETTING-STARTED.md
 check "...and README links Anthropic's legal page" grep -q "code.claude.com/docs/en/legal-and-compliance" README.md
+# Third-party licences go into the image, and name the versions the Dockerfile pins (audit of 2026-11-17, A4).
+check "the image carries LICENSE and THIRD-PARTY.md" bash -c 'grep -qx "COPY LICENSE THIRD-PARTY.md /usr/share/doc/pixan-kernel-spike/" Dockerfile && grep -qx "!THIRD-PARTY.md" .dockerignore'
+pinned() { local v; v=$(grep -oE "(^|[ ])$1=v?[0-9][0-9.]*" Dockerfile | head -1 | sed -E 's/.*=v?//'); [ -n "$v" ] && grep -qF -- "$2 $v" THIRD-PARTY.md; }
+for p in "IMAGEIO_FFMPEG imageio-ffmpeg" "TYPST_VERSION Typst" "UV_VERSION uv" "SUPERCRONIC_VERSION supercronic"; do
+  # shellcheck disable=SC2086  # two words on purpose
+  check "THIRD-PARTY.md names the pinned version: ${p#* }" pinned $p
+done
+check "...and both GPL copies of FFmpeg, with where their source is" bash -c 'grep -q "BtbN/FFmpeg-Builds" THIRD-PARTY.md && grep -q "PyAV-Org/pyav-ffmpeg" THIRD-PARTY.md'
 echo "$FAILS failed"; exit $((FAILS > 0))
