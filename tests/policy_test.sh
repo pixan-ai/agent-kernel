@@ -98,6 +98,12 @@ mark; first=$(cat /data/cron/pending); sleep 1; mark
 check "an incoming message is time-stamped, and a second one keeps the first time" test -n "$first" -a "$(cat /data/cron/pending)" = "$first"
 touch /data/cron/pending.told; env -i PATH=/usr/bin:/bin sh -c "$(hook '.hooks.Stop[0].hooks[0].command')"
 check "the end of the turn clears it" test ! -e /data/cron/pending -a ! -e /data/cron/pending.told
+# Jobs and the dream are Claude sessions too, with their own config directory (audit of 2026-11-17, M1)
+job_hook() { env -i PATH=/usr/bin:/bin CLAUDE_CONFIG_DIR=/data/cron/config sh -c "$(hook "$1")"; }
+echo 100 > /data/cron/pending; job_hook '.hooks.Stop[0].hooks[0].command'
+check "the end of a job's turn leaves a waiting message's time alone" test "$(cat /data/cron/pending)" = 100
+rm -f /data/cron/pending; job_hook '.hooks.UserPromptSubmit[0].hooks[1].command' < /dev/null
+check "...and a job's prompt is not a waiting message" test ! -e /data/cron/pending
 
 rm -f "$ARGS"
 check "StopFailure hook runs" run_hook '.hooks.StopFailure[0].hooks[0].command' '{"error":"authentication_failed"}'

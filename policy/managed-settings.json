@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f /data/cron/pending /data/cron/pending.told",
+            "command": "[ \"$CLAUDE_CONFIG_DIR\" = /data/cron/config ] || rm -f /data/cron/pending /data/cron/pending.told",
             "timeout": 5
           },
           {
@@ -93,7 +93,7 @@
           },
           {
             "type": "command",
-            "command": "[ -e /data/cron/pending ] || date +%s > /data/cron/pending",
+            "command": "[ \"$CLAUDE_CONFIG_DIR\" = /data/cron/config ] || [ -e /data/cron/pending ] || date +%s > /data/cron/pending",
             "timeout": 5
           },
           {
