@@ -41,6 +41,11 @@ for v in $(sed -n '/^ARG /{:a;/\\$/{N;ba};p}' Dockerfile | grep -oE '[A-Z][A-Z0-
   check "the pins workflow watches $v" grep -q "$v=" .github/workflows/pins.yml
 done
 
+# Docker Hub as a second registry (decision of 2026-11-17): same digest, signed and verified there too, credentials only from secrets.
+hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" && grep -q 'password: \${{ secrets.DOCKERHUB_TOKEN }}' "$1" \
+  && grep -q 'cosign sign --yes "docker.io/$HUB@$DIGEST"' "$1" && grep -q 'for ref in "$IMAGE" ${HUB:+"docker.io/$HUB"}' "$1"; }
+check "a release also publishes to Docker Hub when it is configured, signed and verified there" hub .github/workflows/release.yml
+
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
 blocks() { grep -q 'image-ref: pixan-kernel-spike:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
 check "CI fails on a fixable CRITICAL vulnerability in the publishable image" blocks
