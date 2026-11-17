@@ -15,6 +15,7 @@ jobs:
   analyze:
     name: Analyze workflows
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       actions: read

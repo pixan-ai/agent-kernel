@@ -11,10 +11,11 @@ START=${START:-/usr/local/bin/start.sh}
 STUBS=$(mktemp -d); OUT=$(mktemp); ERR=$(mktemp)
 chmod 755 "$STUBS"; chmod 644 "$OUT" "$ERR"
 cat > "$STUBS/script" <<'EOF'
-#!/usr/bin/env bash
+#!/bin/bash
 # Stub pty: record who would run claude, with which credentials and command, then "exit" like claude dying.
 { echo "uid=$(id -u)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
 echo "owner said: SCREEN-MARKER" > /data/tui.log; sleep 3  # long enough for a 1 s mirror to fire
+[ ! -e /data/long-claude ] || /bin/sleep 60 < /dev/null  # a Claude that keeps running, for the idle watcher (off the pipe, as a killed Claude would be)
 EOF
 chmod 755 "$STUBS/script"
 cat > "$STUBS/sleep" <<'EOF'
@@ -98,7 +99,9 @@ echo "* * * * * touch /data/escaped" > /data/cron/crontab; echo "0 8 * * * job.s
 check "...a restart rebuilds it: a hand-written line is gone, the image's jobs are back" bash -c '! grep -q escaped /data/cron/crontab && grep -q "pkill -x script" /data/cron/crontab'
 check "...and the agent's own jobs are kept" grep -qx "0 8 \* \* \* job.sh news" /data/cron/crontab
 check "a quick restart is not reported as downtime" bash -c '! grep -q "Back online" /data/curl-calls'
-touch -d "2 hours ago" /data/cron/alive; again
+touch -d "10 minutes ago" /data/cron/alive; again
+check "...but ten minutes down is (the threshold is five; audit, M9)" grep -q "Back online" /data/curl-calls
+rm -f /data/curl-calls; touch -d "2 hours ago" /data/cron/alive; again
 check "a start after real downtime tells the owner jobs may have been missed" grep -q "Back online" /data/curl-calls
 
 check "peer view is off by default: no SSH server" test ! -e /data/peer-args
@@ -140,6 +143,9 @@ touch /data/idle; env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 check "IDLE_SLEEP_MINUTES: an agent that was asleep waits at the doorbell before Claude starts" test -s /data/doorbell-runs
 check "...then starts Claude and is no longer marked asleep" bash -c 'grep -q "exec claude" /data/probe && test ! -e /data/idle'
 check "...and waking up is not reported as downtime" bash -c '! grep -q "Back online" /data/curl-calls'
+find /data -mindepth 1 -delete; touch /data/long-claude; env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x IDLE_SLEEP_MINUTES=0 timeout 50 "$START" >"$OUT" 2>"$ERR"; pkill -u 1001 2>/dev/null
+check "...and with no conversation for that long, the running Claude is put to sleep and waits at the doorbell (audit, M9)" test -s /data/doorbell-runs
+rm -f /data/long-claude
 rm -f /data/braked; touch /data/idle /data/slow-doorbell; env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x IDLE_SLEEP_MINUTES=30 timeout 90 "$START" >"$OUT" 2>"$ERR"; pkill -u 1001 2>/dev/null
 check "...and a long wait at the doorbell does not count as Claude running: the crash-loop brake still applies" test -e /data/braked
 

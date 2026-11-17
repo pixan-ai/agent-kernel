@@ -27,7 +27,8 @@ m=$(sed -n 's/.*\/\([A-Za-z]*\)"$/\1/p'); echo "$m $*" >> /data/api-calls
 [ "$m" != setWebhook ] || { [ -e /data/webhook-refused ] && printf '{"ok":false,"description":"bad webhook: HTTPS url must be provided"}' || printf '{"ok":true}'; }
 [ "$m" != getWebhookInfo ] || printf '{"ok":true,"result":{"pending_update_count":%s}}' "$(cat /data/pending-count)"
 EOF
-printf '#!/usr/bin/env bash\necho ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
+printf '#!/usr/bin/env bash\n/bin/sleep 0.5; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
+printf '#!/usr/bin/env bash\n[ "$1" != 240 ] || { echo kept >> /data/keep-awake; exit 1; }\nexec /bin/sleep "$@"\n' > "$STUBS/sleep"
 printf '#!/usr/bin/env bash\necho run >> /data/backup-runs\n' > "$STUBS/backup.sh"
 chmod 755 "$STUBS"/*
 fresh() {
@@ -45,6 +46,9 @@ check "...with a secret that only Telegram and this agent know" grep -q "secret_
 check "...kept in a private file" test "$(stat -c %a /data/ssh/doorbell-secret)" = 600
 check "it waits for a ring, then removes the webhook so the plugin can poll" test "$(cat /data/bun-runs) $(calls | awk '{print $NF}')" = "ring deleteWebhook"
 check "a backup is made before sleeping when the last one is old" test -s /data/backup-runs
+check "...and with no jobs, nothing keeps the container awake" test ! -e /data/keep-awake
+fresh 0; touch /data/cron/last-backup; echo "0 8 * * * job.sh news" > /data/cron/jobs; asleep DOORBELL_URL=https://agent.example
+check "with scheduled jobs, the container is kept awake every four minutes while Claude sleeps (audit, M9)" test -s /data/keep-awake
 
 fresh 1; touch /data/cron/last-backup; asleep DOORBELL_URL=https://agent.example
 check "a message already waiting (it arrived while going to sleep, or the host woke the container) -> no waiting" test ! -e /data/bun-runs

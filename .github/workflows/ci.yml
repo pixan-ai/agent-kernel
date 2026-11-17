@@ -8,15 +8,23 @@ on:
 permissions:
   contents: read
 
+# A new push to a pull request cancels its older run; runs on main always finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: ShellCheck
         run: shellcheck bin/*.sh tests/*.sh
+      - name: ShellCheck on the policy's hook commands
+        run: jq -r '.. | objects | select(has("command")) | .command' policy/managed-settings.json | while IFS= read -r c; do printf '%s\n' "$c" | shellcheck -s sh - || exit 1; done
       - name: Docs match the code
         run: bash tests/docs_test.sh
       - name: Workflows are pinned and least-privilege
@@ -32,6 +40,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: lint
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
