@@ -42,6 +42,8 @@ ARG TYPST_VERSION=0.15.1 TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccb
 RUN curl -fsSL -o /tmp/typst.tar.xz "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
  && echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c - && tar -xJf /tmp/typst.tar.xz -C /usr/local/bin --strip-components=1 --no-same-owner --wildcards '*/typst' && rm /tmp/typst.tar.xz
 
+# What the image carries and under which licences (the GPL binaries and where their source is).
+COPY LICENSE THIRD-PARTY.md /usr/share/doc/pixan-kernel-spike/
 # Managed policy: owned by root, not editable by the agent, highest precedence in Claude Code.
 COPY policy/ /etc/claude-code/
 COPY --chmod=755 bin/ /usr/local/bin/

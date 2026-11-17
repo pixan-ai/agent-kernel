@@ -4,3 +4,4 @@ docs
 .env
 .env.*
 *.md
+!THIRD-PARTY.md

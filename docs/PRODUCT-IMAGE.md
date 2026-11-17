@@ -29,7 +29,7 @@ Option C: publish a base image (OS, `bun`, `jq`, `setpriv`, policy, scripts) and
 
 1. **Decided (2026-11-10): option C.** The `base` target is what may be published; whoever runs an agent builds `agent` on top of it, which adds Claude Code on their own host.
 2. **Decided: the base image carries the managed policy.** It holds no secrets.
-3. **Open: the `ffmpeg` in the base image (since 2026-11-15) is the static build `imageio-ffmpeg` 0.8.1 carries, configured with `--enable-gpl --enable-version3` and x264, x265 and xvid: GPLv3.** The Python wrapper is BSD-2-Clause. Publishing the image means meeting GPLv3 for that binary (its licence and a way to its source). Kept in the image by decision; to settle before publishing.
+3. **Half settled: the GPL binaries in the base image.** Two copies of FFmpeg are under the GPL: the static `ffmpeg` that `imageio-ffmpeg` 0.8.1 carries (GPLv3: `--enable-gpl --enable-version3`, with x264, x265 and xvid) and the libraries in the PyAV wheel that faster-whisper uses (with x264 and x265). Since the audit of 2026-11-17 the image carries `THIRD-PARTY.md` (each one, its licence and where the source of that exact build is) and `LICENSE` at `/usr/share/doc/pixan-kernel-spike/`, and the GPL texts are at `/usr/share/common-licenses/`. Still open before publishing: the links point to the upstream projects, so the source stays available only while they keep it. GPLv3 asks whoever publishes to make sure it does: keep a copy of those sources next to each published image, or give a written offer. The owner decides when turning publishing on.
 4. **Open: whether to ask Anthropic in writing before publishing anything.** Publishing stays locked (`PUBLISH_IMAGE`) until the owner turns it on.
 
 ## Not decided here
