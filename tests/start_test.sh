@@ -36,7 +36,7 @@ printf '#!/usr/bin/env bash\necho "$*" > /data/supercronic-args\n' > "$STUBS/sup
 printf '#!/usr/bin/env bash\necho "$*" > /data/peer-args\n' > "$STUBS/peer.sh"; chmod 755 "$STUBS/peer.sh"
 printf '#!/usr/bin/env bash\necho "$*" >> /data/backup-args\n' > "$STUBS/backup.sh"; chmod 755 "$STUBS/backup.sh"
 printf '#!/usr/bin/env bash\necho yes > /data/dream-runs\n' > "$STUBS/dream.sh"; chmod 755 "$STUBS/dream.sh"
-printf '#!/usr/bin/env bash\necho rang >> /data/doorbell-runs\n' > "$STUBS/doorbell.sh"; chmod 755 "$STUBS/doorbell.sh"
+printf '#!/usr/bin/env bash\necho rang >> /data/doorbell-runs; [ ! -e /data/slow-doorbell ] || sleep 61\n' > "$STUBS/doorbell.sh"; chmod 755 "$STUBS/doorbell.sh"
 chmod 755 "$STUBS/curl"
 
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42)
@@ -113,6 +113,11 @@ check "listed groups are open to the bot, without a mention" test "$(group '[.gr
 check "...and it hears everyone in them, people and bots" test "$(group '.groups["-1001"].allowFrom')" = '[]'
 check "...and private messages stay owner-only" test "$(group '.allowFrom - ["-1001","-1002"]')" = '["42"]'
 
+sed -i '/-1002/d' /data/settings; echo 99 > /data/config/channels/telegram/bot.pid; chown 1001 /data/config/channels/telegram/bot.pid
+env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x TELEGRAM_GROUP_IDS="-1001 -1002" timeout 20 "$START" >"$OUT" 2>"$ERR"; pkill -u 1001 2>/dev/null
+check "TELEGRAM_GROUP_IDS seeds only the first start: a group removed by chat does not come back" test "$(group '.groups | keys')" = '["-1001"]'
+check "a new container drops the poller pid left by the last one" test ! -e /data/config/channels/telegram/bot.pid
+
 check "the bot's own Telegram identity is kept for the session hook" test "$(jq -r .result.username /data/config/channels/telegram/me.json)" = Test_bot
 
 seq 1 10050 > /data/audit.jsonl; seq 1 520 > /data/workspace/sent.jsonl; chown 1001 /data/audit.jsonl /data/workspace/sent.jsonl; again
@@ -136,6 +141,8 @@ touch /data/idle; env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 check "IDLE_SLEEP_MINUTES: an agent that was asleep waits at the doorbell before Claude starts" test -s /data/doorbell-runs
 check "...then starts Claude and is no longer marked asleep" bash -c 'grep -q "exec claude" /data/probe && test ! -e /data/idle'
 check "...and waking up is not reported as downtime" bash -c '! grep -q "Back online" /data/curl-calls'
+rm -f /data/braked; touch /data/idle /data/slow-doorbell; env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x IDLE_SLEEP_MINUTES=30 timeout 90 "$START" >"$OUT" 2>"$ERR"; pkill -u 1001 2>/dev/null
+check "...and a long wait at the doorbell does not count as Claude running: the crash-loop brake still applies" test -e /data/braked
 
 run ANTHROPIC_API_KEY=dummy-api-key-0123456789ABCDEFGHIJ
 check "API key switch: its last 20 chars are pre-approved" test "$(jq -c '.customApiKeyResponses.approved' /data/config/.claude.json)" = '["0123456789ABCDEFGHIJ"]'

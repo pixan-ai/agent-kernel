@@ -6,6 +6,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A group removed by chat came back at the next restart while it was still in `TELEGRAM_GROUP_IDS`: the variable now seeds `/data/settings` on the first start only.
+- A new container removes the plugin's `bot.pid` left by the last one, so a recycled process id is never taken for an old poller.
+- The crash-loop brake measured from before the doorbell wait, so after a long sleep a Claude that died at once restarted without the 60 s pause.
+- The image sets `LANG=C.UTF-8`; it had no locale.
 - A job whose delivery Telegram refused (the bot removed from the group, a group renumbered) was recorded as sent and nobody was told. It is now sent first, recorded only if it went, and the owner is told otherwise.
 - The agent could widen its own policy: a settings file of its own (`/data/config/settings.json`, `/data/workspace/.claude/settings.json`) could add hooks and `allow` rules, which Claude Code merges with the managed ones. The policy now sets `allowManagedHooksOnly` and `allowManagedPermissionRulesOnly`.
 - A scheduled job or the dream started and ended the "message waiting" mark of the main conversation: a job's end of turn erased a real waiting message (no alert after ten minutes), and a long job raised a false one. Both hooks now skip the jobs' own sessions.

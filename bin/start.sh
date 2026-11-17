@@ -17,16 +17,15 @@ CFG=/data/config; TG=$CFG/channels/telegram; WS=/data/workspace
 # Backups (docs/BACKUP.md): the storage credentials go to a private file. An empty volume with BACKUP_AGE_KEY set is restored from the newest backup.
 (umask 077; mkdir -p /data/ssh; [ -z "${RCLONE_CONF:-}" ] || printf '%s\n' "$RCLONE_CONF" > /data/ssh/rclone.conf)
 [ -e "$CFG/.claude.json" ] || [ -z "${BACKUP_AGE_KEY:-}" ] || backup.sh restore || echo "restore failed: starting with an empty volume" >&2
-mkdir -p "$WS" "$TG/inbox"
+mkdir -p "$WS" "$TG/inbox"; rm -f "$TG/bot.pid"  # a new container has no old poller, and a stale pid can name a recycled process
 cp -rn /opt/seed/config/. "$CFG"/
 # The plugin must run from the volume copy (the one the policy protects), and a new image must replace it:
 # its registry files carry the absolute build path, so copy it fresh at every start and point them at the volume.
 rm -rf "$CFG/plugins" && cp -r /opt/seed/config/plugins "$CFG/" && sed -i "s#/opt/seed/config#$CFG#g" "$CFG"/plugins/*.json
 # Who may talk to the bot: the owner in private, plus everyone in the groups listed in /data/settings. That file is seeded
-# from the variables and then kept by the agent itself (config.sh), so the owner never has to come back to the host.
+# from the variables on the first start only, then kept by the agent itself (config.sh), so a group removed by chat stays removed.
 # shellcheck disable=SC2086  # word splitting on purpose: one line per id
-{ cat /data/settings 2> /dev/null || true; printf 'group %s\n' ${TELEGRAM_GROUP_IDS:-}; } | grep ' .' | sort -u > /data/settings.tmp || true
-mv /data/settings.tmp /data/settings
+[ -e /data/settings ] || printf 'group %s\n' ${TELEGRAM_GROUP_IDS:-} | grep ' .' > /data/settings || true
 # The plugin and the alert hook read the bot credentials from this file (ready for an env scrub on hosts that allow it).
 (umask 077; printf 'TELEGRAM_BOT_TOKEN=%s\nOWNER_TELEGRAM_ID=%s\n' "$TELEGRAM_BOT_TOKEN" "$OWNER_TELEGRAM_ID" > "$TG/.env")
 config.sh apply
@@ -60,9 +59,8 @@ supercronic -quiet -inotify /data/cron/crontab &
 # Telegram to announce a message; then Claude starts again and continues the conversation. /data/idle marks "asleep".
 while :; do
   dream.sh || true  # once a day: consolidate memory, then the next conversation starts clean (docs/MEMORY.md)
-  T0=$SECONDS
   [ ! -e /data/idle ] || [ -z "${IDLE_SLEEP_MINUTES:-}" ] || doorbell.sh || sleep 30
-  rm -f /data/idle
+  rm -f /data/idle; T0=$SECONDS
   [ -z "${IDLE_SLEEP_MINUTES:-}" ] || (while sleep 30; do (( SECONDS - T0 < IDLE_SLEEP_MINUTES * 60 )) && continue
       [ -n "$(find "$CFG/projects" -name '*.jsonl' -newermt "-${IDLE_SLEEP_MINUTES} minutes" 2> /dev/null | head -1)" ] || { touch /data/idle; pkill -x script; break; }; done) &
   # A restart continues the last conversation. If claude then dies within a minute, the next start opens a fresh one instead of looping on a session it cannot load.
