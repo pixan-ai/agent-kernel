@@ -11,8 +11,8 @@ cat > "$STUBS/claude" <<'EOF2'
 #!/usr/bin/env bash
 # Stub Claude: record its config directory, its prompt and what it was given to read; then behave as CLAUDE_STUB says.
 echo "$CLAUDE_CONFIG_DIR" > /data/claude-config-dir; printf '%s' "$*" > /data/claude-prompt; printf '%s\n' "$@" > /data/claude-args; cat > /data/claude-stdin
-case "${CLAUDE_STUB:-ok}" in ok) ;; quiet) echo "Not logged in"; exit 1 ;; *) echo boom >&2; exit 1 ;; esac  # quiet: like the real one, the reason on stdout
-echo "- Ana prefers mornings" > /data/workspace/MEMORY.md
+case "${CLAUDE_STUB:-ok}" in ok) ;; silent) echo "I could not write the file"; exit 0 ;; quiet) echo "Not logged in"; exit 1 ;; *) echo boom >&2; exit 1 ;; esac  # quiet: like the real one, the reason on stdout
+echo "- Ana prefers mornings" > /data/workspace/MEMORY.md; date +%F > "/data/workspace/memory/$(date +%F).md"
 EOF2
 printf '#!/usr/bin/env bash\necho "$1" >> /data/notified\n' > "$STUBS/notify.sh"
 chmod 755 "$STUBS"/*
@@ -58,6 +58,10 @@ check "...and the owner is told: a dream that fails night after night must not g
 dream CLAUDE_STUB=quiet
 check "a dream that keeps failing tells the owner once a day, not at every start or wake (audit)" test "$(grep -c "Not logged in" /data/notified)" = 1
 check "Claude gives its reason on standard output, not as an error: the start log still says why" grep -q "dream: failed.*Not logged in" /data/dream-log
+fresh; rm -f /data/notified; dream CLAUDE_STUB=silent
+check "Claude ends well but wrote nothing (audit, A2): the day is not thrown away" absent /data/fresh
+check "...it is tried again at the next start" absent /data/cron/last-dream
+check "...and the owner is told" grep -q "could not write the file" /data/notified
 
 fresh; rm "$P/s1.jsonl"; dream
 check "a new agent with no conversation does not dream" absent /data/claude-stdin
