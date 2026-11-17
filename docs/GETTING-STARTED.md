@@ -62,6 +62,8 @@ A fixed-price server suits several agents better than per-minute billing, and a 
 
 ## 5. What to tell the agent next
 
+The examples are in Spanish, as the agents in this project are used; the agent answers in the language it is written to.
+
 | You say | What happens | More |
 |---|---|---|
 | "Mándame cada día a las 8 un resumen de …" | It schedules a job; you get a notice | [CRON.md](CRON.md) |
@@ -147,7 +149,7 @@ In plain words, for whoever runs an agent.
 
 **Super-users** are people you trust to run the agent with you. You name them by telling the agent "haz super-usuario a 123456789"; a super-user can name others. They give instructions in the groups the agent is in.
 
-**Everyone else in a group** can ask for ordinary work: answer a question, transcribe a voice note, read a document, search, summarise, make a file. Since 2026-11-15 the agent does this for any member.
+**Everyone else in a group** can ask for ordinary work: answer a question, transcribe a voice note, read a document, search, summarise, make a file.
 
 **Only you and the super-users** can make the agent:
 
@@ -161,23 +163,25 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 **To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Voice, documents and office files need nothing: every agent has them.
 
-**What gets blocked, and why.** Installed tools live in two folders on the agent's disk. From the shell, the agent may run and read what is there, but any other command that touches those folders is refused unless you or a super-user asked in that message. Its settings, jobs and install record cannot be written by hand at all, not even on your request: they change only through the agent's own settings command, which always tells you.
+**What gets blocked, and why.** Installed tools live in two folders on the agent's disk. Package managers, and the file tools on those folders, are refused unless you or a super-user asked in that message. Any other change there without such a request is reported to you after the fact. Its settings, jobs, install record and keys cannot be written by hand at all, not even on your request: settings and jobs change only through the agent's own settings command, which always tells you.
 
 **What you receive in private**, whoever made the change:
 
 | Notice | When |
 |---|---|
-| ⚙️ Setting changed: … | A group, super-user, fellow agent or job was added or removed |
+| ⚙️ Setting changed: … | A group, super-user, fellow agent or job was added or removed; for a job, with its schedule, destination and text |
 | 🧰 Installed at the request of NAME: … | Something was installed |
+| ⚠️ … changed in the install folders, with no request from you or a super-user | Something changed where tools live although nobody allowed to install asked |
 | ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |
 | ⚠️ Tonight's memory consolidation failed | The nightly memory failed (at most once a day) |
 | ⚠️ Scheduled job … failed | A job failed, with the reason |
+| ⚠️ Scheduled job … could not be delivered | Telegram refused the delivery (the bot was removed from the group, or the group changed id) |
+| Back online. I was down from … | The agent was down for more than five minutes; jobs due meanwhile did not run |
+| My Telegram channel was down … Restarting | The watchdog found the Telegram plugin gone and restarted Claude |
 | ⚠️ Tonight's backup failed | The nightly backup could not be sent (only when backups are on) |
 | ⏳ I received a message more than 10 minutes ago … | A message is still unanswered |
 
 ## Self-improvement: installing skills and tools
-
-Decided on 2026-11-12, built with a lock in `bin/install-lock.sh`. Seen working on a live agent on 2026-11-13.
 
 **Who.** Only the owner or a super-user ([SETTINGS.md](SETTINGS.md)) can make the agent install something. The owner counts as one more super-user. Anyone else who asks is refused by a hook, not only by the agent's judgment.
 
@@ -185,12 +189,11 @@ Decided on 2026-11-12, built with a lock in `bin/install-lock.sh`. Seen working 
 
 | Say | It runs | Lands in |
 |---|---|---|
-| "baja elevenlabs" / "instala python-pptx" | `uv pip install elevenlabs` | `/data/tools/venv` (run with `/data/tools/venv/bin/python`) |
+| "baja elevenlabs" / "instala qrcode" | `uv pip install elevenlabs` | `/data/tools/venv` (run with `/data/tools/venv/bin/python`) |
 | "instala la herramienta ruff" | `uv tool install ruff` | `/data/bin`, on the agent's `PATH` |
 | "aprende a hacer un PowerPoint" | writes a skill | `/data/workspace/.claude/skills/` |
 
 It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("haz una gráfica", "lee este código QR"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
-
 
 **What the owner sees.** A private Telegram message after every install: "🧰 Installed at the request of NAME: COMMAND". Every install is also a line in `/data/tools.json` (when, who by name and id, the tool, the command). Ask "¿qué tienes instalado?" to see the list.
 
@@ -217,7 +220,7 @@ The rules common to every agent (`/etc/claude-code/`) come with the image and ca
 
 The image is built for 64-bit Intel and AMD (`linux/amd64`); ARM servers and Apple Silicon Macs are not supported.
 
-Every agent gets these, ready for its skills (decided 2026-11-12):
+Every agent gets these, ready for its skills:
 
 | Tool | Made by | For |
 |---|---|---|
@@ -225,16 +228,15 @@ Every agent gets these, ready for its skills (decided 2026-11-12):
 | `uv`, `uvx` | Astral | Installing Python packages and tools, fast and isolated (pinned by version and checksum) |
 | `pdftotext` and the rest of `poppler-utils` | Poppler (freedesktop.org) | Reading PDFs |
 | `pandoc` | John MacFarlane and contributors | Quick Word, Markdown and HTML from text |
-| `python-docs`: Python with `openpyxl`, `python-docx`, `python-pptx` | Open-source projects of those names | Making Excel, Word and PowerPoint files with layout (decided 2026-11-15) |
+| `python-docs`: Python with `openpyxl`, `python-docx`, `python-pptx` | Open-source projects of those names | Making Excel, Word and PowerPoint files with layout |
 | `typst` | Typst GmbH | Making PDFs, with its own fonts, no LaTeX |
-| `whisper-ctranslate2` with the Whisper `small` model | Softcatalà; model by OpenAI, converted by Systran | Voice notes and audio to text, offline (decided 2026-11-15) |
+| `whisper-ctranslate2` with the Whisper `small` model | Softcatalà; model by OpenAI, converted by Systran | Voice notes and audio to text, offline |
 | `markitdown` | Microsoft | PDF, Word, Excel, PowerPoint, HTML and CSV to text |
 | `ffmpeg` (static build from `imageio-ffmpeg`) | FFmpeg developers | Video frames and audio conversion |
 | `unzip` | Info-ZIP | Opening zip files and skill packages |
 | Time zones (`tzdata`) | IANA | Jobs and logs in the `TZ` you set; already in the Debian base |
 
-Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages (for example `python-pptx`) are not in the image: they are installed per agent. Voice and documents add about 1.3 GB (the Whisper model is about 480 MB of it); the tools of 2026-11-12 added about 300 MB to the image, most of it `pandoc`.
-
+Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages are not in the image: they are installed per agent. The voice and document tools take about 1.3 GB of the image, the Whisper model about 480 MB of it.
 
 ## If something is wrong
 

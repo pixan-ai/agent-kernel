@@ -1,6 +1,6 @@
 # Findings
 
-Evidence labels: **Lab** = observed on a real run; **Docs** = from official documentation; **Code** = read from the plugin source; **Open** = not verified.
+Evidence labels: **Lab** = observed on a real run; **Docs** = from official documentation; **Code** = read from the source (the plugin's, or this repository's with its tests); **Open** = not verified.
 
 ## What works
 
@@ -20,10 +20,10 @@ Evidence labels: **Lab** = observed on a real run; **Docs** = from official docu
 
 | Finding | Evidence |
 |---|---|
-| Auto mode can still stall on a permission prompt (for example a first Read outside the working directories). Reproduced on Railway: a Read of `/etc/hostname` stopped the turn until Allow. The `Notification` hook (`permission_prompt`) alerted the owner on Telegram alongside the plugin's Allow/Deny buttons, and the turn finished after Allow. The hook only gets a generic message; the detail is in the plugin's "See more". | Lab |
+| Auto mode can still stall on a permission prompt (for example a first Read outside the working directories). Reproduced on Railway: a Read of `/etc/hostname` stopped the turn until Allow. The `Notification` hook (`permission_prompt`) alerted the owner on Telegram alongside the plugin's Allow/Deny buttons, and the turn finished after Allow. The hook only gets a generic message; the detail is in the plugin's "See more". Since then the policy sets `denyInsteadOfPrompting`, so such a call is refused instead, and the `Notification` hook was removed (2026-11-17). | Lab |
 | A broad `Edit(//data/config/**)` deny also blocked the agent's own memory directory. Deny specific files instead. | Lab |
 | `deny` rules block file tools, not Bash. | Docs, Lab |
-| A `Read` deny rule also prevented writing the same file. Whether `Read(**/.env)` blocked reads is **not** settled: the audit log shows two reads of `/data/workspace/.env`, and the hook type that logged them was not identified. | Lab (unresolved) |
+| A `Read` deny rule also prevented writing the same file. Whether `Read(**/.env)` blocked reads is **not** settled: the audit log (removed on 2026-11-17) showed two reads of `/data/workspace/.env`, and the hook type that logged them was not identified. | Lab (unresolved) |
 | The model is not pinned: different sessions ran different Opus versions. Set `ANTHROPIC_MODEL`. With `ANTHROPIC_MODEL=claude-opus-5-5` on Railway, all 9 responses in the transcript carry that model. | Lab |
 | While the machine is suspended nothing runs. A background timer that was due during suspension fired on wake. | Lab (inferred) |
 | `/start` on the bot shows pairing instructions even when the allowlist is active. | Code |

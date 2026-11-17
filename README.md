@@ -11,11 +11,11 @@ Claude Code can receive messages from Telegram through [Channels](https://code.c
 ```
 Telegram ──► official plugin (MCP channel) ──► claude (interactive, in a `script` pty) ──► reply tool ──► Telegram
                                                    ▲
-                       managed policy (root-owned, highest precedence) + hooks (audit, alerts)
+                       managed policy (root-owned, highest precedence) + hooks (install lock, alerts)
 ```
 
-- The `script` command provides the pty. No tmux, no supervisor process.
-- No supervisor: if `claude` exits, the container exits and the host restarts it. `watchdog.sh` covers what that cannot see: a Telegram channel that died while Claude kept running, and a message left unanswered.
+- The `script` command provides the pty. No tmux.
+- No supervisor process: if `claude` exits, the container exits and the host restarts it. `watchdog.sh` covers what that cannot see: a Telegram channel that died while Claude kept running, a message left unanswered and a plan limit running out.
 - Behavior is controlled with `.md` files (`CLAUDE.md`) and one managed settings file.
 
 New here? Follow [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md): from nothing to an agent that answers, step by step.
@@ -57,7 +57,7 @@ See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as 
 | `PEER_PUBLIC_KEYS` | no | Public SSH keys of fellow agents allowed to read this agent's screen and conversation and to add or drop its groups and super-users (see [docs/PEERS.md](docs/PEERS.md)). Unset = no SSH server |
 | `PEER_SSH_KEY` | no | Private SSH key this agent uses to look at fellow agents |
 | `SCREEN_MIRROR` | no | Seconds between copies of the readable screen to the service log (e.g. `30`). Unset = off. The screen contains your conversation: enable only to debug |
-| `CLAUDE_FLAGS` | no | Extra `claude` flags. Empty = default interactive mode (auto mode) |
+| `CLAUDE_FLAGS` | no | Extra `claude` flags. Empty = default interactive mode (auto mode). The advisor is on for every agent through the policy |
 | `ANTHROPIC_MODEL` | no | Pin the model. Unpinned, the model can differ between sessions |
 | `TZ` | no | Container time zone |
 
@@ -71,7 +71,7 @@ Defense in depth, each layer using an official mechanism:
 2. **Managed policy**: root-owned file; `deny` rules, enforced on Claude's file tools only, for credentials and for writes to the config, plugin and policy paths (a shell command can still write them, see below).
 3. **Permission classifier (auto mode)**: reviews every action that is not explicitly allowed.
 4. **Never waits for a person**: `permissions.denyInsteadOfPrompting` denies any call that would need an approval prompt; the agent is told and carries on. Nothing is ever allowed by it.
-5. **Hooks**: credential failures alert the owner on Telegram; what each tool call did is in the session transcript.
+5. **Hooks**: the install lock (only the owner and the super-users can make the agent install; a change in the install folders without such a request is reported to the owner), credential failures alerted on Telegram, the agent's memory and recent deliveries given to every session.
 6. **Container**: non-root user (uid 1001), one volume, no secrets baked into the image.
 
 Known limits (read before trusting it):
@@ -79,9 +79,9 @@ Known limits (read before trusting it):
 - `deny` rules are enforced for Claude's file tools. For the shell it depends on how a command is written: Claude Code recognises some commands (`cat`, redirections) but not a script or `grep -r` that opens a file itself. Treat the shell as unconstrained. A hard floor needs OS-level controls (file permissions, sandbox).
 - **Security level on Railway: soft floor only.** There is no hard isolation for the shell: it blocks the user namespaces that the env scrub and the sandbox need, so a shell command can read the tokens. Only the `deny` rules and the auto mode `hard_deny` rule stand in the way (soft layers). A host that allows namespaces is needed for a hard floor: see [Hardening by host](docs/THREAT-MODEL.md#hardening-by-host).
 - There is **no egress control** by default. An allowed shell can reach any host. A network allowlist is not included yet.
-- The alert hook is reactive: it fires when a turn fails, not on a timer.
+- Alerts are reactive: a credential failure is reported when a turn fails, and the watchdog checks every five minutes.
 
-The full picture is in the [threat model](docs/THREAT-MODEL.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md). For what a customer would download versus what runs here, see [lab image and product image](docs/PRODUCT-IMAGE.md).
+The full picture is in the [threat model](docs/THREAT-MODEL.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md). For what is published versus what runs an agent, see [Images](docs/PRODUCT-IMAGE.md).
 
 ## Repository layout
 
@@ -99,13 +99,14 @@ bin/doorbell.js               the listener Telegram calls while the agent sleeps
 bin/backup.sh                 nightly encrypted backup, and restore onto an empty volume (see docs/BACKUP.md)
 bin/watchdog.sh               tells the owner about a message left unanswered and a plan limit past 80%, and restarts when the Telegram plugin is gone
 bin/notify.sh                 one Telegram message to the owner
-bin/install-lock.sh           the install lock: only a super-user can make the agent install (see docs/GETTING-STARTED.md)
-policy/managed-settings.json  the managed policy and hooks
+bin/install-lock.sh           the install lock: only the owner or a super-user can make the agent install (see docs/GETTING-STARTED.md)
 bin/system.cron               the image's own scheduled jobs (daily recycle, watchdog, nightly backup)
+policy/managed-settings.json  the managed policy and hooks
 policy/CLAUDE.md              what the agent is told about its limits (managed: root-owned, updated with the image)
 tests/                        acceptance tests (run inside the built image) and docs-vs-code checks
-docs/                         architecture, findings, deployment, threat model, secrets, repository settings, releasing
-.github/                      CI, issue and PR templates, Dependabot
+docs/                         guide, architecture, threat model, findings, deployment, secrets, releasing
+THIRD-PARTY.md                the third-party software in the image and its licences
+.github/                      CI, release, weekly version check, issue and PR templates, Dependabot
 ```
 
 ## Contributing

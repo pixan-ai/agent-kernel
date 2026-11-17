@@ -28,7 +28,7 @@ An agent that sleeps when idle ([SLEEP.md](SLEEP.md)) dreams when it goes to sle
 
 ## The daily council
 
-With several agents working for the same client, a daily council keeps them, and you, in step. It needs no code: a Telegram group and one scheduled job per agent.
+With several agents working for the same team or project, a daily council keeps them, and you, in step. It needs no code: a Telegram group and one scheduled job per agent.
 
 1. Create a Telegram group, add every agent and the people who should read it ([GROUPS.md](GROUPS.md)).
 2. Tell each agent, in private: "join the group -100…".
@@ -42,4 +42,5 @@ Where these rules came from: [LEARNINGS.md](LEARNINGS.md).
 
 - In CI (`tests/dream_test.sh`): what the dream is given, that it dreams once a day and only when something was said, that a failed dream leaves the conversation intact; the memory reaching the new session (`tests/policy_test.sh`); the dream running before Claude starts (`tests/start_test.sh`).
 - With a real Claude, outside a container (2026-11-12): a two-message conversation became a correct `MEMORY.md` and a daily file, using only the file tools.
-- Not verified yet on a real host: the dream under the managed policy, the quality of what it keeps, and a council in a real group.
+- On Railway (2026-11-17): both agents' dreams, under the managed policy, wrote the day's file and rewrote `MEMORY.md`.
+- Not verified yet: the quality of what it keeps over weeks, and a council in a real group.
