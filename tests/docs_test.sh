@@ -64,4 +64,10 @@ for p in "IMAGEIO_FFMPEG imageio-ffmpeg" "TYPST_VERSION Typst" "UV_VERSION uv" "
   check "THIRD-PARTY.md names the pinned version: ${p#* }" pinned $p
 done
 check "...and both GPL copies of FFmpeg, with where their source is" bash -c 'grep -q "BtbN/FFmpeg-Builds" THIRD-PARTY.md && grep -q "PyAV-Org/pyav-ffmpeg" THIRD-PARTY.md'
+# The Railway template's settings are kept in the repository: the same variables as the guide, the volume, the uid.
+tmpl=$(sed -n '/^## The one-click template/,$p' docs/DEPLOY-RAILWAY.md)
+for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_CODE_OAUTH_TOKEN RAILWAY_RUN_UID TZ; do
+  check "the Railway template sets $v, like the guide" bash -c 'grep -q "| \`$0\` |" <<<"$1" && grep -q "| \`$0\` |" docs/GETTING-STARTED.md' "$v" "$tmpl"
+done
+check "...a volume at /data and Restart Policy Always" bash -c 'grep -q "mounted at \`/data\`" <<<"$0" && grep -q "Restart Policy \*\*Always\*\*" <<<"$0"' "$tmpl"
 echo "$FAILS failed"; exit $((FAILS > 0))
