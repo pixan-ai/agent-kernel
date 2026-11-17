@@ -46,8 +46,8 @@ See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as 
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `CLAUDE_CODE_OAUTH_TOKEN` | one of the two | Claude subscription (Pro/Max) token from `claude setup-token`; uses the subscription's limits |
-| `ANTHROPIC_API_KEY` | one of the two | Console API key, billed per use. Takes precedence if both are set |
+| `CLAUDE_CODE_OAUTH_TOKEN` | one of the two | Claude subscription (Pro/Max) token from `claude setup-token`; for a personal agent ([which credential](https://code.claude.com/docs/en/legal-and-compliance)) |
+| `ANTHROPIC_API_KEY` | one of the two | Console API key, billed per use; for an agent that serves groups or clients. Takes precedence if both are set |
 | `TELEGRAM_BOT_TOKEN` | yes | Bot token, read by the official plugin |
 | `OWNER_TELEGRAM_ID` | yes | The only user who can talk to the bot in private (allowlist), and who gets every notice. In groups the bot hears every member |
 | `TELEGRAM_GROUP_IDS` | no | Telegram groups the bot may take part in (see [docs/GROUPS.md](docs/GROUPS.md)). In a listed group it reads and answers every member, people and bots. Unset = private chat with the owner only |

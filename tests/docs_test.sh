@@ -51,4 +51,9 @@ check "every external Dockerfile FROM is pinned by digest (Dependabot keeps it c
 check "agent instructions exist and match the policy: connectors disabled" bash -c 'jq -e .disableClaudeAiConnectors policy/managed-settings.json >/dev/null && grep -qi "connectors.*disabled" policy/CLAUDE.md'
 check "agent instructions tell it not to touch credentials" grep -qi "never read, print, send" policy/CLAUDE.md
 
+# The project is open source and stands on its own: no business is advertised in it (decided 2026-11-17).
+check "no document or script mentions consulting" bash -c '! grep -rniI --exclude-dir=.git --exclude=docs_test.sh "consult" .'
+# Which Claude credential: Anthropic's terms keep subscriptions for ordinary, individual use (audit of 2026-11-17, A5).
+check "the guide recommends an API key for an agent that serves groups or clients" grep -q "API key for an agent that serves groups or clients" docs/GETTING-STARTED.md
+check "...and README links Anthropic's legal page" grep -q "code.claude.com/docs/en/legal-and-compliance" README.md
 echo "$FAILS failed"; exit $((FAILS > 0))
