@@ -56,6 +56,9 @@ config job "30 9 * * *" news "Other prompt"
 check "setting a job again replaces it" test "$(grep -c 'job.sh news$' $C)$(cat /data/cron/prompts/news)" = "1Other prompt"
 config drop news
 check "drop NAME removes the job" bash -c '! grep -q "job.sh news" /data/cron/crontab'
+check "...and its prompt, so show no longer lists it (seen live on 2026-11-17)" test ! -e /data/cron/prompts/news -a ! -e /data/cron/prompts/news.to
+config drop ../settings
+check "...but a value that is not a job name removes no file" test -e /data/settings
 sed -i '/evil\|escaped/d' /data/cron/jobs
 
 before=$(cat /data/settings)

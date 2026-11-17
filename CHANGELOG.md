@@ -27,6 +27,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- `config.sh drop NAME` left the job's prompt behind, so `config.sh show` still listed a dropped job (seen live on 2026-11-17). It now removes it.
 - A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
 - The owner's notice of a new job now says where it goes and how its prompt starts, and `config.sh show` lists the jobs' prompts.
 - A group removed by chat came back at the next restart while it was still in `TELEGRAM_GROUP_IDS`: the variable now seeds `/data/settings` on the first start only.
