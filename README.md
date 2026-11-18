@@ -3,7 +3,7 @@
 [![CI](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-A **Claude Code agent on Telegram, 24/7**, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, with less than 300 lines of shell and no custom agent code.
+A **Claude Code agent on Telegram, 24/7**, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, with less than 300 lines of [Bash](https://www.gnu.org/software/bash/) and no custom agent code.
 
 > **Status: lab / alpha.** It has run on a laptop (Windows, WSL2, Docker Desktop) and on Railway. It is not a production-ready or audited product. See [docs/FINDINGS.md](docs/FINDINGS.md) for the evidence and what is still unverified. What earlier fleets and this project taught us: [docs/LEARNINGS.md](docs/LEARNINGS.md).
 
