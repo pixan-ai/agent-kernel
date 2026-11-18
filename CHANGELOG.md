@@ -14,6 +14,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- README opens with the project's own description and CI and license badges; the Railway template uses the same description. `docs_test` checks that "less than 300 lines of shell" stays true.
 - Renovate replaces Dependabot and the weekly version check (decided 2026-11-18): every version the Dockerfile pins (Claude Code on its stable channel, uv, Typst and supercronic with their checksums, the Python packages, the base image, the actions) and the optional stack's packages update by pull request, merged by Renovate only once CI is green. `THIRD-PARTY.md` no longer repeats those versions.
 - Updates (decided 2026-11-18): Claude Code follows its stable channel, now 2.1.311, and moves only through a tested pull request; going back is `CLAUDE_CODE_VERSION` on the host and a redeploy. The plugin follows its upstream at every build, and CI also builds weekly. The owner is told at start when Claude Code or the plugin changed version.
 - Small cleanups after the audit of 2026-11-18 (B7, B8): `compose.yml` drops `init: true` (the image runs tini); the threat model's install row moves into its own section; stale wording fixed; "license" spelled one way.
