@@ -23,7 +23,7 @@ Notes:
 
 A Railway template does steps 1 to 3 for whoever deploys: they only paste the three values. The owner of this repository creates and publishes it from the Railway dashboard; the settings to enter are these, kept here so they can be checked against the code.
 
-1. Railway dashboard → workspace settings → **Templates** → **New Template** (Railway's docs: "Create a Template", starting from scratch), and add a service from the GitHub repository `pixan-ai/pixan-kernel-spike` (branch `main`).
+1. Railway dashboard → workspace settings → **Templates** → **New Template** (Railway's docs: "Create a Template", starting from scratch), and add a service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
 2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`.
 3. Add a **volume** mounted at `/data`.
 4. **Variables**: the three credentials with no default, so the deployer is asked for them, and each with its description (the composer's labels may differ from these words; the values must not):

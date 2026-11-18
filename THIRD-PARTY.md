@@ -1,6 +1,6 @@
 # Third-party software in the image
 
-This project's own code (`bin/`, `policy/`, `tests/`) is Apache-2.0 (`LICENSE`). The `base` image also carries the software below, unmodified. This file and `LICENSE` are in the image at `/usr/share/doc/pixan-kernel-spike/`. The full texts of the common licences (GPL-2, GPL-3, LGPL-2.1, Apache-2.0 and others) are at `/usr/share/common-licenses/`.
+This project's own code (`bin/`, `policy/`, `tests/`) is Apache-2.0 (`LICENSE`). The `base` image also carries the software below, unmodified. This file and `LICENSE` are in the image at `/usr/share/doc/agent-kernel/`. The full texts of the common licences (GPL-2, GPL-3, LGPL-2.1, Apache-2.0 and others) are at `/usr/share/common-licenses/`.
 
 Claude Code and the Telegram plugin are not part of the `base` image. Whoever runs an agent builds the `agent` target on their own host, which installs them under Anthropic's terms (docs/PRODUCT-IMAGE.md).
 

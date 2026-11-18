@@ -47,7 +47,7 @@ hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" 
 check "a release also publishes to Docker Hub when it is configured, signed and verified there" hub .github/workflows/release.yml
 
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
-blocks() { grep -q 'image-ref: pixan-kernel-spike:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
+blocks() { grep -q 'image-ref: agent-kernel:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
 check "CI fails on a fixable CRITICAL vulnerability in the publishable image" blocks
 
 echo "$FAILS failed"; exit $((FAILS > 0))

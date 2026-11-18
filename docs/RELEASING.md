@@ -8,11 +8,11 @@ A release is a tag. Pushing a `v*` tag runs [`.github/workflows/release.yml`](..
 
 The same image, same digest, is also pushed to Docker Hub and signed there when these are set in the repository's **Settings → Secrets and variables → Actions**:
 
-1. On Docker Hub, create a public repository, for example `NAMESPACE/pixan-kernel-spike`, and a personal access token with **Read & Write** on it.
-2. Variable `DOCKERHUB_REPOSITORY` = `NAMESPACE/pixan-kernel-spike`.
+1. On Docker Hub, create a public repository, for example `NAMESPACE/agent-kernel`, and a personal access token with **Read & Write** on it.
+2. Variable `DOCKERHUB_REPOSITORY` = `NAMESPACE/agent-kernel`.
 3. Secrets `DOCKERHUB_USERNAME` (the Docker Hub user) and `DOCKERHUB_TOKEN` (that token, pasted only there).
 
-Without the variable, only `ghcr.io` gets the image. GitHub's attestation is stored next to the `ghcr.io` copy; the cosign signature is on both, so `cosign verify docker.io/NAMESPACE/pixan-kernel-spike:0.1.0` with the same two flags as below works too.
+Without the variable, only `ghcr.io` gets the image. GitHub's attestation is stored next to the `ghcr.io` copy; the cosign signature is on both, so `cosign verify docker.io/NAMESPACE/agent-kernel:0.1.0` with the same two flags as below works too.
 
 ## Cut a release
 

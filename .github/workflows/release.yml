@@ -25,7 +25,7 @@ jobs:
         ports:
           - 5000:5000
     env:
-      IMAGE: localhost:5000/pixan-kernel-spike
+      IMAGE: localhost:5000/agent-kernel
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,7 +39,7 @@ jobs:
           context: .
           target: base
           push: true
-          tags: localhost:5000/pixan-kernel-spike:test
+          tags: localhost:5000/agent-kernel:test
           sbom: true
           provenance: mode=max
           cache-from: type=gha

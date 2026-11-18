@@ -1,4 +1,4 @@
-# pixan-kernel-spike
+# agent-kernel
 
 Run **Claude Code 24x7 on Telegram** in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. A few hundred lines of shell glue, no custom agent code.
 

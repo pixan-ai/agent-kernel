@@ -45,7 +45,7 @@ Details and notes: [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md). Cost: an agent that i
 ### Your own server or computer (Docker)
 
 ```bash
-git clone https://github.com/pixan-ai/pixan-kernel-spike && cd pixan-kernel-spike
+git clone https://github.com/pixan-ai/agent-kernel && cd agent-kernel
 cp .env.example .env    # fill in the same values as above
 docker compose up -d --build
 ```
