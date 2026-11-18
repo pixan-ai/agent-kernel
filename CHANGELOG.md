@@ -25,6 +25,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Removed
 
+- The "supervisor" clause: an agent's own workspace notes could grant it authority over fellow agents, and anyone it talks to could ask for that line to be written (audit of 2026-11-18, M6). Only the owner or a super-user can now ask an agent to change a fellow agent.
 - The install lock (`bin/install-lock.sh`: the turn, check and lock-file hooks, about 50 lines): it tried to refuse installs by matching commands, every audit found another spelling, and the refusals seen live came from the agent's judgment and Claude Code's classifier. Who may ask for an install is the agent's instruction again; `bin/installs.sh` records every change in the install folders and tells the owner.
 - `bin/denials.sh` and `peer.sh look NAME denials`: the transcript (`peer.sh look NAME transcript`) and the screen show the same.
 - The audit log `/data/audit.jsonl` and its three hooks: the session transcript already holds every tool call.
