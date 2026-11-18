@@ -4,27 +4,31 @@
 #   installs.sh record  PostToolUse: a change in the install folders is recorded in /data/tools.json and the owner is told;
 #                       a change in the settings, the jobs or the bot's files that did not go through config.sh is told too
 #   installs.sh replay  start.sh: make the Python environment, then reinstall the recorded packages (failures are logged)
+#   installs.sh mark    config.sh: its own change was told, so take the settings as they are now
 set -uo pipefail
-SEEN=/data/cron/watch.seen; LOG=/data/tools.json; B=$(dirname "$(readlink -f "$0")")
+SEEN=/data/cron/watch.seen; SUMS=/data/cron/watch.sums; LOG=/data/tools.json; B=$(dirname "$(readlink -f "$0")")
 TOOLS=(/data/bin /data/tools /data/config/skills /data/workspace/.claude/skills)
 KEPT=(/data/settings /data/cron/jobs /data/cron/prompts /data/cron/crontab /data/config/settings.json /data/config/channels/telegram/.env /data/config/channels/telegram/access.json)
 # Only these are replayed at start, and only if every word is a package name or exactly --python /data/tools/venv/bin/python.
 REPLAY='^(uv pip install|uv tool install|bun add -g) '
 SPEC='^(@[a-z0-9._-]+/)?[A-Za-z0-9][A-Za-z0-9._-]*(\[[A-Za-z0-9,._-]+\])?([=<>!~@]=?[A-Za-z0-9.*+,<>=~-]*)*$'
-in=$( [ "${1:-}" = replay ] || cat )
+in=$( [[ ${1:-} =~ ^(replay|mark)$ ]] || cat )
 field() { jq -r "$1 // \"\"" <<<"$in"; }
-# The first file changed since the last look, by change time, which cannot be set back (bytecode a first import writes is left out).
-# config.sh, the start and the replay move the mark after their own writes, so only other writers are reported.
-changed() { [ ! -e "$SEEN" ] || find "$@" -cnewer "$SEEN" ! -type d ! -name '*.pyc' -print -quit 2> /dev/null; }
+# Installs: the first file changed since the last look, by change time, which cannot be set back (left out: the bytecode a first import
+# writes, and the lock files a tool takes while it runs). The settings: by content, since the plugin touches its own files at start.
+# config.sh, the start and the replay mark the state after their own writes, so only other writers are reported.
+changed() { [ ! -e "$SEEN" ] || find "$@" -cnewer "$SEEN" ! -type d ! -name '*.pyc' ! -name '*.lock' ! -path '*/.locks/*' -print -quit 2> /dev/null; }
+sums() { find "${KEPT[@]}" -type f -print0 2> /dev/null | sort -z | xargs -0 -r sha256sum; true; }  # some of them may not exist yet
 case "${1:-}" in
   record)
-    t=$(changed "${TOOLS[@]}"); k=$(changed "${KEPT[@]}"); touch "$SEEN"; c=$(field '.tool_input.command // .tool_input.file_path // .tool_input.notebook_path')
+    t=$(changed "${TOOLS[@]}"); k=$([ ! -e "$SUMS" ] || diff <(sums) "$SUMS" | sed -n 's/^< [0-9a-f]* *//p' | head -1); touch "$SEEN"; sums > "$SUMS"; c=$(field '.tool_input.command // .tool_input.file_path // .tool_input.notebook_path')
     [ -z "$k" ] || "$B/notify.sh" "⚠️ $k was changed by hand, not through config.sh, after: ${c:0:300}" || true
     [ -n "$t" ] || exit 0
     jq -cn --arg t "$(field .tool_name)" --arg c "$c" '{at: (now | todate), tool: $t, command: $c}' >> "$LOG"
     "$B/notify.sh" "🧰 Installed: ${c:0:300}" || true ;;
+  mark) touch "$SEEN"; sums > "$SUMS" ;;
   replay)
-    trap 'touch "$SEEN"' EXIT  # what the start wrote and puts back is not news to the owner
+    trap 'touch "$SEEN"; sums > "$SUMS"' EXIT  # what the start wrote and puts back is not news to the owner
     cd / && export UV_NO_CONFIG=1  # a uv.toml planted in the workspace must not choose the package index
     mkdir -p /data/bin /data/tools
     ! command -v uv > /dev/null || [ -x /data/tools/venv/bin/python ] || uv venv -q --python /usr/bin/python3 /data/tools/venv || echo "installs: no Python environment (not fatal)" >&2
