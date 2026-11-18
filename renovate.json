@@ -4,6 +4,7 @@
   "extends": ["config:recommended"],
   "automerge": true,
   "platformAutomerge": false,
+  "prCreation": "immediate",
   "customManagers": [
     {
       "customType": "regex",

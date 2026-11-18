@@ -14,6 +14,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- Renovate opens its pull request at once (`prCreation: immediate`): CI runs on pull requests, not on Renovate's branches, so waiting for checks on the branch would wait for ever.
 - The guide's examples of what to tell the agent are in English, with the Spanish its first users say in parentheses; the agent answers in any language.
 - README opens with the project's own description and CI and license badges; the Railway template uses the same description. `docs_test` checks that "less than 300 lines of Bash" stays true.
 - Renovate replaces Dependabot and the weekly version check (decided 2026-11-18): every version the Dockerfile pins (Claude Code on its stable channel, uv, Typst and supercronic with their checksums, the Python packages, the base image, the actions) and the optional stack's packages update by pull request, merged by Renovate only once CI is green. `THIRD-PARTY.md` no longer repeats those versions.

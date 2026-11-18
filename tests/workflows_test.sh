@@ -38,7 +38,7 @@ check "CI runs ShellCheck on the policy's hook commands too (audit, B6)" grep -q
 
 # Everything updates by pull request, merged only when CI is green (decided 2026-11-18): Renovate, with a line for each version it moves.
 check "Renovate merges its own pull requests only once their checks pass, and Claude Code follows its stable channel" \
-  bash -c 'jq -e ".automerge == true and .platformAutomerge == false and (.packageRules[] | select(.matchDepNames == [\"@anthropic-ai/claude-code\"]) | .followTag) == \"stable\"" renovate.json > /dev/null'
+  bash -c 'jq -e ".automerge == true and .platformAutomerge == false and .prCreation == \"immediate\" and (.packageRules[] | select(.matchDepNames == [\"@anthropic-ai/claude-code\"]) | .followTag) == \"stable\"" renovate.json > /dev/null'
 for v in $(grep -oE '^ARG [A-Z][A-Z0-9_]*=' Dockerfile | cut -c5- | tr -d = | grep -v '_SHA256$'); do
   check "Renovate updates $v: a '# renovate:' line comes right before it" bash -c 'grep -B1 "^ARG $0=" Dockerfile | head -1 | grep -q "^# renovate: datasource="' "$v"
 done
