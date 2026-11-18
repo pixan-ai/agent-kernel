@@ -34,6 +34,7 @@ while [ $# -gt 1 ]; do [ "$1" != -o ] || [ "${TG_STATUS:-200}" != 200 ] || echo 
 printf '%s' "${TG_STATUS:-200}"; [ "${TG_STATUS:-200}" != 000 ] || exit 7
 EOF
 printf '#!/usr/bin/env bash\necho "$*" > /data/supercronic-args\n' > "$STUBS/supercronic"; chmod 755 "$STUBS/supercronic"
+printf '#!/usr/bin/env bash\ncat "%s/claude-version"\n' "$STUBS" > "$STUBS/claude"; chmod 755 "$STUBS/claude"; echo "2.1.311 (Claude Code)" > "$STUBS/claude-version"; chmod 644 "$STUBS/claude-version"
 printf '#!/usr/bin/env bash\necho "$*" > /data/peer-args\n' > "$STUBS/peer.sh"; chmod 755 "$STUBS/peer.sh"
 printf '#!/usr/bin/env bash\necho "$*" >> /data/backup-args\n' > "$STUBS/backup.sh"; chmod 755 "$STUBS/backup.sh"
 printf '#!/usr/bin/env bash\necho yes > /data/dream-runs\n' > "$STUBS/dream.sh"; chmod 755 "$STUBS/dream.sh"
@@ -122,6 +123,10 @@ env -i "${base_env[@]}" CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x TELEGRAM_GROUP_ID
 check "TELEGRAM_GROUP_IDS seeds only the first start: a group removed by chat does not come back" test "$(group '.groups | keys')" = '["-1001"]'
 check "a new container drops the poller pid left by the last one" test ! -e /data/config/channels/telegram/bot.pid
 
+check "the versions of Claude Code and the plugin are kept on the volume, and a first start tells nothing" bash -c 'grep -q "Claude Code 2.1.311" /data/cron/versions && ! grep -q "Versions changed" /data/curl-calls'
+echo "2.1.320 (Claude Code)" > "$STUBS/claude-version"; again
+check "a start with another version tells the owner, from which to which, and how to go back (decided 2026-11-18)" bash -c 'grep -q "Versions changed: Claude Code 2.1.311.* → Claude Code 2.1.320" /data/curl-calls && grep -q "CLAUDE_CODE_VERSION" /data/curl-calls'
+echo "2.1.311 (Claude Code)" > "$STUBS/claude-version"
 check "the bot's own Telegram identity is kept for the session hook" test "$(jq -r .result.username /data/config/channels/telegram/me.json)" = Test_bot
 
 seq 1 520 > /data/workspace/sent.jsonl; chown 1001 /data/workspace/sent.jsonl; again

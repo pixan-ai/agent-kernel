@@ -51,16 +51,21 @@ WORKDIR /data/workspace
 ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/start.sh"]
 
 FROM base AS agent
-ARG CLAUDE_CODE_VERSION=2.1.319
+# Claude Code's stable channel (about a week old, skipping releases with major regressions): Renovate opens a pull request when it
+# moves, CI builds and tests it, and only then does a host get it. To go back, set CLAUDE_CODE_VERSION on the host and redeploy.
+ARG CLAUDE_CODE_VERSION=2.1.311
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
  && /home/agent/.local/bin/claude --version
 ENV PATH="/home/agent/.local/bin:${PATH}"
 
-# The official plugin is baked into /opt/seed/config; start.sh copies it to the volume at every start.
+# The official plugin is baked into /opt/seed/config; start.sh copies it to the volume at every start. The official marketplace only
+# follows its main branch (a commit cannot be pinned), so each build takes the latest plugin: a plugin that does not install fails
+# the build, and the host keeps the previous deployment.
 RUN export CLAUDE_CONFIG_DIR=/opt/seed/config && mkdir -p "$CLAUDE_CONFIG_DIR" \
  && claude plugin marketplace add anthropics/claude-plugins-official \
  && claude plugin install telegram@claude-plugins-official \
  && for d in /opt/seed/config/plugins/cache/claude-plugins-official/telegram/*/; do bun install --cwd "$d"; done
-# Pinned: neither the auto-updater nor `claude update` may move it (set after the install, which this would also refuse).
+# Updates come only with a new image, built and tested first: neither the auto-updater nor `claude update` may change a running agent
+# (set after the install, which this would also refuse).
 ENV DISABLE_UPDATES=1

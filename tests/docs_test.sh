@@ -15,7 +15,7 @@ refs=$(grep -oE '\$\{?[A-Z][A-Z0-9_]*' bin/start.sh | tr -d '${' | sort -u)
 assigned=$({ grep -oE '(^[[:space:]]*|;[[:space:]]*|\()[A-Z][A-Z0-9_]*=' bin/start.sh | sed -E 's/^[;(]//; s/^[[:space:]]+//; s/=$//'; echo SECONDS; } | sort -u)
 inputs=$(comm -23 <(printf '%s\n' "$refs") <(printf '%s\n' "$assigned"))
 # Consumed by Claude Code or the OS, not by start.sh, but documented for the user.
-known=$(printf '%s\n' "$inputs" ANTHROPIC_MODEL TZ)
+known=$(printf '%s\n' "$inputs" ANTHROPIC_MODEL TZ; grep -oE '^ARG [A-Z][A-Z0-9_]*' Dockerfile | cut -d" " -f2)  # build arguments: a host variable of the same name is used at build
 documented=$(sed -n '/^| Variable/,/^$/p' README.md | grep -oE '^\| `[A-Z][A-Z0-9_]*`' | tr -d '|` ')
 example=$(grep -oE '^#? ?[A-Z][A-Z0-9_]*=' .env.example | tr -d '# =')
 

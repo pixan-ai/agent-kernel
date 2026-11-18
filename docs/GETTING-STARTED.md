@@ -112,6 +112,7 @@ Set once, at installation. Changing one restarts the agent.
 | `OWNER_TELEGRAM_ID` | required | The owner: the only private chat, and who gets every notice | step 1 |
 | `TZ` | `UTC` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
 | `ANTHROPIC_MODEL` | Claude's default | Pin the model | |
+| `CLAUDE_CODE_VERSION` | the stable channel | Go back to a previous Claude Code; read when the image is built, so redeploy | [Updates](#updates-and-how-to-go-back) |
 | `CLAUDE_FLAGS` | empty | Extra flags for `claude`. The advisor is already on for every agent (`advisorModel: opus` in the policy); `--advisor MODEL` here picks another one for this agent | |
 | `TELEGRAM_GROUP_IDS` | empty | Groups to join at the first start (the same as telling the agent); read only while `/data/settings` does not exist yet | [GROUPS.md](GROUPS.md) |
 | `IDLE_SLEEP_MINUTES` | empty = always on | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
@@ -251,6 +252,18 @@ Not in the image, because both carry FFmpeg under the GPL; downloaded by each ag
 
 Like any install, it lives on the volume: it survives restarts, redeploys and new images, is told to you, and is put back at start if it ever went missing. Only deleting the volume removes it.
 
+## Updates, and how to go back
+
+Everything updates on its own; nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
+
+| Part | How it updates | How to go back |
+|---|---|---|
+| **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged and the host builds it | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.311`) and redeploy. Remove the variable to follow the channel again |
+| **Telegram plugin** | Every build takes its latest version (the official marketplace cannot be pinned). If it does not install, the build fails and the host keeps the previous deployment; CI also tries it every week | The host's rollback to the previous deployment (on Railway: the deployment's **Rollback**) |
+| **Tools in the image** (uv, Typst, markitdown, the base image…) | Renovate pull requests, tested by CI, merged when green | Revert that pull request |
+
+After every change you get a private notice: "🔄 Versions changed: Claude Code 2.1.311, Telegram plugin 0.0.7 → Claude Code 2.1.320, Telegram plugin 0.0.8". If the agent misbehaves after one, that notice tells you what to go back to.
+
 ## If something is wrong
 
 | Symptom | Likely cause |
@@ -264,3 +277,4 @@ Like any install, it lives on the volume: it survives restarts, redeploys and ne
 | It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`: the public address is missing or wrong ([SLEEP.md](SLEEP.md)) |
 | "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
+| Something broke right after "🔄 Versions changed" | Go back to the previous version ([Updates, and how to go back](#updates-and-how-to-go-back)) and tell the project |

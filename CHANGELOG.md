@@ -14,6 +14,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- Updates (decided 2026-11-18): Claude Code follows its stable channel, now 2.1.311, and moves only through a tested pull request; going back is `CLAUDE_CODE_VERSION` on the host and a redeploy. The plugin follows its upstream at every build, and CI also builds weekly. The owner is told at start when Claude Code or the plugin changed version.
 - Small cleanups after the audit of 2026-11-18 (B7, B8): `compose.yml` drops `init: true` (the image runs tini); the threat model's install row moves into its own section; stale wording fixed; "license" spelled one way.
 - Notices about jobs are optional (decided 2026-11-18): `config.sh notices jobs off|on`, by telling the agent "no me avises de las tareas". A delivered one-off removes itself without a notice (`config.sh done NAME`). Groups, super-users and fellow agents are always told.
 - The guide recommends a regular review of what each agent installed and of its groups and super-users, and supergroups from the start, since Telegram converts a group and changes its id on its own.
