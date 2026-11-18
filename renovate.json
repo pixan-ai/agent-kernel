@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Everything updates on its own, by pull request, and merges only when CI is green (docs/GETTING-STARTED.md#updates-and-how-to-go-back).",
+  "extends": ["config:recommended"],
+  "automerge": true,
+  "platformAutomerge": false,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Versions pinned in the Dockerfile, each under a '# renovate:' line; a checksum on the next line follows its version.",
+      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nARG [A-Z0-9_]+=(?<currentValue>\\S+)(\\nARG [A-Z0-9_]+_SHA256=(?<currentDigest>[0-9a-f]{64}))?"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Python packages in the optional stack's recipes.",
+      "managerFilePatterns": ["/^policy/stack\\.md$/"],
+      "matchStrings": ["(?<depName>[a-z0-9-]+)==(?<currentValue>[0-9][0-9.]*)"],
+      "datasourceTemplate": "pypi"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Claude Code follows its stable channel: about a week old, skipping releases with major regressions.",
+      "matchDepNames": ["@anthropic-ai/claude-code"],
+      "followTag": "stable"
+    }
+  ]
+}

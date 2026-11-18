@@ -13,26 +13,39 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
  && useradd -m -u 1001 agent && mkdir -p /data /opt/seed /run/sshd && chown agent:agent /data /opt/seed
 
 # Supercronic runs the scheduled jobs (docs/CRON.md). Pinned by version and checksum.
-ARG SUPERCRONIC_VERSION=v0.2.51 SUPERCRONIC_SHA256=cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123
+# renovate: datasource=github-release-attachments depName=aptible/supercronic
+ARG SUPERCRONIC_VERSION=v0.2.51
+ARG SUPERCRONIC_SHA256=cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123
 RUN curl -fsSL -o /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" \
  && echo "${SUPERCRONIC_SHA256}  /usr/local/bin/supercronic" | sha256sum -c - && chmod 755 /usr/local/bin/supercronic
 
 # uv (Astral) installs Python packages and tools quickly and in isolation. Pinned by version and checksum.
-ARG UV_VERSION=0.13.8 UV_SHA256=5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
+# renovate: datasource=github-release-attachments depName=astral-sh/uv
+ARG UV_VERSION=0.13.8
+ARG UV_SHA256=5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
 RUN curl -fsSL -o /tmp/uv.tgz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
  && echo "${UV_SHA256}  /tmp/uv.tgz" | sha256sum -c - && tar -xzf /tmp/uv.tgz -C /usr/local/bin --strip-components=1 --no-same-owner && rm /tmp/uv.tgz
 
 # Every agent reads documents and makes them, out of the box. One environment, the packages named here pinned (their dependencies are
 # resolved at build time): markitdown (PDF, Word, Excel, PowerPoint to text), python-docx, python-pptx and openpyxl (making them; run
 # with `python-docs`). Voice and video are not in the image (their FFmpeg is GPL): the agent installs them when asked (policy/stack.md).
-ARG MARKITDOWN=0.1.9 PYTHON_DOCX=1.2.0 PYTHON_PPTX=1.0.2 OPENPYXL=3.1.5
+# renovate: datasource=pypi depName=markitdown
+ARG MARKITDOWN=0.1.9
+# renovate: datasource=pypi depName=python-docx
+ARG PYTHON_DOCX=1.2.0
+# renovate: datasource=pypi depName=python-pptx
+ARG PYTHON_PPTX=1.0.2
+# renovate: datasource=pypi depName=openpyxl
+ARG OPENPYXL=3.1.5
 RUN UV_TOOL_DIR=/opt/tools UV_TOOL_BIN_DIR=/usr/local/bin uv tool install --no-cache --python /usr/bin/python3 "markitdown[pdf,docx,pptx,xlsx,xls]==${MARKITDOWN}" \
       --with "python-docx==${PYTHON_DOCX}" --with "python-pptx==${PYTHON_PPTX}" --with "openpyxl==${OPENPYXL}" \
  && printf '#!/bin/sh\nexec %s "$@"\n' /opt/tools/markitdown/bin/python > /usr/local/bin/python-docs && chmod 755 /usr/local/bin/python-docs
 
 # Typst makes PDFs (`typst compile`), with its own fonts: one binary, no LaTeX. Pinned by version and checksum.
-ARG TYPST_VERSION=0.15.1 TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
-RUN curl -fsSL -o /tmp/typst.tar.xz "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+# renovate: datasource=github-release-attachments depName=typst/typst
+ARG TYPST_VERSION=v0.15.1
+ARG TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
+RUN curl -fsSL -o /tmp/typst.tar.xz "https://github.com/typst/typst/releases/download/${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
  && echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c - && tar -xJf /tmp/typst.tar.xz -C /usr/local/bin --strip-components=1 --no-same-owner --wildcards '*/typst' && rm /tmp/typst.tar.xz
 
 # What the image carries and under which licences (the GPL binaries and where their source is).
@@ -53,6 +66,7 @@ ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/start.sh"]
 FROM base AS agent
 # Claude Code's stable channel (about a week old, skipping releases with major regressions): Renovate opens a pull request when it
 # moves, CI builds and tests it, and only then does a host get it. To go back, set CLAUDE_CODE_VERSION on the host and redeploy.
+# renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_CODE_VERSION=2.1.311
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \

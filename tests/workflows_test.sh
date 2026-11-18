@@ -36,10 +36,13 @@ done
 check "CI cancels a pull request's older run when a new push arrives (audit, B9)" bash -c 'grep -q "^concurrency:" "$0" && grep -q "cancel-in-progress: \${{ github.event_name == .pull_request. }}" "$0"' .github/workflows/ci.yml
 check "CI runs ShellCheck on the policy's hook commands too (audit, B6)" grep -q "shellcheck -s sh" .github/workflows/ci.yml
 
-# Versions the Dockerfile pins by hand: a weekly workflow compares each with upstream (audit of 2026-11-17, M10).
-for v in $(sed -n '/^ARG /{:a;/\\$/{N;ba};p}' Dockerfile | grep -oE '[A-Z][A-Z0-9_]+=' | tr -d = | grep -v '_SHA256$'); do
-  check "the pins workflow watches $v" grep -q "$v=" .github/workflows/pins.yml
+# Everything updates by pull request, merged only when CI is green (decided 2026-11-18): Renovate, with a line for each version it moves.
+check "Renovate merges its own pull requests only once their checks pass, and Claude Code follows its stable channel" \
+  bash -c 'jq -e ".automerge == true and .platformAutomerge == false and (.packageRules[] | select(.matchDepNames == [\"@anthropic-ai/claude-code\"]) | .followTag) == \"stable\"" renovate.json > /dev/null'
+for v in $(grep -oE '^ARG [A-Z][A-Z0-9_]*=' Dockerfile | cut -c5- | tr -d = | grep -v '_SHA256$'); do
+  check "Renovate updates $v: a '# renovate:' line comes right before it" bash -c 'grep -B1 "^ARG $0=" Dockerfile | head -1 | grep -q "^# renovate: datasource="' "$v"
 done
+check "...and only Renovate: no second bot, no weekly issue" test ! -e .github/dependabot.yml -a ! -e .github/workflows/pins.yml
 
 # Docker Hub as a second registry (decision of 2026-11-17): same digest, signed and verified there too, credentials only from secrets.
 hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" && grep -q 'password: \${{ secrets.DOCKERHUB_TOKEN }}' "$1" \
