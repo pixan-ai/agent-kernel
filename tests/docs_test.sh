@@ -67,4 +67,6 @@ for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_CODE_OAUTH_TOKEN RAILWAY_RU
 done
 check "...a volume at /data and Restart Policy Always" bash -c 'grep -q "mounted at \`/data\`" <<<"$0" && grep -q "Restart Policy \*\*Always\*\*" <<<"$0"' "$tmpl"
 check "Claude Code stays at its pinned version: neither the auto-updater nor \`claude update\` (audit of 2026-11-18, B9)" bash -c 'grep -q "DISABLE_AUTOUPDATER=1" Dockerfile && grep -q "DISABLE_UPDATES=1" Dockerfile'
+lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
+check "README's \"less than 300 lines of shell\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))
