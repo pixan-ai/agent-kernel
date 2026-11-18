@@ -9,7 +9,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - Every agent has the advisor on from its first start: the policy sets `advisorModel` to `opus`, so Claude can ask a stronger model for advice at key moments of a task. On a subscription its use counts toward the plan's limits. Experimental in Claude Code; `CLAUDE_FLAGS=--advisor MODEL` still picks another model for one agent.
 - The settings for a one-click Railway template, in docs/DEPLOY-RAILWAY.md (service, volume, variables with their descriptions), checked against the guide by `docs_test`. The template itself is made and published from the Railway dashboard.
 - A release can also publish the image to Docker Hub, same digest, signed there too, when `DOCKERHUB_REPOSITORY` and its two secrets are set (docs/RELEASING.md). Publishing stays locked by `PUBLISH_IMAGE`.
-- `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/pixan-kernel-spike/`: the software the image carries, its licences, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
+- `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/agent-kernel/`: the software the image carries, its licences, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
 - A weekly workflow (`pins.yml`) compares every version the Dockerfile pins by hand (supercronic, uv, Typst, the Python packages, the Whisper model, Claude Code) with its latest upstream release, and keeps one issue open listing those behind. Dependabot already watched the actions and the base image.
 
 ### Changed
@@ -29,6 +29,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A job with a schedule that cannot happen (minute 60, day 0, `*/0`) stopped Supercronic at once, and with it every job, the watchdog, the backup and the 04:00 recycle, silently. `config.sh` now refuses such a schedule, and leaves out any such line already on the volume.
 - `config.sh drop NAME` left the job's prompt behind, so `config.sh show` still listed a dropped job (seen live on 2026-11-17). It now removes it.
 - A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
 - The owner's notice of a new job now says where it goes and how its prompt starts, and `config.sh show` lists the jobs' prompts.
