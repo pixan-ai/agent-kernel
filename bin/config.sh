@@ -28,8 +28,9 @@ case "${1:-} ${2:-}" in
 esac
 # What supercronic runs: the image's jobs, then the agent's, and of those only well-formed job.sh lines. Anything else in the file never runs.
 { cat "$B/system.cron"; grep -E '^([0-9*/,-]+ ){5}job\.sh [A-Za-z0-9_-]+$' $J | while IFS= read -r l; do ! valid "$l" || echo "$l"; done || true; } > /data/cron/crontab.tmp && mv /data/cron/crontab.tmp /data/cron/crontab
+O=${OWNER_TELEGRAM_ID:-}  # the host's variable wins over the file, which the agent's shell can write (notify.sh does the same)
 # shellcheck source=/dev/null
-. $TG/.env
+. $TG/.env; OWNER_TELEGRAM_ID=${O:-$OWNER_TELEGRAM_ID}
 jq -n --arg o "$OWNER_TELEGRAM_ID" --rawfile f $F '($f | split("\n") | map(split(" "))) as $l
   | ($l | map(select(.[0] == "group") | .[1])) as $gs
   | {dmPolicy: "allowlist", allowFrom: ([$o] + $gs), groups: ($gs | map({key: ., value: {requireMention: false, allowFrom: []}}) | from_entries), pending: {}}' > $TG/access.json.tmp && mv $TG/access.json.tmp $TG/access.json

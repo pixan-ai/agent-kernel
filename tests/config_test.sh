@@ -62,6 +62,9 @@ check "setting a job again replaces it" test "$(grep -c 'job.sh news$' $C)$(cat 
 config drop news
 check "drop NAME removes the job" bash -c '! grep -q "job.sh news" /data/cron/crontab'
 check "...and its prompt, so show no longer lists it (seen live on 2026-11-17)" test ! -e /data/cron/prompts/news -a ! -e /data/cron/prompts/news.to
+echo "OWNER_TELEGRAM_ID=999" >> /data/config/channels/telegram/.env; env OWNER_TELEGRAM_ID=42 PATH="$STUBS:$PATH" "$BIN/config.sh" apply > /dev/null 2>&1
+check "an owner id added to the bot's file by hand opens no private chat: the host's variable wins (audit of 2026-11-18, A3)" test "$(access '.allowFrom - ["-1001","-1002","-1005"]')" = '["42"]'
+sed -i '/OWNER_TELEGRAM_ID=999/d' /data/config/channels/telegram/.env
 config drop ../settings
 check "...but a value that is not a job name removes no file" test -e /data/settings
 sed -i '/evil\|escaped/d' /data/cron/jobs
