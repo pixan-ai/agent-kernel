@@ -14,6 +14,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- Voice notes and video moved out of the image into an optional stack (`policy/stack.md`, decided 2026-11-18): their FFmpeg is GPL, and downloaded by each agent from the upstream projects when its owner or a super-user asks, it is not distributed by this project. The image is about 1.3 GB smaller. Documents (read and make) stay in the image. CI runs the stack's recipes as written (`tests/stack_test.sh`). An agent that used voice from the image needs one install.
 - The project is renamed `agent-kernel` (it was `pixan-kernel-spike`): the repository, the image names and the licence folder in the image (`/usr/share/doc/agent-kernel/`). GitHub redirects the old address.
 - Documents reviewed end to end: what changed with the audit of 2026-11-17 (no audit log, install folders watched rather than guarded, job notices) is described the same everywhere; decision dates moved out of the guides; the evidence from the live tests of 2026-11-17 added; the image page and the repository settings brought up to date; issue and pull request templates ask for the version, the host and a failing test.
 - Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.

@@ -36,5 +36,5 @@ A Railway template does steps 1 to 3 for whoever deploys: they only paste the th
 | `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
 | `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
 
-5. Template name `Pixan agent`, description "A personal Claude Code agent on Telegram, with memory, scheduled jobs and voice notes", and the README as the overview. **Publish**.
+5. Template name `Pixan agent`, description "A personal Claude Code agent on Telegram, with memory, scheduled jobs and documents", and the README as the overview. **Publish**.
 6. Deploy it once into a new project with real values and send the bot a message. Then add the template's link to the guide (docs/GETTING-STARTED.md, "Railway (the quick way)").

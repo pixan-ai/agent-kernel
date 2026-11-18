@@ -26,6 +26,7 @@ for t in start tools policy cron peer config backup sleep dream install; do
   docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel "/tests/${t}_test.sh" || break
 done
 docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel /tests/media_test.sh
+docker run --rm --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel /tests/stack_test.sh   # downloads the optional stack
 ```
 
 A change to `bin/` comes with a test in `tests/` that runs the script and checks what it does (exit code, files, output). Break the value the test guards and make sure it turns red.

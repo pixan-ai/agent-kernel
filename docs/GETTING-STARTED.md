@@ -71,7 +71,8 @@ The examples are in Spanish, as the agents in this project are used; the agent a
 | "Tu compañero X está en …" / "¿Qué está haciendo X?" | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
 | "Recuerda que …" / "¿Qué recuerdas de …?" | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
 | "Cada día a las 9 publica en el grupo -100… lo más relevante de ayer" | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
-| A voice note, a PDF, a Word, Excel or PowerPoint file | It transcribes or reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
+| A PDF, a Word, Excel or PowerPoint file | It reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
+| "Aprende a escuchar notas de voz" / "aprende a trabajar con video" | It installs voice or video once, from the optional stack; then it transcribes voice notes or works with videos | [The optional stack](#the-optional-stack-voice-and-video) |
 | "Hazme un Excel / Word / PowerPoint / PDF con …" | It makes the file and sends it to you | [What the image contains](#what-the-image-contains) |
 | "Haz super-usuario a 123456789" | That person can also give it instructions in its groups | [GROUPS.md](GROUPS.md) |
 | "Mándame el archivo …" | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
@@ -161,7 +162,7 @@ In plain words, for whoever runs an agent.
 
 When someone else asks for one of these, the agent says that you or a super-user has to ask. This rests on its instructions and its judgment, not on code that tries to guess commands: a rule like that is always one spelling short, while Claude reads the request itself. What code does guarantee is that **you hear about every change**: anything installed, and any change to its settings, jobs or bot files that did not go through its settings command, reaches you in private ([THREAT-MODEL.md](THREAT-MODEL.md)).
 
-**To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Voice, documents and office files need nothing: every agent has them.
+**To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Documents and office files need nothing: every agent has them. Voice and video need one install, below.
 
 **What you are told, and why nothing is blocked by pattern.** Installed tools live in two folders on the agent's disk; every change there is recorded and told to you. Its settings and jobs are meant to change only through its own settings command, which always tells you; a change made any other way is told to you too, marked "by hand". Until 2026-11-18 a hook also tried to refuse installs by matching commands. Every audit found another way to write the same thing, while the refusals that mattered in practice came from the agent itself and from Claude Code's own checks, so it was removed: the agent decides, you see what it did.
 
@@ -230,13 +231,22 @@ Every agent gets these, ready for its skills:
 | `pandoc` | John MacFarlane and contributors | Quick Word, Markdown and HTML from text |
 | `python-docs`: Python with `openpyxl`, `python-docx`, `python-pptx` | Open-source projects of those names | Making Excel, Word and PowerPoint files with layout |
 | `typst` | Typst GmbH | Making PDFs, with its own fonts, no LaTeX |
-| `whisper-ctranslate2` with the Whisper `small` model | Softcatalà; model by OpenAI, converted by Systran | Voice notes and audio to text, offline |
 | `markitdown` | Microsoft | PDF, Word, Excel, PowerPoint, HTML and CSV to text |
-| `ffmpeg` (static build from `imageio-ffmpeg`) | FFmpeg developers | Video frames and audio conversion |
 | `unzip` | Info-ZIP | Opening zip files and skill packages |
 | Time zones (`tzdata`) | IANA | Jobs and logs in the `TZ` you set; already in the Debian base |
 
-Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages are not in the image: they are installed per agent. The voice and document tools take about 1.3 GB of the image, the Whisper model about 480 MB of it.
+Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age`, `supercronic`; Claude Code only in the agent image, never in the published `base` ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)). Other Python packages are not in the image: they are installed per agent.
+
+## The optional stack: voice and video
+
+Not in the image, because both carry FFmpeg under the GPL; downloaded by each agent from their own projects, they are not distributed by this project. When you or a super-user ask ("aprende a escuchar notas de voz", "aprende a trabajar con video"), the agent installs them exactly as [`policy/stack.md`](../policy/stack.md) says, with pinned versions; CI runs those recipes as written.
+
+| Part | What it is | First install |
+|---|---|---|
+| Voice notes and audio | Whisper `small` (`whisper-ctranslate2`), offline once installed | A few minutes; about 700 MB |
+| Video | `ffmpeg`, the static build `imageio-ffmpeg` carries | Under a minute |
+
+Like any install, it lives on the volume: it survives restarts, redeploys and new images, is told to you, and is put back at start if it ever went missing. Only deleting the volume removes it.
 
 ## If something is wrong
 
