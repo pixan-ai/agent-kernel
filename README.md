@@ -11,7 +11,7 @@ Claude Code can receive messages from Telegram through [Channels](https://code.c
 ```
 Telegram ──► official plugin (MCP channel) ──► claude (interactive, in a `script` pty) ──► reply tool ──► Telegram
                                                    ▲
-                       managed policy (root-owned, highest precedence) + hooks (install lock, alerts)
+                       managed policy (root-owned, highest precedence) + hooks (notices, alerts)
 ```
 
 - The `script` command provides the pty. No tmux.
@@ -67,11 +67,11 @@ The policy lives in [`policy/managed-settings.json`](policy/managed-settings.jso
 
 Defense in depth, each layer using an official mechanism:
 
-1. **Sender allowlist**: in private the plugin only accepts the configured Telegram user. In a group the owner enabled, every member is heard; there the owner-only rule is an instruction to the agent, not a lock, except for installs, which a hook refuses to anyone but the owner and the super-users.
+1. **Sender allowlist**: in private the plugin only accepts the configured Telegram user. In a group the owner enabled, every member is heard; there the owner-only rule is an instruction to the agent, applied by its judgment, and every change it makes to its tools or settings is told to the owner.
 2. **Managed policy**: root-owned file; `deny` rules, enforced on Claude's file tools only, for credentials and for writes to the config, plugin and policy paths (a shell command can still write them, see below).
 3. **Permission classifier (auto mode)**: reviews every action that is not explicitly allowed.
 4. **Never waits for a person**: `permissions.denyInsteadOfPrompting` denies any call that would need an approval prompt; the agent is told and carries on. Nothing is ever allowed by it.
-5. **Hooks**: the install lock (only the owner and the super-users can make the agent install; a change in the install folders without such a request is reported to the owner), credential failures alerted on Telegram, the agent's memory and recent deliveries given to every session.
+5. **Hooks**: every change to the agent's tools, and any change to its settings or the bot's files that did not go through its settings command, told to the owner; credential failures alerted on Telegram; the agent's memory and recent deliveries given to every session.
 6. **Container**: non-root user (uid 1001), one volume, no secrets baked into the image.
 
 Known limits (read before trusting it):
@@ -99,7 +99,7 @@ bin/doorbell.js               the listener Telegram calls while the agent sleeps
 bin/backup.sh                 nightly encrypted backup, and restore onto an empty volume (see docs/BACKUP.md)
 bin/watchdog.sh               tells the owner about a message left unanswered and a plan limit past 80%, and restarts when the Telegram plugin is gone
 bin/notify.sh                 one Telegram message to the owner
-bin/install-lock.sh           the install lock: only the owner or a super-user can make the agent install (see docs/GETTING-STARTED.md)
+bin/installs.sh               records what the agent installs and tells the owner; reinstalls it at start (see docs/GETTING-STARTED.md)
 bin/system.cron               the image's own scheduled jobs (daily recycle, watchdog, nightly backup)
 policy/managed-settings.json  the managed policy and hooks
 policy/CLAUDE.md              what the agent is told about its limits (managed: root-owned, updated with the image)

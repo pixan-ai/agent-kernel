@@ -9,7 +9,7 @@
 | `script` | Provides the pty that interactive Claude needs | util-linux |
 | `bin/start.sh` | Seeds config, writes the allowlist, pre-accepts onboarding, starts claude | this repo |
 | `policy/managed-settings.json`, `policy/CLAUDE.md` | Permissions, hooks, channel enablement; what the agent is told about its limits | this repo |
-| `bin/*` | Scheduled jobs, the daily memory, the opt-in sleep, backups, the peer view, the install lock, the watchdog | this repo ([README](../README.md#repository-layout)) |
+| `bin/*` | Scheduled jobs, the daily memory, the opt-in sleep, backups, the peer view, the record of installs, the watchdog | this repo ([README](../README.md#repository-layout)) |
 | Supercronic | The clock for scheduled jobs | aptible, pinned by checksum |
 
 ## Why interactive mode in a pty
