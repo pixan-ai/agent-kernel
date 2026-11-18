@@ -29,6 +29,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A line `OWNER_TELEGRAM_ID=…` added to the bot's private file from the agent's shell sent every notice to that id and opened private chats to it. `notify.sh` and `config.sh` now take the owner from the host's variable, which the agent cannot change, and use the file only where the variable is absent.
 - A job with a schedule that cannot happen (minute 60, day 0, `*/0`) stopped Supercronic at once, and with it every job, the watchdog, the backup and the 04:00 recycle, silently. `config.sh` now refuses such a schedule, and leaves out any such line already on the volume.
 - `config.sh drop NAME` left the job's prompt behind, so `config.sh show` still listed a dropped job (seen live on 2026-11-17). It now removes it.
 - A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
