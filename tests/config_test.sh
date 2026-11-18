@@ -74,9 +74,9 @@ config group -1009; config drop -1009
 check "...but groups still are, both ways" bash -c 'grep -q "Setting changed: group -1009" /data/curl-args && grep -q "Setting changed: drop -1009" /data/curl-args'
 : > /data/curl-args; config notices jobs on; config job "0 7 * * *" loud_one "x"
 check "notices jobs on: job notices are back" told "Setting changed: job loud_one"
-: > /data/curl-args; config done loud_one
+: > /data/curl-args; config "done" loud_one
 check "done NAME (a one-off that was delivered) removes the job without a notice" bash -c '! grep -q "job.sh loud_one" /data/cron/jobs && test ! -s /data/curl-args'
-config group -1010; config done -1010
+config group -1010; config "done" -1010
 check "...and removes nothing but a job" grep -qx "group -1010" /data/settings
 config drop -1010
 config drop ../settings
