@@ -35,4 +35,5 @@ jq -n --arg o "$OWNER_TELEGRAM_ID" --rawfile f $F '($f | split("\n") | map(split
   | ($l | map(select(.[0] == "group") | .[1])) as $gs
   | {dmPolicy: "allowlist", allowFrom: ([$o] + $gs), groups: ($gs | map({key: ., value: {requireMention: false, allowFrom: []}}) | from_entries), pending: {}}' > $TG/access.json.tmp && mv $TG/access.json.tmp $TG/access.json
 [ "$1" = apply ] || echo "ok: $1 $2${D:-}. Groups: $(jq -c '.groups | keys' $TG/access.json)"
+touch /data/cron/watch.seen  # this change was told (or is the start's own): installs.sh reports only the others
 [ "$1" = apply ] || "$B/notify.sh" "⚙️ Setting changed${SSH_CONNECTION:+ by a fellow agent}: $1 $2${D:-}. To undo it, ask me to drop $2." || echo "could not notify the owner" >&2

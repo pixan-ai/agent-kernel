@@ -159,19 +159,19 @@ In plain words, for whoever runs an agent.
 - look at or change a fellow agent;
 - share anything from your private chats, its memory or its files.
 
-When someone else asks for one of these, the agent says that you or a super-user has to ask. Installing and naming super-users are also refused by a hook, not only by the agent's judgment; the rest rests on its instructions ([THREAT-MODEL.md](THREAT-MODEL.md)).
+When someone else asks for one of these, the agent says that you or a super-user has to ask. This rests on its instructions and its judgment, not on code that tries to guess commands: a rule like that is always one spelling short, while Claude reads the request itself. What code does guarantee is that **you hear about every change**: anything installed, and any change to its settings, jobs or bot files that did not go through its settings command, reaches you in private ([THREAT-MODEL.md](THREAT-MODEL.md)).
 
 **To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Voice, documents and office files need nothing: every agent has them.
 
-**What gets blocked, and why.** Installed tools live in two folders on the agent's disk. Package managers, and the file tools on those folders, are refused unless you or a super-user asked in that message. Any other change there without such a request is reported to you after the fact. Its settings, jobs, install record and keys cannot be written by hand at all, not even on your request: settings and jobs change only through the agent's own settings command, which always tells you.
+**What you are told, and why nothing is blocked by pattern.** Installed tools live in two folders on the agent's disk; every change there is recorded and told to you. Its settings and jobs are meant to change only through its own settings command, which always tells you; a change made any other way is told to you too, marked "by hand". Until 2026-11-18 a hook also tried to refuse installs by matching commands. Every audit found another way to write the same thing, while the refusals that mattered in practice came from the agent itself and from Claude Code's own checks, so it was removed: the agent decides, you see what it did.
 
 **What you receive in private**, whoever made the change:
 
 | Notice | When |
 |---|---|
 | ⚙️ Setting changed: … | A group, super-user, fellow agent or job was added or removed; for a job, with its schedule, destination and text |
-| 🧰 Installed at the request of NAME: … | Something was installed |
-| ⚠️ … changed in the install folders, with no request from you or a super-user | Something changed where tools live although nobody allowed to install asked |
+| 🧰 Installed: … | Something changed where tools live, with the command that did it |
+| ⚠️ … was changed by hand, not through config.sh | Its settings, jobs or bot files changed without its settings command |
 | ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |
 | ⚠️ Tonight's memory consolidation failed | The nightly memory failed (at most once a day) |
 | ⚠️ Scheduled job … failed | A job failed, with the reason |
@@ -183,7 +183,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 ## Self-improvement: installing skills and tools
 
-**Who.** Only the owner or a super-user ([SETTINGS.md](SETTINGS.md)) can make the agent install something. The owner counts as one more super-user. Anyone else who asks is refused by a hook, not only by the agent's judgment.
+**Who.** Only the owner or a super-user ([SETTINGS.md](SETTINGS.md)) can ask the agent to install something. The owner counts as one more super-user. The agent declines anyone else, by its instructions; whatever it installs, you are told.
 
 **How to ask.** Write to the agent on Telegram, in private or in a group it is in:
 
@@ -195,7 +195,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("haz una gráfica", "lee este código QR"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
 
-**What the owner sees.** A private Telegram message after every install: "🧰 Installed at the request of NAME: COMMAND". Every install is also a line in `/data/tools.json` (when, who by name and id, the tool, the command). Ask "¿qué tienes instalado?" to see the list.
+**What the owner sees.** A private Telegram message after every install: "🧰 Installed: COMMAND". Every install is also a line in `/data/tools.json` (when, the tool, the command). Ask "¿qué tienes instalado?" to see the list.
 
 **Only that agent.** An install applies to the agent that ran it. To have it on other agents, the super-user asks each of them; there is no fleet-wide install.
 
@@ -205,7 +205,7 @@ It runs at once, with no approval step. You do not need to know the tool's name:
 
 **API keys never go through chat.** If a tool needs one (ElevenLabs does), the owner sets it as a host variable.
 
-**What it is.** A guardrail against being talked into installing, not a sandbox. Its limits are in [THREAT-MODEL.md](THREAT-MODEL.md). System packages (`apt`) still only arrive through a pull request to the image ([What the image contains](#what-the-image-contains)).
+**What it is.** A record and a notice, not a sandbox: the agent's judgment decides, and you see the result. Its limits are in [THREAT-MODEL.md](THREAT-MODEL.md). System packages (`apt`) still only arrive through a pull request to the image ([What the image contains](#what-the-image-contains)).
 
 ### Files on the volume
 

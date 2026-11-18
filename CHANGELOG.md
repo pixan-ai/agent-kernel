@@ -22,6 +22,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Removed
 
+- The install lock (`bin/install-lock.sh`: the turn, check and lock-file hooks, about 50 lines): it tried to refuse installs by matching commands, every audit found another spelling, and the refusals seen live came from the agent's judgment and Claude Code's classifier. Who may ask for an install is the agent's instruction again; `bin/installs.sh` records every change in the install folders and tells the owner.
 - `bin/denials.sh` and `peer.sh look NAME denials`: the transcript (`peer.sh look NAME transcript`) and the screen show the same.
 - The audit log `/data/audit.jsonl` and its three hooks: the session transcript already holds every tool call.
 - The `Notification` hook for permission prompts: with `denyInsteadOfPrompting` nothing prompts.
@@ -30,6 +31,9 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 ### Fixed
 
 - A line `OWNER_TELEGRAM_ID=…` added to the bot's private file from the agent's shell sent every notice to that id and opened private chats to it. `notify.sh` and `config.sh` now take the owner from the host's variable, which the agent cannot change, and use the file only where the variable is absent.
+- A change to the settings, the jobs, the crontab, `config/settings.json` or the bot's files made other than through `config.sh` went unnoticed when the command did not spell the path as expected (audit of 2026-11-18, A1, M3, B5). Every such change is now told to the owner.
+- The start's reinstall of recorded packages ran in the workspace, where a planted `uv.toml` could choose the package index (M1); it now runs from `/` with `UV_NO_CONFIG=1`.
+- `claude update` could move Claude Code off its pinned version (B9): the image also sets `DISABLE_UPDATES=1`.
 - A job with a schedule that cannot happen (minute 60, day 0, `*/0`) stopped Supercronic at once, and with it every job, the watchdog, the backup and the 04:00 recycle, silently. `config.sh` now refuses such a schedule, and leaves out any such line already on the volume.
 - `config.sh drop NAME` left the job's prompt behind, so `config.sh show` still listed a dropped job (seen live on 2026-11-17). It now removes it.
 - A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
