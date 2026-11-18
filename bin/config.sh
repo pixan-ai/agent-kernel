@@ -6,6 +6,8 @@
 #   config.sh job "M H D M W" NAME "PROMPT" [GROUP_ID]   run that prompt on that schedule; job.sh delivers the answer
 #                            to the owner in private, or to that group if this agent is in it
 #   config.sh drop VALUE     remove the lines with this value (a group, a super-user, a peer or a job name)
+#   config.sh done NAME      remove a one-off job that was delivered, without a notice (job.sh)
+#   config.sh notices jobs off|on   stop or resume the notices about jobs; groups, super-users and peers are always told
 #   config.sh show | apply   print the settings | rebuild the plugin's access list without changing anything (start.sh)
 # Nothing else can be set here: owner, tokens and keys only come from the host's variables.
 set -euo pipefail
@@ -17,11 +19,15 @@ case "${1:-} ${2:-}" in
   "job "*) [[ $2 =~ ^([0-9*/,-]+\ ){4}[0-9*/,-]+$ && ${3:-} =~ ^[A-Za-z0-9_-]+$ && -n ${4:-} ]] || { echo 'use: job "M H D M W" NAME "PROMPT" [GROUP_ID]' >&2; exit 2; }
     valid "$2 job.sh $3" || { echo "not a schedule that can happen: $2" >&2; exit 2; }
     [ -z "${5:-}" ] || grep -qxF "group $5" $F || { echo "a job can deliver to the owner or to a group this agent is in" >&2; exit 2; }
-    printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
+    ! grep -qx "quiet jobs" $F || S=1; printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
   "apply ") ;;
+  "done "?*) [[ $2 =~ ^[A-Za-z0-9_-]+$ ]] || exit 2; grep -vE " job\.sh $2$" $J > $J.tmp || true; mv $J.tmp $J; rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to"; S=1 ;;
+  "notices jobs") case "${3:-}" in off) grep -qx "quiet jobs" $F || echo "quiet jobs" >> $F ;; on) grep -vx "quiet jobs" $F > $F.tmp || true; mv $F.tmp $F ;; *) exit 2 ;; esac
+    U=" To change it, ask me to turn them ${3/off/on}."; set -- notices "jobs $3" ;;
   "group "*|"admin "*) [[ $2 =~ ^-?[0-9]+$ ]] || { echo "an id is a number" >&2; exit 2; }; grep -qxF "$1 $2" $F || echo "$1 $2" >> $F ;;
   "peer "*) [[ $2 =~ ^[A-Za-z0-9_]+=[A-Za-z0-9.-]+$ ]] || { echo "use NAME=HOST" >&2; exit 2; }; grep -qxF "peer $2" $F || echo "peer $2" >> $F ;;
-  "drop "?*) grep -vE " ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))(=.*)?$" $F > $F.tmp || true; mv $F.tmp $F
+  "drop "?*) ! grep -qE " job\.sh $(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g')$" $J || ! grep -qx "quiet jobs" $F || S=1
+    grep -vE " ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))(=.*)?$" $F > $F.tmp || true; mv $F.tmp $F
     grep -vE " job\.sh ($(printf '%s' "$2" | sed 's/[^A-Za-z0-9_-]/./g'))$" $J > $J.tmp || true; mv $J.tmp $J
     [[ ! $2 =~ ^[A-Za-z0-9_-]+$ ]] || rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to" ;;
   *) sed -n '2,10p' "$0" >&2; exit 2 ;;
@@ -36,4 +42,4 @@ jq -n --arg o "$OWNER_TELEGRAM_ID" --rawfile f $F '($f | split("\n") | map(split
   | {dmPolicy: "allowlist", allowFrom: ([$o] + $gs), groups: ($gs | map({key: ., value: {requireMention: false, allowFrom: []}}) | from_entries), pending: {}}' > $TG/access.json.tmp && mv $TG/access.json.tmp $TG/access.json
 [ "$1" = apply ] || echo "ok: $1 $2${D:-}. Groups: $(jq -c '.groups | keys' $TG/access.json)"
 touch /data/cron/watch.seen  # this change was told (or is the start's own): installs.sh reports only the others
-[ "$1" = apply ] || "$B/notify.sh" "⚙️ Setting changed${SSH_CONNECTION:+ by a fellow agent}: $1 $2${D:-}. To undo it, ask me to drop $2." || echo "could not notify the owner" >&2
+[ "$1" = apply ] || [ -n "${S:-}" ] || "$B/notify.sh" "⚙️ Setting changed${SSH_CONNECTION:+ by a fellow agent}: $1 $2${D:-}.${U:- To undo it, ask me to drop $2.}" || echo "could not notify the owner" >&2

@@ -93,6 +93,8 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 - **Backups:** off until you set them up. [BACKUP.md](BACKUP.md).
 - **What it can and cannot protect:** [SECURITY.md](../SECURITY.md) and [THREAT-MODEL.md](THREAT-MODEL.md). On Railway the protection is policy and judgment, not a sandbox.
 - **Rotating a credential:** [SECRETS.md](SECRETS.md).
+- **Review the changes regularly.** Whoever owns the agents should look, every week or so, at what each one installed and at changes to its groups and super-users: the private notices, and "¿qué tienes instalado?" and "¿qué ajustes tienes?". The agents decide by judgment and tell you what they did; the review is what turns those notices into control.
+- **Use supergroups from the start.** Telegram turns a plain group into a supergroup on its own when you change its administrators or some of its settings, and the group gets a new id (`-100…`): the agent stops hearing it until it is told the new one. Create the group as a supergroup (or change one setting that converts it, such as making the history visible to new members) before adding the agent, and tell the agent the `-100…` id ([GROUPS.md](GROUPS.md)).
 
 ## Everything you can configure
 
@@ -138,6 +140,7 @@ Applied at once, kept on the volume, and confirmed to the owner in private. The 
 | A super-user | "haz super-usuario a 123456789" | "quita a 123456789" |
 | A fellow agent, by name | "tu compañero Junior está en agent2.railway.internal" | "olvida a Junior" |
 | A scheduled job, to you or to a group | "cada día a las 8 mándame …" | "quita la tarea …" |
+| The notices about jobs | "no me avises de las tareas" | "avísame de las tareas" |
 | Something to remember | "recuerda que …" | "olvida que …" |
 
 "¿Qué ajustes tienes?" lists them ([SETTINGS.md](SETTINGS.md)).
@@ -170,7 +173,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 | Notice | When |
 |---|---|
-| ⚙️ Setting changed: … | A group, super-user, fellow agent or job was added or removed; for a job, with its schedule, destination and text |
+| ⚙️ Setting changed: … | A group, super-user or fellow agent was added or removed (always), or a job (unless you said "no me avises de las tareas"); for a job, with its schedule, destination and text. A one-off reminder that was delivered removes itself without a notice |
 | 🧰 Installed: … | Something changed where tools live, with the command that did it |
 | ⚠️ … was changed by hand, not through config.sh | Its settings, jobs or bot files changed without its settings command |
 | ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |

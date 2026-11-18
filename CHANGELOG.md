@@ -14,6 +14,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- Notices about jobs are optional (decided 2026-11-18): `config.sh notices jobs off|on`, by telling the agent "no me avises de las tareas". A delivered one-off removes itself without a notice (`config.sh done NAME`). Groups, super-users and fellow agents are always told.
+- The guide recommends a regular review of what each agent installed and of its groups and super-users, and supergroups from the start, since Telegram converts a group and changes its id on its own.
 - Voice notes and video moved out of the image into an optional stack (`policy/stack.md`, decided 2026-11-18): their FFmpeg is GPL, and downloaded by each agent from the upstream projects when its owner or a super-user asks, it is not distributed by this project. The image is about 1.3 GB smaller. Documents (read and make) stay in the image. CI runs the stack's recipes as written (`tests/stack_test.sh`). An agent that used voice from the image needs one install.
 - The project is renamed `agent-kernel` (it was `pixan-kernel-spike`): the repository, the image names and the licence folder in the image (`/usr/share/doc/agent-kernel/`). GitHub redirects the old address.
 - Documents reviewed end to end: what changed with the audit of 2026-11-17 (no audit log, install folders watched rather than guarded, job notices) is described the same everywhere; decision dates moved out of the guides; the evidence from the live tests of 2026-11-17 added; the image page and the repository settings brought up to date; issue and pull request templates ask for the version, the host and a failing test.

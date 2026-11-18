@@ -59,6 +59,7 @@ fresh; echo "OWNER_TELEGRAM_ID=999" >> /data/config/channels/telegram/.env; job 
 check "an owner id added to the bot's file by hand does not take the owner's messages: the host's variable wins (audit of 2026-11-18, A3)" bash -c 'grep -q "chat_id=42" /data/curl-args && ! grep -q "chat_id=999" /data/curl-args'
 : > /data/curl-args; printf '%s\n' "0 9 20 11 * job.sh news" "0 8 * * * job.sh daily" > /data/cron/jobs; echo "0 9 20 11 * job.sh news" > /data/cron/crontab; job
 check "a one-off (a fixed day and month) removes itself once delivered (audit, M5)" bash -c '! grep -q "job.sh news" /data/cron/jobs /data/cron/crontab'
+check "...without a notice: the delivery itself says it ran (decided 2026-11-18)" bash -c '! grep -q "Setting changed" /data/curl-args'
 check "...and leaves the other jobs alone" grep -qx "0 8 \* \* \* job.sh daily" /data/cron/jobs
 printf '%s\n' "0 9 20 11 * job.sh news" > /data/cron/jobs; echo "chat_id=" > /data/telegram-refuses; job; rm -f /data/telegram-refuses
 check "...but not when it could not be delivered" grep -q "job.sh news" /data/cron/jobs

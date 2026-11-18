@@ -65,6 +65,20 @@ check "...and its prompt, so show no longer lists it (seen live on 2026-11-17)" 
 echo "OWNER_TELEGRAM_ID=999" >> /data/config/channels/telegram/.env; env OWNER_TELEGRAM_ID=42 PATH="$STUBS:$PATH" "$BIN/config.sh" apply > /dev/null 2>&1
 check "an owner id added to the bot's file by hand opens no private chat: the host's variable wins (audit of 2026-11-18, A3)" test "$(access '.allowFrom - ["-1001","-1002","-1005"]')" = '["42"]'
 sed -i '/OWNER_TELEGRAM_ID=999/d' /data/config/channels/telegram/.env
+# Job notices are optional (decided 2026-11-18); settings that widen who the agent hears are always told.
+: > /data/curl-args; config notices jobs off
+check "notices jobs off: the owner is told this one last time" told "Setting changed: notices jobs off"
+: > /data/curl-args; config job "0 7 * * *" quiet_one "x"; config drop quiet_one
+check "...then adding or dropping a job is not told" test ! -s /data/curl-args
+config group -1009; config drop -1009
+check "...but groups still are, both ways" bash -c 'grep -q "Setting changed: group -1009" /data/curl-args && grep -q "Setting changed: drop -1009" /data/curl-args'
+: > /data/curl-args; config notices jobs on; config job "0 7 * * *" loud_one "x"
+check "notices jobs on: job notices are back" told "Setting changed: job loud_one"
+: > /data/curl-args; config "done" loud_one
+check "done NAME (a one-off that was delivered) removes the job without a notice" bash -c '! grep -q "job.sh loud_one" /data/cron/jobs && test ! -s /data/curl-args'
+config group -1010; config "done" -1010
+check "...and removes nothing but a job" grep -qx "group -1010" /data/settings
+config drop -1010
 config drop ../settings
 check "...but a value that is not a job name removes no file" test -e /data/settings
 sed -i '/evil\|escaped/d' /data/cron/jobs
