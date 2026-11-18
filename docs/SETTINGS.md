@@ -9,6 +9,7 @@ The host's variables are for installation: credentials, the owner, keys. Day-to-
 | remember a fellow agent | `config.sh peer Junior=agent2.railway.internal` | `peer.sh look junior` works |
 | run a prompt on a schedule | `config.sh job "0 8 * * *" news "Summarise…"` | See [CRON.md](CRON.md) |
 | undo any of these | `config.sh drop VALUE` | Removes the lines with that value |
+| stop or resume the notices about jobs | `config.sh notices jobs off` / `on` | Jobs added or dropped are no longer told; groups, super-users and fellow agents always are |
 
 Super-users also decide what the agent installs (packages, tools, skills): see [GETTING-STARTED.md](GETTING-STARTED.md#self-improvement-installing-skills-and-tools).
 

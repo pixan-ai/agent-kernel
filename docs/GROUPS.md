@@ -20,6 +20,7 @@ Tell the agent in private: "join the group -1001234567890". It applies the chang
 
 ## Traps
 
+- **Use a supergroup from the start.** Telegram converts a plain group into a supergroup on its own when its administrators or some settings change, and the id changes with it. Create it as a supergroup, or convert it before adding the agent, and give the agent the `-100…` id.
 - **The chat id changes when a group becomes a supergroup** (it takes the form `-100…`). The id in the web client's address bar can be the old one. Confirm with `getChat` (title and type) before blaming anything else.
 - Being a member is not being authorised, and the reverse: the plugin silently drops messages from a group that is not listed.
 
