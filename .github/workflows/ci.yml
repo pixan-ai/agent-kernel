@@ -52,18 +52,18 @@ jobs:
           context: .
           push: false
           load: true
-          tags: pixan-kernel-spike:ci
+          tags: agent-kernel:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Acceptance tests (inside the built image)
         run: |
           for t in start tools policy cron peer config backup sleep dream install; do
-            docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" pixan-kernel-spike:ci "/tests/${t}_test.sh" || exit 1
+            docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel:ci "/tests/${t}_test.sh" || exit 1
           done
       # A tool the agent's user cannot reach fails as "command not found", with no other sign: run each one as that user.
       - name: Every tool runs as the agent's own user
         run: |
-          docker run --rm --entrypoint sh pixan-kernel-spike:ci -ec 'test "$(id -u)" = 1001
+          docker run --rm --entrypoint sh agent-kernel:ci -ec 'test "$(id -u)" = 1001
             claude --version; bun --version; jq --version; curl --version; age --version; rclone version
             supercronic -version; ssh -V; script --version; realpath --version; tini --version
             whisper-ctranslate2 --help; markitdown --help; ffmpeg -version; pandoc --version; typst --version; python-docs -c "import docx, pptx, openpyxl"
@@ -71,7 +71,7 @@ jobs:
             test -e /usr/share/zoneinfo/America/Mexico_City; UV_PYTHON_DOWNLOADS=never uv venv -q /tmp/venv' > /dev/null
       # Voice notes and documents, as the agent's user and with no network: nothing may be downloaded at use.
       - name: Media and documents, offline
-        run: docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" pixan-kernel-spike:ci /tests/media_test.sh
+        run: docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel:ci /tests/media_test.sh
       # The gate: what this project publishes (the base target, no Anthropic software) must have no fixable CRITICAL vulnerability.
       - name: Build the publishable base target
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -80,12 +80,12 @@ jobs:
           target: base
           push: false
           load: true
-          tags: pixan-kernel-spike:base
+          tags: agent-kernel:base
           cache-from: type=gha
       - name: Vulnerabilities in the base target (Trivy, blocking)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: pixan-kernel-spike:base
+          image-ref: agent-kernel:base
           format: table
           severity: CRITICAL
           ignore-unfixed: true
@@ -95,7 +95,7 @@ jobs:
         continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: pixan-kernel-spike:ci
+          image-ref: agent-kernel:ci
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true

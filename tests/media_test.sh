@@ -24,7 +24,7 @@ check "a Word file is made with Python, and reads back" bash -c 'python-docs -c 
 check "a PowerPoint file is made with Python, and reads back" bash -c 'python-docs -c "import pptx; p=pptx.Presentation(); s=p.slides.add_slide(p.slide_layouts[0]); s.shapes.title.text=\"mango\"; p.save(\"$0/a.pptx\")" && markitdown "$0/a.pptx" | grep -q mango' "$T"
 check "a PDF is made from Markdown, offline, and reads back" bash -c 'printf "# Informe\n\nVentas de **mango**: 12\n" | pandoc -t typst -o "$0/a.typ" && typst compile "$0/a.typ" "$0/a.pdf" && pdftotext "$0/a.pdf" - | grep -q mango' "$T"
 check "video frames can be taken: ffmpeg makes a real frame (audit, B6)" bash -c 'ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc=size=64x48 -frames:v 1 "$0/frame.png" && test -s "$0/frame.png"' "$T"
-D=/usr/share/doc/pixan-kernel-spike
+D=/usr/share/doc/agent-kernel
 check "the licences are in the image: this project's, the third parties', the GPL text" test -s $D/LICENSE -a -s $D/THIRD-PARTY.md -a -s /usr/share/common-licenses/GPL-3
 check "...and THIRD-PARTY.md names the ffmpeg build the image really has" bash -c 'grep -qF "$(ffmpeg -version | sed -n "s/^ffmpeg version \([^ ]*\).*/\1/p")" "$0"' $D/THIRD-PARTY.md
 rm -rf "$T"

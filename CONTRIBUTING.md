@@ -19,13 +19,13 @@
 shellcheck bin/*.sh tests/*.sh
 jq empty policy/managed-settings.json
 hadolint Dockerfile
-docker build -t pixan-kernel-spike .
+docker build -t agent-kernel .
 bash tests/docs_test.sh
 bash tests/workflows_test.sh
 for t in start tools policy cron peer config backup sleep dream install; do
-  docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" pixan-kernel-spike "/tests/${t}_test.sh" || break
+  docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel "/tests/${t}_test.sh" || break
 done
-docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" pixan-kernel-spike /tests/media_test.sh
+docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel /tests/media_test.sh
 ```
 
 A change to `bin/` comes with a test in `tests/` that runs the script and checks what it does (exit code, files, output). Break the value the test guards and make sure it turns red.

@@ -43,7 +43,7 @@ RUN curl -fsSL -o /tmp/typst.tar.xz "https://github.com/typst/typst/releases/dow
  && echo "${TYPST_SHA256}  /tmp/typst.tar.xz" | sha256sum -c - && tar -xJf /tmp/typst.tar.xz -C /usr/local/bin --strip-components=1 --no-same-owner --wildcards '*/typst' && rm /tmp/typst.tar.xz
 
 # What the image carries and under which licences (the GPL binaries and where their source is).
-COPY LICENSE THIRD-PARTY.md /usr/share/doc/pixan-kernel-spike/
+COPY LICENSE THIRD-PARTY.md /usr/share/doc/agent-kernel/
 # Managed policy: owned by root, not editable by the agent, highest precedence in Claude Code.
 COPY policy/ /etc/claude-code/
 COPY --chmod=755 bin/ /usr/local/bin/
