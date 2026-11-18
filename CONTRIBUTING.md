@@ -33,6 +33,10 @@ A change to `bin/` comes with a test in `tests/` that runs the script and checks
 
 CI runs the same checks. Never commit `.env` or any real credential.
 
+## Updates from Renovate
+
+Renovate opens a pull request for every pinned version that moves and merges it itself once CI is green ([how updates work](docs/GETTING-STARTED.md#updates-and-how-to-go-back)). A Renovate pull request that stays red is a real finding: read the failing check before closing it or pinning the old version.
+
 ## Commit messages
 
 Imperative, one subject line, explain why in the body when it is not obvious.

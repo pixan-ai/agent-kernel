@@ -11,6 +11,7 @@
 | `policy/managed-settings.json`, `policy/CLAUDE.md` | Permissions, hooks, channel enablement; what the agent is told about its limits | this repo |
 | `bin/*` | Scheduled jobs, the daily memory, the opt-in sleep, backups, the peer view, the record of installs, the watchdog | this repo ([README](../README.md#repository-layout)) |
 | Supercronic | The clock for scheduled jobs | aptible, pinned by checksum |
+| Renovate (`renovate.json`) | Keeps every pinned version current: a pull request per update, merged when CI is green ([updates](GETTING-STARTED.md#updates-and-how-to-go-back)) | GitHub app, configured here |
 
 ## Why interactive mode in a pty
 
