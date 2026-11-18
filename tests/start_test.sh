@@ -13,7 +13,7 @@ chmod 755 "$STUBS"; chmod 644 "$OUT" "$ERR"
 cat > "$STUBS/script" <<'EOF'
 #!/bin/bash
 # Stub pty: record who would run claude, with which credentials and command, then "exit" like claude dying.
-{ echo "uid=$(id -u)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
+{ echo "uid=$(id -u)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "peerkey=${PEER_SSH_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
 echo "owner said: SCREEN-MARKER" > /data/tui.log; sleep 3  # long enough for a 1 s mirror to fire
 [ ! -e /data/long-claude ] || /bin/sleep 60 < /dev/null  # a Claude that keeps running, for the idle watcher (off the pipe, as a killed Claude would be)
 EOF
@@ -108,6 +108,7 @@ check "peer view is off by default: no SSH server" test ! -e /data/peer-args
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x PEER_PUBLIC_KEYS="ssh-ed25519 AAAA friend" PEER_SSH_KEY="PRIVATE-KEY-BODY"
 check "PEER_PUBLIC_KEYS starts the peer view" grep -qx serve /data/peer-args
 check "PEER_SSH_KEY is stored for looking at others, private (600)" test "$(stat -c %a /data/ssh/peer_key)$(cat /data/ssh/peer_key)" = "600PRIVATE-KEY-BODY"
+check "...and is no longer in the environment of Claude (audit of 2026-11-18, B3)" grep -qx "peerkey=" /data/probe
 
 check "no groups unless listed" test "$(jq -c .groups /data/config/channels/telegram/access.json)" = '{}'
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x TELEGRAM_GROUP_IDS="-1001 -1002"

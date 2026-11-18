@@ -5,8 +5,9 @@ set -uo pipefail
 L=/data/cron/last-dream; W=/data/workspace
 [ -z "$(find $L -mmin -1200 2> /dev/null)" ] || exit 0   # dreamt less than 20 hours ago
 n=(); [ ! -e $L ] || n=(-newer "$L")
-f=$(find /data/config/projects -maxdepth 2 -name '*.jsonl' "${n[@]}" -printf '%T@ %p\n' 2> /dev/null | sort -rn | head -1 | cut -d' ' -f2-)
-[ -n "$f" ] || exit 0                                    # nothing was said since
+# Every conversation since then, oldest first: a restart or a fresh start in the day begins a new one.
+mapfile -t f < <(find /data/config/projects -maxdepth 2 -name '*.jsonl' "${n[@]}" -printf '%T@ %p\n' 2> /dev/null | sort -n | cut -d' ' -f2-)
+[ ${#f[@]} -gt 0 ] || exit 0                             # nothing was said since
 # Its own config directory, like job.sh: a second Claude on the bot's directory would start a second Telegram plugin.
 export CLAUDE_CONFIG_DIR=/data/cron/config
 cd $W && mkdir -p memory || exit 0
@@ -16,7 +17,7 @@ n0=$(wc -l 2> /dev/null < MEMORY.md || echo 0)  # a model rewriting an index can
 # Only what was said: the owner's and other people's messages, and the agent's replies. No tool results.
 jq -r 'select(.type == "user" or .type == "assistant") | .type as $t
   | (.message.content | if type == "string" then . else map(if .type == "text" then .text elif .type == "tool_use" then (.input.text // empty) else empty end) | join("\n") end)
-  | select(length > 0) | "[\($t)] \(.[0:2000])"' "$f" | tail -c 300000 |
+  | select(length > 0) | "[\($t)] \(.[0:2000])"' "${f[@]}" | tail -c 300000 |
   timeout "${JOB_TIMEOUT:-900}" claude -p --permission-mode auto "You are consolidating this agent's memory at the end of its day. Standard input is its conversation since the last time. Tomorrow it starts a new conversation and will know only what is in $W/MEMORY.md, so:
 1. Rewrite $W/MEMORY.md: merge today into what is there. Keep what a colleague taking over tomorrow needs: who is who and how they like things, decisions, commitments and open tasks with their dates, lessons learned. Drop what is done or obsolete. At most 150 lines and 15000 characters: what does not fit is not shown to the agent. Keep one line in it saying what the files in $W/memory/ hold and how to search them (grep -ril WORD $W/memory): without it nobody opens them. Never credentials.
 2. Write $D: a short account of today (what was asked, what was done, what is pending).

@@ -66,4 +66,6 @@ check "...and the owner is told" grep -q "could not write the file" /data/notifi
 fresh; rm "$P/s1.jsonl"; dream
 check "a new agent with no conversation does not dream" absent /data/claude-stdin
 
+fresh; echo '{"type":"user","message":{"content":"Earlier session: buy coffee"}}' > "$P/s0.jsonl"; touch -d "1 hour ago" "$P/s0.jsonl"; dream
+check "every conversation since the last dream is given, not only the newest (audit of 2026-11-18, B1)" bash -c 'grep -q "buy coffee" /data/claude-stdin && grep -q "Call Ana on Monday" /data/claude-stdin && test "$(grep -n "buy coffee" /data/claude-stdin | cut -d: -f1)" -lt "$(grep -n "Call Ana" /data/claude-stdin | cut -d: -f1)"'
 echo "$FAILS failed"; exit $((FAILS > 0))
