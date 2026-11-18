@@ -105,7 +105,7 @@ policy/managed-settings.json  the managed policy and hooks
 policy/CLAUDE.md              what the agent is told about its limits (managed: root-owned, updated with the image)
 tests/                        acceptance tests (run inside the built image) and docs-vs-code checks
 docs/                         guide, architecture, threat model, findings, deployment, secrets, releasing
-THIRD-PARTY.md                the third-party software in the image and its licences
+THIRD-PARTY.md                the third-party software in the image and its licenses
 .github/                      CI, release, weekly version check, issue and PR templates, Dependabot
 ```
 
