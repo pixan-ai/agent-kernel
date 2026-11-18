@@ -1,6 +1,6 @@
 # Optional stack
 
-Tools that are not in the image, ready for the agent to install when the owner or a super-user asks. Each recipe is pinned, and
+Tools that are not in the image, ready for the agent to install when the owner or a super-user asks. Each recipe pins the package it installs (its dependencies are resolved when it is installed), and
 CI runs every `sh` block of this file, in order, as the agent's user (`tests/stack_test.sh`). What it installs lives on the volume
 (`/data/tools`, `/data/bin`), is recorded in `/data/tools.json` and is put back at start if it went missing.
 

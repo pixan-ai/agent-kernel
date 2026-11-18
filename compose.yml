@@ -1,6 +1,8 @@
 services:
   agent:
-    build: .
+    build:
+      context: .
+      args: [CLAUDE_CODE_VERSION]  # from your shell or .env; unset = the Dockerfile's default
     platform: linux/amd64  # the image downloads amd64 binaries
     env_file: .env
     environment:

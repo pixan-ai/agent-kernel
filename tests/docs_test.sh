@@ -47,7 +47,7 @@ done
 check "relative links in the documents resolve" test -z "$broken"
 [ -z "$broken" ] || echo "     broken:$broken"
 
-check "every external Dockerfile FROM is pinned by digest (Dependabot keeps it current)" test -z "$(grep -E '^FROM ' Dockerfile | grep -vE '@sha256:[0-9a-f]{64}|^FROM base AS ')"
+check "every external Dockerfile FROM is pinned by digest (Renovate keeps it current)" test -z "$(grep -E '^FROM ' Dockerfile | grep -vE '@sha256:[0-9a-f]{64}|^FROM base AS ')"
 check "agent instructions exist and match the policy: connectors disabled" bash -c 'jq -e .disableClaudeAiConnectors policy/managed-settings.json >/dev/null && grep -qi "connectors.*disabled" policy/CLAUDE.md'
 check "agent instructions tell it not to touch credentials" grep -qi "never read, print, send" policy/CLAUDE.md
 
@@ -58,7 +58,7 @@ check "the guide recommends an API key for an agent that serves groups or client
 check "...and README links Anthropic's legal page" grep -q "code.claude.com/docs/en/legal-and-compliance" README.md
 # Third-party licences go into the image, and name the versions the Dockerfile pins (audit of 2026-11-17, A4).
 check "the image carries LICENSE and THIRD-PARTY.md" bash -c 'grep -qx "COPY LICENSE THIRD-PARTY.md /usr/share/doc/agent-kernel/" Dockerfile && grep -qx "!THIRD-PARTY.md" .dockerignore'
-check "THIRD-PARTY.md names no version of what Renovate moves, so it never goes stale" bash -c '! grep -qE "(supercronic|uv|Typst) [0-9]" THIRD-PARTY.md'
+check "THIRD-PARTY.md names no version of what moves on its own (Renovate, Debian), so it never goes stale (v1 audit, B4)" bash -c '! grep -qE "(supercronic|uv|Typst|Bun|pandoc.|poppler-utils.) [0-9]|Debian 13\.[0-9]" THIRD-PARTY.md'
 check "no GPL FFmpeg in the image: voice and video are in the optional stack, which the agent is pointed to (decided 2026-11-18)" bash -c '! grep -v "^#" Dockerfile | grep -qiE "whisper|imageio|ffmpeg" && grep -q "/etc/claude-code/stack.md" policy/CLAUDE.md && grep -q "whisper-ctranslate2==" policy/stack.md && grep -q "imageio-ffmpeg==" policy/stack.md'
 # The Railway template's settings are kept in the repository: the same variables as the guide, the volume, the uid.
 tmpl=$(sed -n '/^## The one-click template/,$p' docs/DEPLOY-RAILWAY.md)
@@ -71,6 +71,7 @@ check "Claude Code stays at its pinned version: neither the auto-updater nor \`c
 floor=$(grep -oE "^ \&\& \{ \[.*\}; \}$" Dockerfile)
 check "the build's Claude Code floor refuses 2.1.311 and takes 2.1.319 and 2.1.320" bash -c 'v=2.1.311; ! (eval "$0") 2> /dev/null && v=2.1.319 && (eval "$0") && v=2.1.320 && (eval "$0")' "${floor# && }"
 check "...and the default version is not below the floor" bash -c '[ -n "$0" ] && v=$(grep -oE "^ARG CLAUDE_CODE_VERSION=\S+" Dockerfile | cut -d= -f2) && (eval "$0")' "${floor# && }"
+check "Docker Compose passes CLAUDE_CODE_VERSION to the build, as Railway does (v1 audit, B1)" grep -qF "args: [CLAUDE_CODE_VERSION]" compose.yml
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))

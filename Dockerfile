@@ -3,7 +3,7 @@
 # No tmux, no supervisor: `script` provides the pty, and the host restarts the container when claude exits (watchdog.sh covers a dead channel).
 FROM oven/bun:1-debian@sha256:93d5032fe06d163427822dc1598f420363759bb18155c9cc90eb1be05a64a19e AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-# Unpinned apt packages on purpose: pinned Debian versions vanish from the mirror; Dependabot bumps the base image.
+# Unpinned apt packages on purpose: pinned Debian versions vanish from the mirror; Renovate bumps the base image.
 # Second line: tools for skills (python3: documents and APIs; poppler-utils: PDFs; pandoc: Word and Markdown; unzip: archives).
 # tzdata is already in the base image.
 # hadolint ignore=DL3008

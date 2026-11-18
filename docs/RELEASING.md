@@ -12,7 +12,7 @@ The same image, same digest, is also pushed to Docker Hub and signed there when 
 2. Variable `DOCKERHUB_REPOSITORY` = `NAMESPACE/agent-kernel`.
 3. Secrets `DOCKERHUB_USERNAME` (the Docker Hub user) and `DOCKERHUB_TOKEN` (that token, pasted only there).
 
-Without the variable, only `ghcr.io` gets the image. GitHub's attestation is stored next to the `ghcr.io` copy; the cosign signature is on both, so `cosign verify docker.io/NAMESPACE/agent-kernel:0.1.0` with the same two flags as below works too.
+Without the variable, only `ghcr.io` gets the image. GitHub's attestation is stored next to the `ghcr.io` copy; the cosign signature is on both, so `cosign verify docker.io/NAMESPACE/agent-kernel:1.0.0` with the same two flags as below works too.
 
 ## Cut a release
 
@@ -20,8 +20,8 @@ Without the variable, only `ghcr.io` gets the image. GitHub's attestation is sto
 2. Tag the merge commit and push the tag:
 
    ```bash
-   git tag -s v0.1.0 -m "v0.1.0"   # use -a if you do not sign tags
-   git push origin v0.1.0
+   git tag -s v1.0.0 -m "v1.0.0"   # use -a if you do not sign tags
+   git push origin v1.0.0
    ```
 
 3. Watch the workflow. Without `PUBLISH_IMAGE` only the acceptance job runs; the publish job shows as skipped. A new package is **private** at first: after the first publish, make it public in the package settings (irreversible) and check it is linked to the repository.
@@ -30,12 +30,12 @@ Without the variable, only `ghcr.io` gets the image. GitHub's attestation is sto
 ## Verify an image
 
 ```bash
-cosign verify ghcr.io/OWNER/REPO:0.1.0 \
+cosign verify ghcr.io/OWNER/REPO:1.0.0 \
   --certificate-identity-regexp '^https://github.com/OWNER/REPO/\.github/workflows/release\.yml@refs/tags/v.+$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 
-gh attestation verify oci://ghcr.io/OWNER/REPO:0.1.0 --repo OWNER/REPO
-docker buildx imagetools inspect ghcr.io/OWNER/REPO:0.1.0 --format '{{json .SBOM}}'
+gh attestation verify oci://ghcr.io/OWNER/REPO:1.0.0 --repo OWNER/REPO
+docker buildx imagetools inspect ghcr.io/OWNER/REPO:1.0.0 --format '{{json .SBOM}}'
 ```
 
 In production, pin the image by digest (`ghcr.io/OWNER/REPO@sha256:...`).

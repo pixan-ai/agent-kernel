@@ -1,153 +1,37 @@
 # Changelog
 
-All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow [Semantic Versioning](https://semver.org/) once the first release is tagged.
+All notable changes to this project. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Added
+## [1.0.0] - 2026-11-19
 
-- Every agent has the advisor on from its first start: the policy sets `advisorModel` to `opus`, so Claude can ask a stronger model for advice at key moments of a task. On a subscription its use counts toward the plan's limits. Experimental in Claude Code; `CLAUDE_FLAGS=--advisor MODEL` still picks another model for one agent.
-- The settings for a one-click Railway template, in docs/DEPLOY-RAILWAY.md (service, volume, variables with their descriptions), checked against the guide by `docs_test`. The template itself is made and published from the Railway dashboard.
-- A release can also publish the image to Docker Hub, same digest, signed there too, when `DOCKERHUB_REPOSITORY` and its two secrets are set (docs/RELEASING.md). Publishing stays locked by `PUBLISH_IMAGE`.
-- `THIRD-PARTY.md`, in the repository and in the image with `LICENSE` at `/usr/share/doc/agent-kernel/`: the software the image carries, its licenses, and for the GPL binaries (two copies of FFmpeg, and Debian's) where the source of that exact build is. CI checks it names the versions the Dockerfile pins and the ffmpeg the image really has.
-- A weekly workflow (`pins.yml`) compares every version the Dockerfile pins by hand (supercronic, uv, Typst, the Python packages, the Whisper model, Claude Code) with its latest upstream release, and keeps one issue open listing those behind. Dependabot already watched the actions and the base image.
+First stable release. The detailed history of how it got here is in [docs/history/CHANGELOG-before-1.0.md](docs/history/CHANGELOG-before-1.0.md).
 
-### Changed
+### What an agent does
 
-- Renovate opens its pull request at once (`prCreation: immediate`): CI runs on pull requests, not on Renovate's branches, so waiting for checks on the branch would wait for ever.
-- The guide's examples of what to tell the agent are in English, with the Spanish its first users say in parentheses; the agent answers in any language.
-- README opens with the project's own description and CI and license badges; the Railway template uses the same description. `docs_test` checks that "less than 300 lines of Bash" stays true.
-- Renovate replaces Dependabot and the weekly version check (decided 2026-11-18): every version the Dockerfile pins (Claude Code on its stable channel, uv, Typst and supercronic with their checksums, the Python packages, the base image, the actions) and the optional stack's packages update by pull request, merged by Renovate only once CI is green. `THIRD-PARTY.md` no longer repeats those versions.
-- Updates (decided 2026-11-18): Claude Code follows its stable channel, never below 2.1.319, and moves only through a tested pull request; going back is `CLAUDE_CODE_VERSION` on the host and a redeploy. The plugin follows its upstream at every build, and CI also builds weekly. The owner is told at start when Claude Code or the plugin changed version.
-- Small cleanups after the audit of 2026-11-18 (B7, B8): `compose.yml` drops `init: true` (the image runs tini); the threat model's install row moves into its own section; stale wording fixed; "license" spelled one way.
-- Notices about jobs are optional (decided 2026-11-18): `config.sh notices jobs off|on`, by telling the agent "no me avises de las tareas". A delivered one-off removes itself without a notice (`config.sh done NAME`). Groups, super-users and fellow agents are always told.
-- The guide recommends a regular review of what each agent installed and of its groups and super-users, and supergroups from the start, since Telegram converts a group and changes its id on its own.
-- Voice notes and video moved out of the image into an optional stack (`policy/stack.md`, decided 2026-11-18): their FFmpeg is GPL, and downloaded by each agent from the upstream projects when its owner or a super-user asks, it is not distributed by this project. The image is about 1.3 GB smaller. Documents (read and make) stay in the image. CI runs the stack's recipes as written (`tests/stack_test.sh`). An agent that used voice from the image needs one install.
-- The project is renamed `agent-kernel` (it was `pixan-kernel-spike`): the repository, the image names and the license folder in the image (`/usr/share/doc/agent-kernel/`). GitHub redirects the old address.
-- Documents reviewed end to end: what changed with the audit of 2026-11-17 (no audit log, install folders watched rather than guarded, job notices) is described the same everywhere; decision dates moved out of the guides; the evidence from the live tests of 2026-11-17 added; the image page and the repository settings brought up to date; issue and pull request templates ask for the version, the host and a failing test.
-- Install lock: writes into `/data/bin`, `/data/tools` and the skills folders from the shell are no longer guessed from the command; after every command the folders are looked at, and a change with the lock closed is told to the owner (reported, not prevented). A note that names those folders, written from the shell, is no longer refused.
-- Documents, after the audit of 2026-11-17: which Claude credential to use (a subscription for a personal agent, an API key for an agent that serves groups or clients); the threat model now covers backups, fellow agents, super-users, memory, jobs, the doorbell and group privacy; the secrets left in the start environment are stated; amd64 only; no mention of any business.
-- Tests and CI, after the audit of 2026-11-17: the eight changes the audit made to the code on purpose, which no test caught (the 4:00 recycle, the idle watcher, the five-minute downtime threshold, no terminal and no tunnel over the peer view, the bot token left out of backups, the keep-awake while asleep with jobs, the 80% plan alert), now each fail a test; ffmpeg must make a real frame; CI runs ShellCheck on the policy's hook commands; every workflow job has a time limit, and a new push to a pull request cancels its older CI run.
+- **Claude Code, official and unmodified, on Telegram 24/7** in one container: the official Telegram channel plugin and a managed policy, with less than 300 lines of Bash.
+- **Talks to its owner in private, and to groups**: in a group every member may ask for ordinary work; the owner and the super-users they name by chat run the agent.
+- **Remembers**: every night a dream consolidates the day into `MEMORY.md` and a dated file, and the next conversation starts clean.
+- **Scheduled jobs by chat**, delivered in private or to a group; one-off reminders remove themselves; job notices can be turned off.
+- **Documents out of the box**: reads PDF, Word, Excel, PowerPoint, HTML and CSV; makes Excel, Word, PowerPoint and PDF files. **Voice notes and video** from an optional stack, installed the first time the owner sends one.
+- **Installs tools and skills** when the owner or a super-user asks, and keeps them across restarts.
+- **Fellow agents**: a read-only view of each other over SSH, and groups and super-users set across agents.
+- **Runs unattended**: optional sleep when idle, nightly encrypted backups, and a watchdog for a dead channel, an unanswered message and plan limits.
 
-### Removed
+### How it stays safe
 
-- The "supervisor" clause: an agent's own workspace notes could grant it authority over fellow agents, and anyone it talks to could ask for that line to be written (audit of 2026-11-18, M6). Only the owner or a super-user can now ask an agent to change a fellow agent.
-- The install lock (`bin/install-lock.sh`: the turn, check and lock-file hooks, about 50 lines): it tried to refuse installs by matching commands, every audit found another spelling, and the refusals seen live came from the agent's judgment and Claude Code's classifier. Who may ask for an install is the agent's instruction again; `bin/installs.sh` records every change in the install folders and tells the owner.
-- `bin/denials.sh` and `peer.sh look NAME denials`: the transcript (`peer.sh look NAME transcript`) and the screen show the same.
-- The audit log `/data/audit.jsonl` and its three hooks: the session transcript already holds every tool call.
-- The `Notification` hook for permission prompts: with `denyInsteadOfPrompting` nothing prompts.
-- The `Bash(rm -rf /)` deny rules (a pattern that any spelling escapes) and `promptSuggestionEnabled` in the policy (the image's environment already sets it).
+- The managed policy is the only one (`allowManagedHooksOnly`, `allowManagedPermissionRulesOnly`); nothing waits for a prompt (`denyInsteadOfPrompting`, which needs Claude Code 2.1.319 or later: an older one fails the build); auto mode refuses to leak credentials; the advisor is on.
+- The owner is told of the changes the [threat model](docs/THREAT-MODEL.md#installs-and-settings-told-not-locked) lists: settings, installs, version changes, and changes made by hand to the files that steer the agent (its settings and jobs, the workspace's Claude settings, `CLAUDE.md` and MCP servers, the install record). What is not seen, such as a deletion, is listed there too. Notices follow the owner id set on the host.
+- The agent decides by its instructions and judgment; code does not guess commands. What that leaves open is written in the [threat model](docs/THREAT-MODEL.md), with evidence labels.
+- Three external reviews (one on 2026-11-17, two on 2026-11-18) were addressed before this release.
 
-### Fixed
+### How it stays current
 
-- Claude Code is never older than 2.1.319, which the policy's `denyInsteadOfPrompting` needs (audit of 2026-11-18 v1, A1). Following the stable channel had put it at 2.1.311, which ignores the setting, so an unattended agent could wait on a permission prompt. It stays at 2.1.319 until the channel passes it; a lower `CLAUDE_CODE_VERSION` fails the build, and the host keeps its deployment.
-- `config.sh done` removed any job, a recurring one too, without telling the owner. It now removes only a delivered one-off (a fixed day and month); any other is refused, and `drop` removes it with a notice (audit of 2026-11-18 v1, M2).
-- Two settings changed at the same moment could lose one: they shared the same temporary files. `config.sh` now makes one change at a time (`flock`) (audit of 2026-11-18 v1, B7).
-- The peer SSH server also sets `DisableForwarding=yes`. Unix-socket forwarding, the one kind not switched off by name, was already refused because the server does not run as root; now the option says so too (audit of 2026-11-18 v1, B5).
-- More changes are told to the owner (audit of 2026-11-18 v1, M3): the workspace's `CLAUDE.md`, `.mcp.json` and `.claude/settings*.json`, the jobs' `settings.json`, MCP servers added with `claude mcp add` (only the servers in `.claude.json` are compared), and lines added by hand to `/data/tools.json`, which the start replays.
-- A release tagged the image's versions as it pushed it, before the checks and the signature: a release that then failed left a tag on an unchecked, unsigned image. It now pushes by digest and adds the version tags last, on the same digest (audit of 2026-11-18 v1, M1). The release path rehearses this on every pull request that touches it.
-- Seen in the live tests of 2026-11-18: a tool the owner had uninstalled came back at the next start, since only installs were recorded. Uninstalls are now recorded and told ("🧰 Removed"), and the start reinstalls only what is still installed.
-- Seen in the live tests of 2026-11-18: every agent reported its bot's `.env` "changed by hand" after a start (the plugin re-permissions it); the settings and the bot's files are now compared by content. Using an old Whisper setup reported an install (its model cache takes lock files in `/data/tools`); lock files are left out. Turning job notices on said "turn them on"; it now says "off".
-- A voice note from the owner or a super-user now installs voice from `stack.md` when it is missing, then gets its answer; the agents had used setups of their own from before.
-- The release job checked a different build from the one it published: it now checks the pushed digest (no Claude Code, no fixable CRITICAL vulnerability) before signing it (audit of 2026-11-18, M4). The release path's test registry is pinned by digest (B10).
-- The dream consolidated only the newest conversation since the last one; a restart in the day left the earlier one out (audit of 2026-11-18, B1). It now reads all of them, oldest first.
-- `PEER_SSH_KEY` stayed in Claude's environment (B3); it is unset with the other secrets once written to `/data/ssh`.
-- A line `OWNER_TELEGRAM_ID=…` added to the bot's private file from the agent's shell sent every notice to that id and opened private chats to it. `notify.sh` and `config.sh` now take the owner from the host's variable, which the agent cannot change, and use the file only where the variable is absent. The agent's start-of-session note on who its owner is does the same (audit of 2026-11-18 v1, M4).
-- A change to the settings, the jobs, the crontab, `config/settings.json` or the bot's files made other than through `config.sh` went unnoticed when the command did not spell the path as expected (audit of 2026-11-18, A1, M3, B5). Every such change is now told to the owner.
-- The start's reinstall of recorded packages ran in the workspace, where a planted `uv.toml` could choose the package index (M1); it now runs from `/` with `UV_NO_CONFIG=1`.
-- `claude update` could move Claude Code off its pinned version (B9): the image also sets `DISABLE_UPDATES=1`.
-- A job with a schedule that cannot happen (minute 60, day 0, `*/0`) stopped Supercronic at once, and with it every job, the watchdog, the backup and the 04:00 recycle, silently. `config.sh` now refuses such a schedule, and leaves out any such line already on the volume.
-- `config.sh drop NAME` left the job's prompt behind, so `config.sh show` still listed a dropped job (seen live on 2026-11-17). It now removes it.
-- A one-off job (a fixed day and month) stayed scheduled and ran again a year later: it now removes itself once delivered.
-- The owner's notice of a new job now says where it goes and how its prompt starts, and `config.sh show` lists the jobs' prompts.
-- A group removed by chat came back at the next restart while it was still in `TELEGRAM_GROUP_IDS`: the variable now seeds `/data/settings` on the first start only.
-- A new container removes the plugin's `bot.pid` left by the last one, so a recycled process id is never taken for an old poller.
-- The crash-loop brake measured from before the doorbell wait, so after a long sleep a Claude that died at once restarted without the 60 s pause.
-- The image sets `LANG=C.UTF-8`; it had no locale.
-- Install lock, after the audit of 2026-11-17: package managers with options before the verb (`uv pip -q install`) and `uv tool run` are refused like the rest; the keys in `/data/ssh` are kept from the shell; the lock and the record are kept also by a relative path (`cd /data/cron && touch install-ok`); `npm run install-optional` and `node build/tools.js` are no longer refused.
-- A job whose delivery Telegram refused (the bot removed from the group, a group renumbered) was recorded as sent and nobody was told. It is now sent first, recorded only if it went, and the owner is told otherwise.
-- The agent could widen its own policy: a settings file of its own (`/data/config/settings.json`, `/data/workspace/.claude/settings.json`) could add hooks and `allow` rules, which Claude Code merges with the managed ones. The policy now sets `allowManagedHooksOnly` and `allowManagedPermissionRulesOnly`.
-- A scheduled job or the dream started and ended the "message waiting" mark of the main conversation: a job's end of turn erased a real waiting message (no alert after ten minutes), and a long job raised a false one. Both hooks now skip the jobs' own sessions.
+- Claude Code follows its stable channel, never below 2.1.319. Renovate updates every pinned version by pull request, merged only when CI is green; going back is `CLAUDE_CODE_VERSION` on the host.
+- The owner is told at start when Claude Code or the plugin changed version.
+- The publishable `base` image carries no Anthropic software, ships `THIRD-PARTY.md`, and is checked, scanned, signed and attested before its version tags are published (publishing is locked until the owner turns it on).
 
-## [0.1.0] - 2026-11-15
+### Where it runs
 
-First tagged version. Lab / alpha: what was verified on a real host, and what was not, is at the end of each document under `docs/`.
-
-### Added
-
-- **Every agent makes Excel, Word, PowerPoint and PDF files** (decided 2026-11-15): `python-docs` runs Python with `openpyxl`, `python-docx` and `python-pptx`, and `typst` (pinned by version and checksum, about 40 MB) makes PDFs. CI makes each kind as the agent's user with no network and reads it back. Not through `pandoc --pdf-engine=typst`: the image's pandoc writes a template this Typst rejects.
-- **Every agent hears voice notes and reads documents out of the box** (decided 2026-11-15; this reverses the 2026-11-12 decision to keep `ffmpeg` out of the image). The `base` image adds, pinned: `whisper-ctranslate2` with the Whisper `small` model baked in (voice to text, offline), `markitdown` (PDF, Word, Excel, PowerPoint, HTML and CSV to text) and a static `ffmpeg` (video frames). About 1.2 GB more. CI checks them as the agent's user with no network (`tests/media_test.sh`). The agent is told they are there, and how to download a Google Docs link that is shared publicly.
-- Guide: what a group member who is not a super-user may ask for (since #74), and that voice notes and documents work with no setup.
-- **Plan limits.** The status line keeps the figures Claude Code gives it (5-hour and weekly use of the subscription) and shows them on the agent's screen; the watchdog tells the owner once when one passes 80%. A scheduled job or a nightly dream stopped by a limit now tells the owner why: Claude gives that reason on standard output, which the job's failure notice left out, and a failed dream only went to the log.
-- **Install lock** (`bin/install-lock.sh`): only the owner or a super-user can make the agent install packages, tools or skills. A `UserPromptSubmit` hook opens the lock for one turn when the Telegram message comes from a super-user. It reads the sender from the first line the plugin writes, and a turn with a second `<channel` tag gets no lock. A `PreToolUse` hook refuses installs (uv, pip, npm, bun, uvx, `claude plugin`/`mcp`, `/data/bin`, `/data/tools`, the skills folders) while the lock is closed. Jobs and the dream never get it. Each install is recorded in `/data/tools.json` and the owner is told. `start.sh` reinstalls the recorded package lines. Installs go to `/data/tools` and `/data/bin`, after the image's own commands in `PATH`. When a task needs a tool it lacks, the agent says which and why, and installs it if a super-user asked; the managed instructions carry a pinned recipe for `ffmpeg` without root (`imageio-ffmpeg==0.8.1`, linked into `/data/bin`). A guardrail, not a sandbox: see docs/THREAT-MODEL.md.
-- Docs: self-improvement is decided, not built yet. Only a super-user can ask an agent to install skills or tools; the install runs at once and the owner is notified afterwards (same as settings); it applies to that agent unless a super-user asks to replicate it. Python 3 will be added to the image. See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
-- `docs/LEARNINGS.md`: what long-running agents taught us, in earlier fleets and here, with where each rule is applied. From it: the memory shown at session start ends with `[end of MEMORY.md]`, so a cut is noticed; the dream logs the index size before and after and keeps a pointer into the daily files; CI runs every tool as the agent's own user.
-- **Daily dream** (`bin/dream.sh`, `docs/MEMORY.md`): once a day what was said is consolidated into `/data/workspace/MEMORY.md` and the next conversation starts clean, so a session no longer grows for ever. The memory is shown to the agent at every session start. A failed dream leaves the conversation as it was. `docs/MEMORY.md` also describes the daily council: every agent of a team reporting in one Telegram group.
-- Opt-in sleep (`IDLE_SLEEP_MINUTES`): Claude stops after a quiet period and a Telegram webhook wakes the agent; the official plugin still receives the message by polling. On Railway with Serverless an idle agent used no memory, and answered 2 to 3 s after a message. See docs/SLEEP.md.
-- Unanswered-message alert: a message whose turn has not ended after ten minutes is reported to the owner, once.
-- docs/GETTING-STARTED.md: installation for a first-time user, and what to tell the agent afterwards.
-- Backup and restore: a nightly backup of memory, conversations, workspace, settings and jobs, encrypted with age inside the container and sent with rclone (Google Drive by default, Cloudflare R2 as an alternative); restore onto an empty volume by setting the private key. See docs/BACKUP.md.
-- Watchdog: when Claude runs but the Telegram plugin's process is gone (two checks, five minutes apart), the owner is told and Claude restarts with the conversation.
-- The agent knows its own Telegram bot name and id from the first message: the start-up check keeps Telegram's answer and the SessionStart hook states it (seen on Railway: an agent in a group did not know it was being addressed).
-- Settings by chat: the agent adds groups, senders and fellow agents itself (`config.sh`), applies them at once and tells the owner every time. A fellow agent can set another's groups over the peer channel. See docs/SETTINGS.md.
-- Peer view: `transcript` (the recent conversation of a fellow agent) and names from `PEERS` instead of addresses.
-- Telegram groups: `TELEGRAM_GROUP_IDS` and `TELEGRAM_GROUP_SENDERS`; no mention needed in a listed group. See docs/GROUPS.md.
-- Peer view (opt-in): a fellow agent holding a listed key can read this agent's screen, status and denials over SSH with a forced command; nothing else. See docs/PEERS.md.
-- `procps` in the image: the seeded daily recycle uses `pkill`.
-- Scheduled jobs that survive restarts: a crontab on the volume run by Supercronic (pinned), `job.sh` (a prompt in its own Claude session, answer sent to the owner and kept in `sent.md`, alert on failure or timeout), a downtime notice at start, and a daily recycle at 04:00. Claude Code's in-session scheduler is disabled. See docs/CRON.md.
-- The agent gets a `CLAUDE.md` in its workspace stating its limits (denied prompts, no credentials, connectors disabled, only `/data` persists). Copied once; the owner can edit the copy.
-- Claude Code on Telegram in one container: the official harness in a `script` pty, the official Telegram channel plugin, a root-owned managed policy.
-- Credential: a Claude subscription token (`CLAUDE_CODE_OAUTH_TOKEN`) or an API key (`ANTHROPIC_API_KEY`).
-- Railway support: volume ownership handled by the entrypoint (`RAILWAY_RUN_UID=0`), screen mirror to the service log (opt-in, see Changed).
-- Policy: `denyInsteadOfPrompting` so an unattended agent never waits for a person; deny rules and an auto-mode rule against leaking credentials; hooks that audit and alert the owner on Telegram.
-- Acceptance tests for the entrypoint, the diagnostic tools, the policy and the documentation, run in CI inside the built image.
-- Documentation: findings, architecture, Railway deployment, threat model, secrets, repository settings.
-- Supply chain: every action pinned to a commit SHA (and a test that keeps it so), CodeQL for the workflows, OpenSSF Scorecard, a report-only Trivy scan, and a release workflow that publishes with an SBOM, SLSA provenance, a keyless cosign signature and a GitHub attestation. See [docs/RELEASING.md](docs/RELEASING.md).
-- Image: tools for skills in the `base` target: Python 3, `uv`/`uvx` (Astral, pinned by version and checksum), `poppler-utils`, `pandoc`, `unzip` (`tzdata` was already there). CI runs each one as the agent's user. About 300 MB more. `ffmpeg` is left out (about 450 MB more); agents install it when needed. See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md#what-the-image-contains).
-
-### Changed
-
-- **Groups: anyone may ask for work** (decided 2026-11-15). Seen on a live agent: a group member who was not a super-user asked it to transcribe a voice note and it refused, because its instructions forbade running commands for anyone but the owner and the super-users. Any member may now ask for ordinary work; installing, settings, jobs, fellow agents and private information stay reserved. This widens what a member can make the agent run (`docs/THREAT-MODEL.md`).
-- Wording, before v0.1.0: the agent's instructions say "your owner or a super-user" where both may ask (joining a group, looking at a fellow agent, letting two bots talk) and "whoever wrote to you" for the reply language; README and the Dockerfile no longer call the restart policy "the watchdog" now that `watchdog.sh` exists; `PRODUCT-IMAGE.md` records which decisions are taken and which is open; `FINDINGS.md` and `CRON.md` lose two stale statements.
-- Docs: stale claims fixed before v0.1.0. Peers can also set groups and super-users; the owner allowlist is private only; installs are locked even in groups; `deny` rules cover file tools only; Serverless only with the opt-in sleep; publishing builds `base` only; the secrets inventory now includes the peer and backup keys.
-- **Groups are open.** In a group the agent was told to join it now reads and can answer every member, people and bots, instead of only the owner and listed ids. `TELEGRAM_GROUP_SENDERS` and `config.sh sender` are removed. The agent is told its owner's id at every session start and that only the owner gives instructions; in groups that is an instruction, not a lock (see `docs/GROUPS.md`). Super-users (`config.sh admin ID`) may also give instructions in the groups; the owner or any super-user names them, on this agent or on a fellow agent.
-- CI fails when the publishable base image has a fixable CRITICAL vulnerability (Trivy). The agent image, which adds Claude Code and the plugin, stays report-only.
-- The agent is shown its recent job deliveries with every message (a `UserPromptSubmit` hook over `sent.jsonl`), instead of being asked to read a file it could skip. `sent.md` is replaced by `sent.jsonl`, written one line at a time.
-- Jobs can deliver to a group the agent is in (`config.sh job … GROUP_ID`); the job's session is told it only writes the message; a job's stderr no longer reaches Telegram except in its failure notice to the owner (seen on Railway: a job for a group ended as an error message in private).
-- `tini` is PID 1 (SIGTERM reaches the entrypoint); the bot token is removed from the environment before Claude and the scheduler start; a missing `TELEGRAM_BOT_TOKEN` or `OWNER_TELEGRAM_ID` fails at once; `mem_limit` in compose; the start log no longer prints a `whitespace:` field that could only say "no"; tests share `tests/lib.sh`.
-- **Security:** scheduled jobs can only be `job.sh NAME` (a prompt run inside Claude under the policy). The agent adds them with `config.sh job`, which tells the owner; any other line in the cron files never runs. The daily recycle moved to the image (`bin/system.cron`), so the agent cannot remove it and updates reach existing volumes.
-- `access.json` is replaced atomically.
-- Policy: bypass-permissions mode is disabled (`disableBypassPermissionsMode`), and the setting that pre-accepted its warning (`skipDangerousModePermissionPrompt`) is gone.
-- Removed `railway.json` (Railway stops reading it on 2026-12-01); the service settings in docs/DEPLOY-RAILWAY.md are the configuration.
-- Alert hooks use `notify.sh`: the bot token no longer appears on a command line.
-- The audit log records one short line per event instead of the whole event, and keeps its last 10000 lines (it grew without limit and duplicated the transcript).
-- Group instructions: a message from the owner to the group in general is answered (seen on Railway: both agents stayed silent on a plain "Hola").
-- `config.sh` answers with a confirmation and the resulting groups and senders, so an agent that changes a fellow agent's settings can verify it (seen on Railway: the change worked but returned nothing).
-- `access.json` is rebuilt from the variables at every start (it was written only once): changing the owner or the groups is a variable change and a redeploy.
-- A restart continues the last conversation (`--continue`). If Claude dies within a minute while continuing, the next start opens a fresh session. A 60-second brake slows crash loops.
-- Fix: the Telegram plugin ran from the image's build path (its registry files hold absolute paths), outside the policy's protection, and a newer image could not replace the copy on the volume. Every start now copies the plugin to the volume and points its registry there.
-- Fix: the agent could not see photos or files sent on Telegram. They land in the plugin's inbox, outside the workspace, and the first read was denied. The inbox is now an additional working directory (still not writable by the agent).
-- The agent's instructions moved to the managed location (`/etc/claude-code/CLAUDE.md`): root-owned, updated with every image, not editable by the agent. The copy seeded earlier in `/data/workspace` is no longer written.
-- The Dockerfile has two targets: `base` (no Anthropic software, the only publishable one) and `agent` (default; adds Claude Code and the plugin). The release workflow pushes `base` only and CI verifies it contains no Claude Code.
-- Docs: the security level is stated per host (**Railway: soft floor only**) in README and SECURITY.md, with the namespace check for hosts that can do better.
-- The base image is pinned by digest; a test fails on an unpinned `FROM`.
-- Start-up asks Telegram (`getMe`) once and fails fast on HTTP 401 (revoked or mistyped bot token) instead of leaving the bot mute. A network error does not stop the start.
-- **Privacy:** the screen mirror to the service log is now off by default. It contains the owner's conversation, and service logs are visible to anyone with project access. Set `SCREEN_MIRROR=<seconds>` to turn it on while debugging.
-
-### Fixed
-
-- A dream whose Claude ended well without writing anything still started a clean conversation, losing the day with no notice. The dream now counts only if the day's file was written after it started; otherwise the conversation continues, the dream is tried again and the owner is told.
-- **Install lock, audit of 2026-11-15** (#67–#76). #68 had narrowed the lock to a list of leading commands, so `/bin/cp`, `command cp`, `cd /data/bin && curl`, a Python `shutil.copy`, `sed -i` and a glob such as `/data/b[i]n` wrote there again. From the shell, any command that names `/data/bin`, `/data/tools` or the skills folders is now refused while the lock is closed, except running what is installed there (with its variables) and reading it; the 🧰 notice still fires only for a package manager or a plain write. Writing `/data/settings`, `/data/cron/jobs` or `/data/cron/prompts` by hand is refused to everyone (`echo "admin 999" >> /data/settings` made a super-user with no notice), and `config.sh admin` or `peer.sh … admin` needs the owner or a super-user. Quotes, escapes and globs no longer hide the lock file or the record. The replay at start takes a line only if every word is a package name, so a forged record cannot install from a URL, an index, a path or `--from`. A dream that keeps failing tells the owner once a day, not at every start or wake. The agent is told to edit its notes with the file tools.
-- Guide: a table row broken by #76, the watchdog line in README, the release workflow's comment (the published target has no Claude Code), and "all pinned" in the Dockerfile.
-- `screen.sh` returned the agent's screen one word per line: Claude Code places words with cursor-column moves, which were read as new lines. Seen on a live agent; checked against a real Claude Code screen.
-- An install the agent chained with other commands on one line (`uv pip install … 2>&1 | tail; cd … && python …`) was recorded but never reinstalled at start, because only a line that was nothing but the install was replayed. Each part of the line is now taken on its own; only the installs are replayed. Seen on a live agent.
-- Install lock, seen on a live agent: any command that named `/data/bin` or `/data/tools` counted as an install. With the lock closed the agent could not run an installed tool by its path, list the folder, or write a note that mentioned it; with it open, checking a tool's version was recorded and announced to the owner as an install. The lock now refuses package managers and **writes** into those folders (copy, link, move, download, redirect), not reading or running what is there. The agent may read `/data/tools.json` with the Read tool, which the permissions denied.
-- A dream that failed logged no reason: Claude writes it on standard output, which was thrown away. Seen on Railway, where every dream since 2026-11-12 failed with an empty message. The log now carries it.
-- A `MEMORY.md` longer than what is shown at session start was cut in silence. The agent is now told it is missing the end and must shorten it; the dream keeps the index under 150 lines and 15000 characters.
-- The Telegram reply tool is pre-approved, so nothing reviewed the files it attaches, and its `files` parameter takes any path. A `PreToolUse` hook now refuses attachments from outside `/data/workspace`, `/tmp` and the Telegram inbox (keys, credentials, conversations), also through `..` or a link.
-- A job kept posting to a group after `config.sh drop GROUP`, and delivered to whatever its `.to` file said. `job.sh` now checks at delivery time that the destination is a group the agent is in; otherwise the owner gets it.
-- The dream reads text that any member of a group may have written, and ran with every tool. It now has only `Read`, `Edit` and `Write`: no shell, no network.
-- An agent went to sleep even when Telegram refused the webhook, and then never heard a message. It now stays awake and says so in the log.
-- The entrypoint now exits with status 1 and says so when Claude exits (it used to exit with 141).
-- The entrypoint fails fast, naming the missing variable, when no Claude credential is set.
-- A token copied from a phone with line breaks is cleaned before use.
+- Railway (the reference deployment) and Docker on any amd64 host.
