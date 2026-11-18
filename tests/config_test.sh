@@ -47,6 +47,11 @@ check "a line that is not exactly a job.sh call never reaches supercronic" bash 
 bad_job() { ! config job "$@" && ! grep -q "$2" /data/cron/crontab; }
 check "a schedule that is not five cron fields is refused" bad_job "* * * * * touch" nope "x"
 check "a job name with anything but letters, digits, _ and - is refused" bad_job "0 8 * * *" 'a;b' "x"
+for when in "99 99 99 99 99" "60 * * * *" "0 0 0 * *" "*/0 * * * *"; do
+  check "an impossible schedule is refused, it would stop every job (audit of 2026-11-18, A2): $when" bad_job "$when" never "x"
+done
+echo "60 * * * * job.sh broken" >> /data/cron/jobs; config apply
+check "...and one already on the volume is left out, so the clock keeps running" bash -c '! grep -q broken /data/cron/crontab && supercronic -test /data/cron/crontab > /dev/null 2>&1 && grep -q "pkill -x script" /data/cron/crontab'
 config group -1001; config job "0 9 * * *" bye "Say goodbye" -1001
 check "a job can deliver to a group this agent is in" test "$(cat /data/cron/prompts/bye.to)" = "-1001"
 check "...and the owner is told where it goes" told "bye (0 9 \* \* \*, to group -1001): Say goodbye"

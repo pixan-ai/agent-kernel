@@ -11,9 +11,11 @@
 set -euo pipefail
 F=/data/settings; TG=/data/config/channels/telegram; J=/data/cron/jobs; B=$(dirname "$(readlink -f "$0")")
 mkdir -p /data/cron/prompts; touch $F $J
+valid() { printf '%s\n' "$1" > /data/cron/line.test && supercronic -test /data/cron/line.test > /dev/null 2>&1; }  # one bad line stops supercronic, and every job with it
 case "${1:-} ${2:-}" in
   "show ") cat $F $J; grep -r . /data/cron/prompts || true; exit ;;  # the jobs' prompts as FILE:TEXT
   "job "*) [[ $2 =~ ^([0-9*/,-]+\ ){4}[0-9*/,-]+$ && ${3:-} =~ ^[A-Za-z0-9_-]+$ && -n ${4:-} ]] || { echo 'use: job "M H D M W" NAME "PROMPT" [GROUP_ID]' >&2; exit 2; }
+    valid "$2 job.sh $3" || { echo "not a schedule that can happen: $2" >&2; exit 2; }
     [ -z "${5:-}" ] || grep -qxF "group $5" $F || { echo "a job can deliver to the owner or to a group this agent is in" >&2; exit 2; }
     printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
   "apply ") ;;
@@ -25,7 +27,7 @@ case "${1:-} ${2:-}" in
   *) sed -n '2,10p' "$0" >&2; exit 2 ;;
 esac
 # What supercronic runs: the image's jobs, then the agent's, and of those only well-formed job.sh lines. Anything else in the file never runs.
-{ cat "$B/system.cron"; grep -E '^([0-9*/,-]+ ){5}job\.sh [A-Za-z0-9_-]+$' $J || true; } > /data/cron/crontab.tmp && mv /data/cron/crontab.tmp /data/cron/crontab
+{ cat "$B/system.cron"; grep -E '^([0-9*/,-]+ ){5}job\.sh [A-Za-z0-9_-]+$' $J | while IFS= read -r l; do ! valid "$l" || echo "$l"; done || true; } > /data/cron/crontab.tmp && mv /data/cron/crontab.tmp /data/cron/crontab
 # shellcheck source=/dev/null
 . $TG/.env
 jq -n --arg o "$OWNER_TELEGRAM_ID" --rawfile f $F '($f | split("\n") | map(split(" "))) as $l
