@@ -1,18 +1,19 @@
 # Repository settings for maintainers
 
-Settings that cannot live in the repository's files. Checked against the public repository on 2026-11-17.
+Settings that cannot live in the repository's files. Checked against the public repository on 2026-11-18.
 
 | # | Setting | State | Why | How |
 |---|---|---|---|---|
 | 1 | Private vulnerability reporting | on | [SECURITY.md](../SECURITY.md) tells reporters to use it | `gh api -X PUT repos/OWNER/REPO/private-vulnerability-reporting` |
 | 2 | Dependabot security updates | **off** | Security fixes arrive as PRs that pass CI | `gh api -X PUT repos/OWNER/REPO/vulnerability-alerts` then `gh api -X PUT repos/OWNER/REPO/automated-security-fixes` |
-| 3 | Ruleset on `main` | **none** | Nobody publishes without a green CI; no force push, no deletion | See below |
+| 3 | Ruleset on `main` | on: pull request, `lint` and `build` green, no force push, no deletion | Nobody publishes without a green CI; no force push, no deletion | See below |
 | 4 | Secret scanning and push protection | on | | |
 | 5 | Actions: default workflow permissions | check | Read-only by default; workflows ask for more | Settings, Actions, General |
 | 6 | OpenSSF Best Practices badge | not registered | A public, reviewable checklist | Sign in at bestpractices.dev with GitHub and register the repository |
 | 7 | Container package visibility | after the first release | Public so anyone can pull. **Irreversible** | Package settings, Danger Zone, Change visibility |
-| 8 | Immutable releases | **off** | A published release and its tag cannot be changed afterwards | Settings, General, Releases |
-| 9 | Renovate | **not installed** | Updates every pinned version by pull request and merges it when CI is green (`renovate.json`) | Install the Renovate app (github.com/apps/renovate) on this repository only |
+| 8 | Immutable releases | on (set by the owner) | A published release and its tag cannot be changed afterwards | Settings, General, Releases |
+| 9 | Renovate | installed | Updates every pinned version by pull request and merges it when CI is green (`renovate.json`) | Install the Renovate app (github.com/apps/renovate) on this repository only |
+| 10 | Delete head branches after merge; Wiki and Projects off | on; off | No stale branches, no empty tabs | Settings, General |
 
 ## Ruleset for `main`
 
