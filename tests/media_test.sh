@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2329,SC2016  # helpers are called through check "$@"; bash -c bodies are single-quoted on purpose
-# Acceptance tests for what every agent can read out of the box: voice notes and documents.
+# Acceptance tests for what every agent can read and make out of the box: documents.
 # CI runs this inside the built image as the agent's own user (uid 1001) and with no network, so nothing is downloaded at use.
-# The fixtures were made for this repository: a synthetic Spanish voice (espeak-ng) and three small Office files.
+# The fixtures were made for this repository: three small Office files (and a synthetic Spanish voice, for tests/stack_test.sh).
 set -uo pipefail
 # shellcheck source=tests/lib.sh
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
@@ -11,8 +11,6 @@ says() { grep -qi "$2" <<<"$1"; }
 
 check "runs as the agent's own user" test "$(id -u)" = 1001
 check "text is UTF-8 (accents and emoji in file names and output)" test "${LANG:-}" = C.UTF-8
-out=$(whisper-ctranslate2 --model_directory /opt/models/whisper-small --compute_type int8 --language es --output_dir "$T" "$F/hola.ogg" 2>&1)
-check "a voice note is transcribed, offline, with the model in the image" says "$out" "hola"
 for f in doc.docx hoja.xlsx pres.pptx; do
   check "a document is read to text: $f" says "$(markitdown "$F/$f" 2>&1)" "mango"
 done
@@ -23,9 +21,8 @@ check "an Excel file is made with Python, and reads back" bash -c 'python-docs -
 check "a Word file is made with Python, and reads back" bash -c 'python-docs -c "import docx; d=docx.Document(); d.add_heading(\"mango\"); d.save(\"$0/a.docx\")" && markitdown "$0/a.docx" | grep -q mango' "$T"
 check "a PowerPoint file is made with Python, and reads back" bash -c 'python-docs -c "import pptx; p=pptx.Presentation(); s=p.slides.add_slide(p.slide_layouts[0]); s.shapes.title.text=\"mango\"; p.save(\"$0/a.pptx\")" && markitdown "$0/a.pptx" | grep -q mango' "$T"
 check "a PDF is made from Markdown, offline, and reads back" bash -c 'printf "# Informe\n\nVentas de **mango**: 12\n" | pandoc -t typst -o "$0/a.typ" && typst compile "$0/a.typ" "$0/a.pdf" && pdftotext "$0/a.pdf" - | grep -q mango' "$T"
-check "video frames can be taken: ffmpeg makes a real frame (audit, B6)" bash -c 'ffmpeg -hide_banner -loglevel error -f lavfi -i testsrc=size=64x48 -frames:v 1 "$0/frame.png" && test -s "$0/frame.png"' "$T"
+check "voice and video are not in the image: their FFmpeg is GPL, the agent installs them when asked (policy/stack.md)" bash -c '! command -v ffmpeg && ! command -v whisper-ctranslate2 && test -s /etc/claude-code/stack.md'
 D=/usr/share/doc/agent-kernel
 check "the licences are in the image: this project's, the third parties', the GPL text" test -s $D/LICENSE -a -s $D/THIRD-PARTY.md -a -s /usr/share/common-licenses/GPL-3
-check "...and THIRD-PARTY.md names the ffmpeg build the image really has" bash -c 'grep -qF "$(ffmpeg -version | sed -n "s/^ffmpeg version \([^ ]*\).*/\1/p")" "$0"' $D/THIRD-PARTY.md
 rm -rf "$T"
 echo "$FAILS failed"; exit $((FAILS > 0))

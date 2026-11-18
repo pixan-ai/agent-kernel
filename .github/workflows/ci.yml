@@ -66,12 +66,15 @@ jobs:
           docker run --rm --entrypoint sh agent-kernel:ci -ec 'test "$(id -u)" = 1001
             claude --version; bun --version; jq --version; curl --version; age --version; rclone version
             supercronic -version; ssh -V; script --version; realpath --version; tini --version
-            whisper-ctranslate2 --help; markitdown --help; ffmpeg -version; pandoc --version; typst --version; python-docs -c "import docx, pptx, openpyxl"
+            markitdown --help; pandoc --version; typst --version; python-docs -c "import docx, pptx, openpyxl"
             python3 --version; uv --version; uvx --version; pdftotext -v; pandoc --version; unzip -v
             test -e /usr/share/zoneinfo/America/Mexico_City; UV_PYTHON_DOWNLOADS=never uv venv -q /tmp/venv' > /dev/null
-      # Voice notes and documents, as the agent's user and with no network: nothing may be downloaded at use.
+      # Documents, as the agent's user and with no network: nothing may be downloaded at use.
       - name: Media and documents, offline
         run: docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel:ci /tests/media_test.sh
+      # The optional stack (voice, video): every recipe in policy/stack.md runs as written, with the network, and then works.
+      - name: Optional stack, as stack.md says
+        run: docker run --rm --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel:ci /tests/stack_test.sh
       # The gate: what this project publishes (the base target, no Anthropic software) must have no fixable CRITICAL vulnerability.
       - name: Build the publishable base target
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0

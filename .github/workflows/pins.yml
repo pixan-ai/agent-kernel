@@ -34,9 +34,9 @@ jobs:
             hf:*) curl -fsS "https://huggingface.co/api/models/${1#hf:}" | jq -r .sha ;;
           esac; }
           for p in SUPERCRONIC_VERSION=gh:aptible/supercronic UV_VERSION=gh:astral-sh/uv TYPST_VERSION=gh:typst/typst \
-                   WHISPER_CT2=pypi:whisper-ctranslate2 MARKITDOWN=pypi:markitdown IMAGEIO_FFMPEG=pypi:imageio-ffmpeg \
+                   MARKITDOWN=pypi:markitdown \
                    PYTHON_DOCX=pypi:python-docx PYTHON_PPTX=pypi:python-pptx OPENPYXL=pypi:openpyxl \
-                   WHISPER_MODEL_REV=hf:Systran/faster-whisper-small CLAUDE_CODE_VERSION=npm:@anthropic-ai/claude-code; do
+                   CLAUDE_CODE_VERSION=npm:@anthropic-ai/claude-code; do
             a=$(arg "${p%%=*}"); l=$(latest "${p#*=}") || l=
             if [ -z "$l" ]; then echo "- \`${p%%=*}\`: could not read ${p#*=}"; elif [ "$a" != "$l" ]; then echo "- \`${p%%=*}\`: $a → $l (${p#*=})"; fi
           done > behind.md
