@@ -46,6 +46,13 @@ hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" 
   && grep -q 'cosign sign --yes "docker.io/$HUB@$DIGEST"' "$1" && grep -q 'for ref in "$IMAGE" ${HUB:+"docker.io/$HUB"}' "$1"; }
 check "a release also publishes to Docker Hub when it is configured, signed and verified there" hub .github/workflows/release.yml
 
+# What is signed is what was checked: the published digest itself (audit of 2026-11-18, M4), and the test registry is pinned too (B10).
+pub=$(sed -n '/^  publish:/,$p' .github/workflows/release.yml)
+checked_first() { local s n c; s=$(grep -n 'Sign (keyless)' <<<"$pub" | cut -d: -f1); n=$(grep -n 'command -v claude' <<<"$pub" | cut -d: -f1); c=$(grep -n 'image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}' <<<"$pub" | cut -d: -f1)
+  [ -n "$s" ] && [ -n "$n" ] && [ -n "$c" ] && [ "$n" -lt "$s" ] && [ "$c" -lt "$s" ]; }
+check "the publish job checks the pushed digest (no Claude Code, no fixable CRITICAL) before signing it" checked_first
+check "the throwaway registry of the release path is pinned by digest" grep -qE 'image: registry:3@sha256:[0-9a-f]{64}' .github/workflows/release.yml
+
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
 blocks() { grep -q 'image-ref: agent-kernel:base' <<<"$gate" && grep -q 'exit-code: "1"' <<<"$gate" && ! grep -q 'continue-on-error' <<<"$gate"; }
 check "CI fails on a fixable CRITICAL vulnerability in the publishable image" blocks

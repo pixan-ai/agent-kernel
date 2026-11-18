@@ -42,6 +42,7 @@ In production, pin the image by digest (`ghcr.io/OWNER/REPO@sha256:...`).
 
 ## Notes
 
+- The publish job builds again, so it does not trust the earlier checks: before signing, it checks the digest it pushed (no Claude Code, no fixable CRITICAL vulnerability). If either fails the job stops, and the pushed digest stays unsigned: it is not a release, and the verification below rejects it.
 - Signatures and attestations are written to a public transparency log, so the workflow's identity is public. The repository is public.
 - Do not create a GitHub Release by hand without signed assets: OpenSSF Scorecard's Signed-Releases check scores an unsigned release 0, and no release at all as not applicable.
 - The acceptance job signs with a throwaway key and skips the transparency log, so it can run on every pull request. What only a tag exercises is the keyless identity and the attestation; the last step of the publish job verifies both.

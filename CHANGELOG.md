@@ -34,6 +34,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- The release job checked a different build from the one it published: it now checks the pushed digest (no Claude Code, no fixable CRITICAL vulnerability) before signing it (audit of 2026-11-18, M4). The release path's test registry is pinned by digest (B10).
 - A line `OWNER_TELEGRAM_ID=…` added to the bot's private file from the agent's shell sent every notice to that id and opened private chats to it. `notify.sh` and `config.sh` now take the owner from the host's variable, which the agent cannot change, and use the file only where the variable is absent.
 - A change to the settings, the jobs, the crontab, `config/settings.json` or the bot's files made other than through `config.sh` went unnoticed when the command did not spell the path as expected (audit of 2026-11-18, A1, M3, B5). Every such change is now told to the owner.
 - The start's reinstall of recorded packages ran in the workspace, where a planted `uv.toml` could choose the package index (M1); it now runs from `/` with `UV_NO_CONFIG=1`.
