@@ -262,6 +262,11 @@ Everything updates on its own; nothing is left behind. What changes is tested be
 | **Telegram plugin** | Every build takes its latest version (the official marketplace cannot be pinned). If it does not install, the build fails and the host keeps the previous deployment; CI also tries it every week | The host's rollback to the previous deployment (on Railway: the deployment's **Rollback**) |
 | **Tools in the image** (uv, Typst, markitdown, the base image…) | Renovate pull requests, tested by CI, merged when green | Revert that pull request |
 
+**Who does the updating: Renovate.** [Renovate](https://docs.renovatebot.com) is a free GitHub app that watches every version this project pins (Claude Code, uv, Typst, supercronic, the Python packages, the base image, the CI actions, the optional stack). When one moves, it opens a pull request with the new version, and its checksum where there is one; CI builds the image and runs every test; Renovate merges it only if all of that is green, and the host then builds the new image. Its settings are in [`renovate.json`](../renovate.json). Nobody has to remember to update anything; a pull request that fails stays open, and nothing reaches the agents.
+
+- **If you deploy from your own copy (fork) of this repository**, install Renovate on it as well ([github.com/apps/renovate](https://github.com/apps/renovate), "only select repositories"), or your copy stays on the versions of the day you copied it.
+- **What CI can and cannot tell.** It proves that a new Claude Code installs and runs and that a new plugin installs, and every tool is used for real in the tests; it cannot prove that the agent answers on Telegram, which needs a live bot. That is what the notice below, and going back in one step, are for.
+
 After every change you get a private notice: "🔄 Versions changed: Claude Code 2.1.311, Telegram plugin 0.0.7 → Claude Code 2.1.320, Telegram plugin 0.0.8". If the agent misbehaves after one, that notice tells you what to go back to.
 
 ## If something is wrong

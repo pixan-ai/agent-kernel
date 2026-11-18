@@ -12,6 +12,7 @@ Settings that cannot live in the repository's files. Checked against the public 
 | 6 | OpenSSF Best Practices badge | not registered | A public, reviewable checklist | Sign in at bestpractices.dev with GitHub and register the repository |
 | 7 | Container package visibility | after the first release | Public so anyone can pull. **Irreversible** | Package settings, Danger Zone, Change visibility |
 | 8 | Immutable releases | **off** | A published release and its tag cannot be changed afterwards | Settings, General, Releases |
+| 9 | Renovate | **not installed** | Updates every pinned version by pull request and merges it when CI is green (`renovate.json`) | Install the Renovate app (github.com/apps/renovate) on this repository only |
 
 ## Ruleset for `main`
 
