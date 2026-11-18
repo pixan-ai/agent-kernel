@@ -30,6 +30,10 @@ rm -rf "$CFG/plugins" && cp -r /opt/seed/config/plugins "$CFG/" && sed -i "s#/op
 # The plugin and the alert hook read the bot credentials from this file (ready for an env scrub on hosts that allow it).
 (umask 077; printf 'TELEGRAM_BOT_TOKEN=%s\nOWNER_TELEGRAM_ID=%s\n' "$TELEGRAM_BOT_TOKEN" "$OWNER_TELEGRAM_ID" > "$TG/.env")
 config.sh apply
+# Claude Code and the plugin come with the image, which follows Claude Code's stable channel (docs/GETTING-STARTED.md): say when they changed.
+v="Claude Code $(claude --version 2> /dev/null | cut -d' ' -f1 || true), Telegram plugin $(find "$CFG/plugins/cache/claude-plugins-official/telegram" -mindepth 1 -maxdepth 1 -printf '%f\n' 2> /dev/null | sort -V | tail -1 || true)"
+[ ! -s /data/cron/versions ] || [ "$(cat /data/cron/versions)" = "$v" ] || notify.sh "🔄 Versions changed: $(cat /data/cron/versions) → $v. If something broke, set CLAUDE_CODE_VERSION on the host to the previous version and redeploy, or use the host's rollback." || true
+echo "$v" > /data/cron/versions
 # A revoked or mistyped bot token would leave the bot mute with no error anywhere: ask Telegram once (the answer also tells the agent its own bot name, see the SessionStart hook). Only a clear 401 stops the start; a network hiccup does not. The URL goes through stdin so the token is not in a process list.
 code=$(printf 'url = "https://api.telegram.org/bot%s/getMe"\n' "$TELEGRAM_BOT_TOKEN" | curl -sS -K - -o "$TG/me.json" -w '%{http_code}' -m 10 2>/dev/null || true)
 [ "$code" != 401 ] || { echo "Telegram rejected TELEGRAM_BOT_TOKEN (HTTP 401): create a new one with BotFather" >&2; exit 1; }
