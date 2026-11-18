@@ -215,7 +215,7 @@ It runs at once, with no approval step. You do not need to know the tool's name:
 
 | File | What it is | Who writes it |
 |---|---|---|
-| `/data/workspace/CLAUDE.md` | This agent's own lasting instructions: name, role, tone, whether it supervises others | The agent, when you ask ("anota en tu CLAUDE.md que …") |
+| `/data/workspace/CLAUDE.md` | This agent's own lasting instructions: name, role, tone | The agent, when you ask ("anota en tu CLAUDE.md que …") |
 | `/data/workspace/MEMORY.md` | What it remembers | The agent, and the nightly dream ([MEMORY.md](MEMORY.md)) |
 
 The rules common to every agent (`/etc/claude-code/`) come with the image and cannot be changed from inside.

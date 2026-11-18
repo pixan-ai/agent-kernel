@@ -19,7 +19,7 @@ Super-users also decide what the agent installs (packages, tools, skills): see [
 
 Any agent that can look at a fellow agent ([PEERS.md](PEERS.md)) can also add or drop **groups and super-users** on it: `peer.sh look junior "group -1001234567890"`. The change is made by the other agent's own `config.sh`, so **its** owner gets the notice, marked "by a fellow agent".
 
-Technically every agent holding a listed key can do this. Who *should* is a matter of instructions: the managed `CLAUDE.md` tells an agent to change a fellow agent's settings only when its own workspace `CLAUDE.md` names it as supervisor, or its owner asks directly. Put that line in the supervisor's `/data/workspace/CLAUDE.md`.
+Technically every agent holding a listed key can do this. Who *should* is a matter of instructions: the managed `CLAUDE.md` tells an agent to change a fellow agent's settings only when its owner or a super-user asks directly. There is no standing "supervisor" role: a line in an agent's own notes cannot grant it, since anyone it talks to could ask for that line to be written (decided 2026-11-18).
 
 ## What cannot be changed this way
 

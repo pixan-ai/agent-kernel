@@ -153,4 +153,7 @@ check "a reply may not attach a key" refuses /data/ssh/peer_key
 check "...nor the conversation, the credentials or the policy" refuses /data/config/.credentials.json
 check "...nor reach them by climbing out of the workspace" refuses /data/workspace/../ssh/rclone.conf
 check "...nor through a link placed in the workspace" refuses /data/workspace/innocent.txt
+RULES=$(dirname "$POLICY")/CLAUDE.md
+check "only the owner or a super-user can have an agent change a fellow agent: no supervisor clause a workspace note could grant (audit of 2026-11-18, M6)" \
+  bash -c '! grep -qi supervisor "$0" && grep -q "only when your owner or a super-user asks you directly" "$0"' "$RULES"
 echo "$FAILS failed"; exit $((FAILS > 0))
