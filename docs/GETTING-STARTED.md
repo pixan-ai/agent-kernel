@@ -56,26 +56,26 @@ A fixed-price server suits several agents better than per-minute billing, and a 
 
 1. The start log shows `oauth token: N chars, starts with sk-ant-oat01-: yes`. N is about 108; a much smaller number means a truncated token.
 2. Send the bot "Hola". It answers within a few seconds.
-3. Ask "¿Cómo te llamas y cuál es tu id?": it knows its own bot name.
+3. Ask "What is your name and id?" ("¿Cómo te llamas y cuál es tu id?"): it knows its own bot name.
 
 `/start` shows pairing instructions from the plugin. Ignore them: in private only the owner is allowed, and no pairing is needed.
 
 ## 5. What to tell the agent next
 
-The examples are in Spanish, as the agents in this project are used; the agent answers in the language it is written to.
+Write to the agent in any language: it answers in the one it is written to. Each example is in English, with the Spanish its first users say in parentheses.
 
 | You say | What happens | More |
 |---|---|---|
-| "Mándame cada día a las 8 un resumen de …" | It schedules a job; you get a notice | [CRON.md](CRON.md) |
-| "Únete al grupo -100…" | It reads and answers everyone in that group, people and bots, no mention needed | [GROUPS.md](GROUPS.md) |
-| "Tu compañero X está en …" / "¿Qué está haciendo X?" | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
-| "Recuerda que …" / "¿Qué recuerdas de …?" | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
-| "Cada día a las 9 publica en el grupo -100… lo más relevante de ayer" | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
+| "Send me a summary of … every day at 8" ("mándame cada día a las 8 un resumen de …") | It schedules a job; you get a notice | [CRON.md](CRON.md) |
+| "Join the group -100…" ("únete al grupo -100…") | It reads and answers everyone in that group, people and bots, no mention needed | [GROUPS.md](GROUPS.md) |
+| "Your fellow agent X is at …" / "What is X doing?" ("tu compañero X está en …" / "¿qué está haciendo X?") | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
+| "Remember that …" / "What do you remember about …?" ("recuerda que …" / "¿qué recuerdas de …?") | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
+| "Every day at 9, post yesterday's highlights in the group -100…" ("cada día a las 9 publica en el grupo -100… lo más relevante de ayer") | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
 | A PDF, a Word, Excel or PowerPoint file | It reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |
-| "Aprende a escuchar notas de voz" / "aprende a trabajar con video" | It installs voice or video once, from the optional stack; then it transcribes voice notes or works with videos | [The optional stack](#the-optional-stack-voice-and-video) |
+| "Learn to listen to voice notes" / "learn to work with video" ("aprende a escuchar notas de voz" / "aprende a trabajar con video") | It installs voice or video once, from the optional stack; then it transcribes voice notes or works with videos | [The optional stack](#the-optional-stack-voice-and-video) |
 | "Hazme un Excel / Word / PowerPoint / PDF con …" | It makes the file and sends it to you | [What the image contains](#what-the-image-contains) |
 | "Haz super-usuario a 123456789" | That person can also give it instructions in its groups | [GROUPS.md](GROUPS.md) |
-| "Mándame el archivo …" | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
+| "Send me the file …" ("mándame el archivo …") | It attaches files from its workspace, or ones it received. It cannot attach keys, credentials or its configuration | [THREAT-MODEL.md](THREAT-MODEL.md) |
 | "Anota en tu CLAUDE.md que …" | Its own lasting instructions (name, role, tone) | |
 
 Every change it makes to its own settings is confirmed to you in private ([SETTINGS.md](SETTINGS.md)).
@@ -93,7 +93,7 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 - **Backups:** off until you set them up. [BACKUP.md](BACKUP.md).
 - **What it can and cannot protect:** [SECURITY.md](../SECURITY.md) and [THREAT-MODEL.md](THREAT-MODEL.md). On Railway the protection is policy and judgment, not a sandbox.
 - **Rotating a credential:** [SECRETS.md](SECRETS.md).
-- **Review the changes regularly.** Whoever owns the agents should look, every week or so, at what each one installed and at changes to its groups and super-users: the private notices, and "¿qué tienes instalado?" and "¿qué ajustes tienes?". The agents decide by judgment and tell you what they did; the review is what turns those notices into control.
+- **Review the changes regularly.** Whoever owns the agents should look, every week or so, at what each one installed and at changes to its groups and super-users: the private notices, and "What have you installed?" ("¿qué tienes instalado?") and "What settings do you have?" ("¿qué ajustes tienes?". The agents decide by judgment and tell you what they did; the review is what turns those notices into control.
 - **Use supergroups from the start.** Telegram turns a plain group into a supergroup on its own when you change its administrators or some of its settings, and the group gets a new id (`-100…`): the agent stops hearing it until it is told the new one. Create the group as a supergroup (or change one setting that converts it, such as making the history visible to new members) before adding the agent, and tell the agent the `-100…` id ([GROUPS.md](GROUPS.md)).
 
 ## Everything you can configure
@@ -137,14 +137,14 @@ Applied at once, kept on the volume, and confirmed to the owner in private. The 
 
 | Setting | Say | Undo |
 |---|---|---|
-| A group to take part in | "únete al grupo -100…" | "sal del grupo -100…" |
-| A super-user | "haz super-usuario a 123456789" | "quita a 123456789" |
-| A fellow agent, by name | "tu compañero Junior está en agent2.railway.internal" | "olvida a Junior" |
-| A scheduled job, to you or to a group | "cada día a las 8 mándame …" | "quita la tarea …" |
-| The notices about jobs | "no me avises de las tareas" | "avísame de las tareas" |
-| Something to remember | "recuerda que …" | "olvida que …" |
+| A group to take part in | "Join the group -100…" ("únete al grupo -100…") | "Leave the group -100…" ("sal del grupo -100…") |
+| A super-user | "Make 123456789 a super-user" ("haz super-usuario a 123456789") | "Remove 123456789" ("quita a 123456789") |
+| A fellow agent, by name | "Your fellow agent Junior is at agent2.railway.internal" ("tu compañero Junior está en …") | "Forget Junior" ("olvida a Junior") |
+| A scheduled job, to you or to a group | "Every day at 8 send me …" ("cada día a las 8 mándame …") | "Remove the job …" ("quita la tarea …") |
+| The notices about jobs | "Don't tell me about jobs" ("no me avises de las tareas") | "Tell me about jobs" ("avísame de las tareas") |
+| Something to remember | "Remember that …" ("recuerda que …") | "Forget that …" ("olvida que …") |
 
-"¿Qué ajustes tienes?" lists them ([SETTINGS.md](SETTINGS.md)).
+"What settings do you have?" ("¿qué ajustes tienes?") lists them ([SETTINGS.md](SETTINGS.md)).
 
 ## Who can ask the agent for what
 
@@ -152,13 +152,13 @@ In plain words, for whoever runs an agent.
 
 **The owner** is you: the Telegram account in `OWNER_TELEGRAM_ID`. Only you can talk to the agent in private.
 
-**Super-users** are people you trust to run the agent with you. You name them by telling the agent "haz super-usuario a 123456789"; a super-user can name others. They give instructions in the groups the agent is in.
+**Super-users** are people you trust to run the agent with you. You name them by telling the agent "Make 123456789 a super-user" ("haz super-usuario a 123456789"); a super-user can name others. They give instructions in the groups the agent is in.
 
 **Everyone else in a group** can ask for ordinary work: answer a question, transcribe a voice note, read a document, search, summarise, make a file.
 
 **Only you and the super-users** can make the agent:
 
-- install a package, a tool or a skill ("instala …", "aprende a …");
+- install a package, a tool or a skill ("install …", "learn to …");
 - change its settings: groups, super-users, fellow agents;
 - schedule jobs;
 - look at or change a fellow agent;
@@ -166,7 +166,7 @@ In plain words, for whoever runs an agent.
 
 When someone else asks for one of these, the agent says that you or a super-user has to ask. This rests on its instructions and its judgment, not on code that tries to guess commands: a rule like that is always one spelling short, while Claude reads the request itself. What code does guarantee is that **you hear about every change**: anything installed, and any change to its settings, jobs or bot files that did not go through its settings command, reaches you in private ([THREAT-MODEL.md](THREAT-MODEL.md)).
 
-**To have something installed**, just ask for the task ("convierte este video a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Documents and office files need nothing: every agent has them. Voice and video need one install, below.
+**To have something installed**, just ask for the task ("turn this video into a GIF"): if the agent lacks a tool it says which one and why, and installs it if you are the owner or a super-user. Documents and office files need nothing: every agent has them. Voice and video need one install, below.
 
 **What you are told, and why nothing is blocked by pattern.** Installed tools live in two folders on the agent's disk; every change there is recorded and told to you. Its settings and jobs are meant to change only through its own settings command, which always tells you; a change made any other way is told to you too, marked "by hand". Until 2026-11-18 a hook also tried to refuse installs by matching commands. Every audit found another way to write the same thing, while the refusals that mattered in practice came from the agent itself and from Claude Code's own checks, so it was removed: the agent decides, you see what it did.
 
@@ -174,7 +174,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 | Notice | When |
 |---|---|
-| ⚙️ Setting changed: … | A group, super-user or fellow agent was added or removed (always), or a job (unless you said "no me avises de las tareas"); for a job, with its schedule, destination and text. A one-off reminder that was delivered removes itself without a notice |
+| ⚙️ Setting changed: … | A group, super-user or fellow agent was added or removed (always), or a job (unless you said "Don't tell me about jobs"); for a job, with its schedule, destination and text. A one-off reminder that was delivered removes itself without a notice |
 | 🧰 Installed: … | Something changed where tools live, with the command that did it |
 | ⚠️ … was changed by hand, not through config.sh | Its settings, jobs or bot files changed without its settings command |
 | ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |
@@ -194,13 +194,13 @@ When someone else asks for one of these, the agent says that you or a super-user
 
 | Say | It runs | Lands in |
 |---|---|---|
-| "baja elevenlabs" / "instala qrcode" | `uv pip install elevenlabs` | `/data/tools/venv` (run with `/data/tools/venv/bin/python`) |
-| "instala la herramienta ruff" | `uv tool install ruff` | `/data/bin`, on the agent's `PATH` |
-| "aprende a hacer un PowerPoint" | writes a skill | `/data/workspace/.claude/skills/` |
+| "Get elevenlabs" / "install qrcode" ("baja elevenlabs" / "instala qrcode") | `uv pip install elevenlabs` | `/data/tools/venv` (run with `/data/tools/venv/bin/python`) |
+| "Install the ruff tool" ("instala la herramienta ruff") | `uv tool install ruff` | `/data/bin`, on the agent's `PATH` |
+| "Learn to make a PowerPoint" ("aprende a hacer un PowerPoint") | writes a skill | `/data/workspace/.claude/skills/` |
 
-It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("haz una gráfica", "lee este código QR"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
+It runs at once, with no approval step. You do not need to know the tool's name: when a task needs one the agent lacks ("make a chart", "read this QR code"), it says which tool and why. If you are a super-user, it installs it then and there. If you are not, it says that a super-user can ask for it. It never installs system packages (`apt`); those need a pull request to the image.
 
-**What the owner sees.** A private Telegram message after every install: "🧰 Installed: COMMAND". Every install is also a line in `/data/tools.json` (when, the tool, the command). Ask "¿qué tienes instalado?" to see the list.
+**What the owner sees.** A private Telegram message after every install: "🧰 Installed: COMMAND". Every install is also a line in `/data/tools.json` (when, the tool, the command). Ask "What have you installed?" to see the list.
 
 **Only that agent.** An install applies to the agent that ran it. To have it on other agents, the super-user asks each of them; there is no fleet-wide install.
 
@@ -216,7 +216,7 @@ It runs at once, with no approval step. You do not need to know the tool's name:
 
 | File | What it is | Who writes it |
 |---|---|---|
-| `/data/workspace/CLAUDE.md` | This agent's own lasting instructions: name, role, tone | The agent, when you ask ("anota en tu CLAUDE.md que …") |
+| `/data/workspace/CLAUDE.md` | This agent's own lasting instructions: name, role, tone | The agent, when you ask ("note in your CLAUDE.md that …") |
 | `/data/workspace/MEMORY.md` | What it remembers | The agent, and the nightly dream ([MEMORY.md](MEMORY.md)) |
 
 The rules common to every agent (`/etc/claude-code/`) come with the image and cannot be changed from inside.
@@ -243,7 +243,7 @@ Also there: Bun (JavaScript and TypeScript), `git`, `jq`, `curl`, `rclone`, `age
 
 ## The optional stack: voice and video
 
-Not in the image, because both carry FFmpeg under the GPL; downloaded by each agent from their own projects, they are not distributed by this project. When you or a super-user ask ("aprende a escuchar notas de voz", "aprende a trabajar con video"), the agent installs them exactly as [`policy/stack.md`](../policy/stack.md) says, with pinned versions; CI runs those recipes as written.
+Not in the image, because both carry FFmpeg under the GPL; downloaded by each agent from their own projects, they are not distributed by this project. When you or a super-user ask ("learn to listen to voice notes", "learn to work with video"), the agent installs them exactly as [`policy/stack.md`](../policy/stack.md) says, with pinned versions; CI runs those recipes as written.
 
 | Part | What it is | First install |
 |---|---|---|
@@ -276,7 +276,7 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | "typing…" and no answer | Claude credential truncated or expired (see the start log) |
 | No reaction at all | Wrong bot token, or variables not deployed. The log says `Telegram rejected TELEGRAM_BOT_TOKEN` for a bad token |
 | Silent in a group | The bot was added before privacy mode was disabled, or the group id changed when it became a supergroup ([GROUPS.md](GROUPS.md)) |
-| It does not remember something from yesterday | The nightly memory left it out. Ask "¿qué recuerdas de …?", and say "recuerda que …" for what must stay ([MEMORY.md](MEMORY.md)) |
+| It does not remember something from yesterday | The nightly memory left it out. Ask "What do you remember about …?", and say "Remember that …" for what must stay ([MEMORY.md](MEMORY.md)) |
 | A job's answer came to you instead of the group | The agent is no longer in that group; tell it to join again |
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`: the public address is missing or wrong ([SLEEP.md](SLEEP.md)) |
