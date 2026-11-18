@@ -24,6 +24,8 @@ quiet() { test ! -s /data/curl-args; }
 check "the policy watches every Bash and file-tool call, failed ones too" bash -c 'test "$(jq -r ".hooks.PostToolUse[] | select(.matcher == \"Bash|Write|Edit|MultiEdit|NotebookEdit\") | .hooks[0].command" "$0")" = "installs.sh record" && test "$(jq -r ".hooks.PostToolUseFailure[] | select(.matcher == \"Bash|Write|Edit|MultiEdit|NotebookEdit\") | .hooks[0].command" "$0")" = "installs.sh record"' "$POLICY"
 check "...and no hook refuses an install any more: who may ask is the agent's judgment (decided 2026-11-18)" bash -c '! grep -q "install-lock\|installs.sh check\|installs.sh turn" "$0"' "$POLICY"
 RULES=$(dirname "$POLICY")/CLAUDE.md
+check "a voice note from the owner or a super-user is the request to install voice, from stack.md only (seen live: old setups of their own)" \
+  bash -c 'grep -q "A voice note or a video from your owner or a super-user is their request" "$0" && grep -q "never with a setup of your own from before" "$0"' "$(dirname "$POLICY")/CLAUDE.md"
 check "the agent is told who may ask for an install, to name a missing tool and why, and never to install system packages" \
   bash -c 'grep -q "say which tool and why" "$0" && grep -q "Never system packages (\`apt\`)" "$0" && grep -q "only when your owner or a super-user asks" "$0"' "$RULES"
 
@@ -55,6 +57,10 @@ for f in "/data/settings:echo admin 998 >> /data/settings" "/data/settings:cd /d
 done
 : > /data/curl-args; config apply; record Bash "ls"
 check "what the start writes (config.sh apply) is not reported" quiet
+chmod 600 /data/config/channels/telegram/.env; touch /data/config/channels/telegram/.env /data/config/channels/telegram/access.json; record Bash "ls"
+check "...nor a file touched or re-permissioned with the same content (seen live: the plugin does that to its .env)" quiet
+mkdir -p /data/tools/whisper-models/.locks; : > /data/tools/whisper-models/.locks/m.lock; record Bash "transcribe a.oga"
+check "...nor the lock files a tool writes while it runs (seen live: a model cache in /data/tools)" quiet
 
 { echo '{"command":"uv pip install elevenlabs"}'; echo '{"command":"uv pip install elevenlabs"}'; echo '{"command":"uv tool install broken"}'
   echo '{"command":"uv pip install imageio-ffmpeg==0.8.1"}'

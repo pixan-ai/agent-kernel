@@ -247,7 +247,7 @@ Not in the image, because both carry FFmpeg under the GPL; downloaded by each ag
 
 | Part | What it is | First install |
 |---|---|---|
-| Voice notes and audio | Whisper `small` (`whisper-ctranslate2`), offline once installed | A few minutes; about 700 MB |
+| Voice notes and audio | Whisper `small` (`whisper-ctranslate2`), offline once installed. The first voice note from you or a super-user installs it, then gets its answer | A few minutes; about 700 MB |
 | Video | `ffmpeg`, the static build `imageio-ffmpeg` carries | Under a minute |
 
 Like any install, it lives on the volume: it survives restarts, redeploys and new images, is told to you, and is put back at start if it ever went missing. Only deleting the volume removes it.

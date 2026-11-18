@@ -40,6 +40,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- Seen in the live tests of 2026-11-18: every agent reported its bot's `.env` "changed by hand" after a start (the plugin re-permissions it); the settings and the bot's files are now compared by content. Using an old Whisper setup reported an install (its model cache takes lock files in `/data/tools`); lock files are left out. Turning job notices on said "turn them on"; it now says "off".
+- A voice note from the owner or a super-user now installs voice from `stack.md` when it is missing, then gets its answer; the agents had used setups of their own from before.
 - The release job checked a different build from the one it published: it now checks the pushed digest (no Claude Code, no fixable CRITICAL vulnerability) before signing it (audit of 2026-11-18, M4). The release path's test registry is pinned by digest (B10).
 - The dream consolidated only the newest conversation since the last one; a restart in the day left the earlier one out (audit of 2026-11-18, B1). It now reads all of them, oldest first.
 - `PEER_SSH_KEY` stayed in Claude's environment (B3); it is unset with the other secrets once written to `/data/ssh`.
