@@ -22,7 +22,7 @@ case "${1:-} ${2:-}" in
     [ -z "${5:-}" ] || grep -qxF "group $5" $F || { echo "a job can deliver to the owner or to a group this agent is in" >&2; exit 2; }
     ! grep -qx "quiet jobs" $F || S=1; printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
   "apply ") ;;
-  "done "?*) [[ $2 =~ ^[A-Za-z0-9_-]+$ ]] && grep -qE "^[^ ]+ [^ ]+ [0-9]+ [0-9]+ [^ ]+ job\.sh $2$" $J || { echo "done is only for a delivered one-off (a fixed day and month); to remove a job, drop it" >&2; exit 2; }; grep -vE " job\.sh $2$" $J > $J.tmp || true; mv $J.tmp $J; rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to"; S=1 ;;
+  "done "?*) { [[ $2 =~ ^[A-Za-z0-9_-]+$ ]] && grep -qE "^[^ ]+ [^ ]+ [0-9]+ [0-9]+ [^ ]+ job\.sh $2$" $J; } || { echo "done is only for a delivered one-off (a fixed day and month); to remove a job, drop it" >&2; exit 2; }; grep -vE " job\.sh $2$" $J > $J.tmp || true; mv $J.tmp $J; rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to"; S=1 ;;
   "notices jobs") case "${3:-}" in off) grep -qx "quiet jobs" $F || echo "quiet jobs" >> $F ;; on) grep -vx "quiet jobs" $F > $F.tmp || true; mv $F.tmp $F ;; *) exit 2 ;; esac
     U=" To change it, ask me to turn them $([ "$3" = off ] && echo on || echo off)."; set -- notices "jobs $3" ;;
   "group "*|"admin "*) [[ $2 =~ ^-?[0-9]+$ ]] || { echo "an id is a number" >&2; exit 2; }; grep -qxF "$1 $2" $F || echo "$1 $2" >> $F ;;
