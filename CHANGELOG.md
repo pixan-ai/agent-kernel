@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- The base image is published (decided 2026-11-19): to GitHub's registry and to Docker Hub as `pixan/agent-kernel`, without asking Anthropic in writing, since it carries no Anthropic software (docs/PRODUCT-IMAGE.md).
+
 ## [1.0.0] - 2026-11-19
 
 First stable release. The detailed history of how it got here is in [docs/history/CHANGELOG-before-1.0.md](docs/history/CHANGELOG-before-1.0.md).

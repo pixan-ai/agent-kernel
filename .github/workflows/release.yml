@@ -82,8 +82,8 @@ jobs:
   publish:
     name: Publish, sign and attest
     needs: acceptance
-    # Locked: publishes only the base target (no Claude Code). Open questions before turning it on: asking Anthropic in writing, and
-    # keeping the GPL sources available (docs/PRODUCT-IMAGE.md). Then set the repository variable PUBLISH_IMAGE to true.
+    # Publishes only the base target (no Claude Code), and only while the repository variable PUBLISH_IMAGE is true (on since
+    # 2026-11-19; decisions in docs/PRODUCT-IMAGE.md).
     # To GitHub's registry always; to Docker Hub too when the variable DOCKERHUB_REPOSITORY (NAMESPACE/NAME) and the secrets
     # DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (an access token with write access to that repository only) are set.
     if: startsWith(github.ref, 'refs/tags/v') && vars.PUBLISH_IMAGE == 'true'
