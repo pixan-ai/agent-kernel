@@ -67,6 +67,10 @@ for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_CODE_OAUTH_TOKEN RAILWAY_RU
 done
 check "...a volume at /data and Restart Policy Always" bash -c 'grep -q "mounted at \`/data\`" <<<"$0" && grep -q "Restart Policy \*\*Always\*\*" <<<"$0"' "$tmpl"
 check "Claude Code stays at its pinned version: neither the auto-updater nor \`claude update\` (audit of 2026-11-18, B9)" bash -c 'grep -q "DISABLE_AUTOUPDATER=1" Dockerfile && grep -q "DISABLE_UPDATES=1" Dockerfile'
+# denyInsteadOfPrompting (policy) needs Claude Code 2.1.319 or later; an older one ignores it (audit of 2026-11-18 v1, A1).
+floor=$(grep -oE "^ \&\& \{ \[.*\}; \}$" Dockerfile)
+check "the build's Claude Code floor refuses 2.1.311 and takes 2.1.319 and 2.1.320" bash -c 'v=2.1.311; ! (eval "$0") 2> /dev/null && v=2.1.319 && (eval "$0") && v=2.1.320 && (eval "$0")' "${floor# && }"
+check "...and the default version is not below the floor" bash -c '[ -n "$0" ] && v=$(grep -oE "^ARG CLAUDE_CODE_VERSION=\S+" Dockerfile | cut -d= -f2) && (eval "$0")' "${floor# && }"
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))
