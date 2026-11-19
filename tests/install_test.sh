@@ -11,7 +11,7 @@ POLICY=${POLICY:-/etc/claude-code/managed-settings.json}; BIN=${BIN:-/usr/local/
 STUBS=$(mktemp -d); chmod 755 "$STUBS"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> /data/curl-args; cat > /dev/null\n' > "$STUBS/curl"
 printf '#!/usr/bin/env bash\necho "$*" >> /data/uv-calls; echo "$PWD ${UV_NO_CONFIG:-}" >> /data/uv-where; [ "$3" != broken ]\n' > "$STUBS/uv"; chmod 755 "$STUBS/curl" "$STUBS/uv"
-find /data -mindepth 1 -delete 2> /dev/null; mkdir -p /data/config/channels/telegram /data/cron /data/workspace /data/bin /data/tools/venv/lib
+find /data -mindepth 1 -delete 2> /dev/null; mkdir -p /data/config/channels/telegram /data/cron/config /data/workspace/.claude /data/bin /data/tools/venv/lib
 printf 'TELEGRAM_BOT_TOKEN=123:abc\nOWNER_TELEGRAM_ID=42\n' > /data/config/channels/telegram/.env
 
 tool() { jq -n --arg t "$1" --arg c "$2" '{session_id: "S1", tool_name: $t, tool_input: (if $t == "Bash" then {command: $c} else {file_path: $c, content: "x"} end)}'; }
@@ -53,10 +53,24 @@ check "a note that names the folders is not an install" test "$(wc -l < /data/to
 check "a change through config.sh is told once, by config.sh, not again by the watch" test "$(grep -c "chat_id=42" /data/curl-args)" = 1
 for f in "/data/settings:echo admin 998 >> /data/settings" "/data/settings:cd /data && echo admin 998 >> settings" "/data/settings:python3 -c \"open('/data/'+'settings','a')\"" \
          "/data/config/channels/telegram/.env:echo OWNER_TELEGRAM_ID=999 >> /data/config/channels/telegram/.env" "/data/cron/crontab:echo '* * * * * x' >> /data/cron/crontab" \
-         "/data/config/settings.json:echo '{}' > /data/config/settings.json" "/data/config/channels/telegram/access.json:echo '{}' > /data/config/channels/telegram/access.json"; do
+         "/data/config/settings.json:echo '{}' > /data/config/settings.json" "/data/config/channels/telegram/access.json:echo '{}' > /data/config/channels/telegram/access.json" \
+         "/data/workspace/.mcp.json:echo '{}' > .mcp.json" "/data/workspace/.claude/settings.json:echo '{}' > .claude/settings.json" \
+         "/data/workspace/.claude/settings.local.json:echo '{}' > .claude/settings.local.json" "/data/workspace/CLAUDE.md:echo rule >> CLAUDE.md" \
+         "/data/cron/config/settings.json:echo '{}' > /data/cron/config/settings.json" "/data/tools.json:echo '{}' >> /data/tools.json"; do
   : > /data/curl-args; echo "# by hand" >> "${f%%:*}"; record Bash "${f#*:}"
-  check "a change by hand is told to the owner, whatever the command looked like (audit of 2026-11-18, A1, M3, B5): ${f#*:}" told "${f%%:*} was changed by hand"
+  check "a change by hand is told to the owner, whatever the command looked like (audit of 2026-11-18, A1, M3, B5; v1 audit, M3): ${f#*:}" told "${f%%:*} was changed by hand"
 done
+# The MCP servers of `claude mcp add` live in .claude.json, which Claude Code rewrites all the time: only the servers count (v1 audit, M3).
+echo '{"numStartups":1,"mcpServers":{}}' > /data/config/.claude.json; : > /data/curl-args; record Bash "ls"
+check "a new .claude.json with no MCP servers is not reported (the first job creates one)" quiet
+: > /data/curl-args; echo '{"numStartups":2,"mcpServers":{}}' > /data/config/.claude.json; record Bash "ls"
+check "Claude Code's own bookkeeping in .claude.json is not reported" quiet
+echo '{"numStartups":2,"mcpServers":{"x":{"command":"evil"}}}' > /data/config/.claude.json; record Bash "claude mcp add x evil"
+check "...but an MCP server added to it is told (v1 audit, M3)" told "/data/config/.claude.json was changed by hand"
+: > /data/curl-args; echo '{"projects":{"/data/workspace":{"mcpServers":{"y":{"command":"evil"}}}}}' > /data/cron/config/.claude.json; record Bash "ls"
+check "...also one added for the workspace only, or for the jobs (v1 audit, M3)" told "/data/cron/config/.claude.json was changed by hand"
+: > /data/curl-args; : > /data/bin/new; record Bash "cp /tmp/new /data/bin/new"; : > /data/curl-args; record Bash "ls"
+check "the record of an install is not then reported as a change to tools.json" quiet
 : > /data/curl-args; config apply; record Bash "ls"
 check "what the start writes (config.sh apply) is not reported" quiet
 chmod 600 /data/config/channels/telegram/.env; touch /data/config/channels/telegram/.env /data/config/channels/telegram/access.json; record Bash "ls"
