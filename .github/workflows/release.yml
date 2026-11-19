@@ -33,40 +33,51 @@ jobs:
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
         with:
           driver-opts: network=host
-      - name: Build and push with SBOM and provenance
+      # Like a release: pushed by digest, with no tag until it is checked and signed.
+      - name: Build and push by digest with SBOM and provenance
+        id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           target: base
-          push: true
-          tags: localhost:5000/agent-kernel:test
+          outputs: type=image,name=localhost:5000/agent-kernel,push-by-digest=true,name-canonical=true,push=true
           sbom: true
           provenance: mode=max
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: The published target contains no Claude Code
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          if docker run --rm --entrypoint bash "$IMAGE:test" -c 'command -v claude || ls /home/agent/.local/bin/claude /opt/seed/config 2>/dev/null | grep .'; then
+          if docker run --rm --entrypoint bash "$IMAGE@$DIGEST" -c 'command -v claude || ls /home/agent/.local/bin/claude /opt/seed/config 2>/dev/null | grep .'; then
             echo "the base target must not contain Claude Code or the plugin"; exit 1
           fi
       - name: The image carries an SBOM and SLSA provenance
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          docker buildx imagetools inspect "$IMAGE:test" --format '{{json .SBOM}}' | jq -e '[.. | objects | select(has("SPDXID"))] | length > 0'
-          docker buildx imagetools inspect "$IMAGE:test" --format '{{json .Provenance}}' | jq -e '[.. | objects | select(has("buildType"))] | length > 0'
+          docker buildx imagetools inspect "$IMAGE@$DIGEST" --format '{{json .SBOM}}' | jq -e '[.. | objects | select(has("SPDXID"))] | length > 0'
+          docker buildx imagetools inspect "$IMAGE@$DIGEST" --format '{{json .Provenance}}' | jq -e '[.. | objects | select(has("buildType"))] | length > 0'
       - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
       - name: Sign with an ephemeral key, verify, and see a wrong key fail
         env:
           COSIGN_PASSWORD: ""
+          DIGEST: ${{ steps.build.outputs.digest }}
         run: |
           cd "$RUNNER_TEMP"
           cosign generate-key-pair
           cosign generate-key-pair --output-key-prefix other
-          digest=$(docker buildx imagetools inspect "$IMAGE:test" --format '{{.Manifest.Digest}}')
-          cosign sign --yes --key cosign.key --use-signing-config=false --new-bundle-format=false --tlog-upload=false --allow-http-registry "$IMAGE@$digest"
-          cosign verify --key cosign.pub --insecure-ignore-tlog --allow-http-registry "$IMAGE@$digest"
-          if cosign verify --key other.pub --insecure-ignore-tlog --allow-http-registry "$IMAGE@$digest"; then
+          cosign sign --yes --key cosign.key --use-signing-config=false --new-bundle-format=false --tlog-upload=false --allow-http-registry "$IMAGE@$DIGEST"
+          cosign verify --key cosign.pub --insecure-ignore-tlog --allow-http-registry "$IMAGE@$DIGEST"
+          if cosign verify --key other.pub --insecure-ignore-tlog --allow-http-registry "$IMAGE@$DIGEST"; then
             echo "verification with the wrong key must fail"; exit 1
           fi
+      - name: Only now, the tag, on the very digest that was signed
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          docker buildx imagetools create -t "$IMAGE:test" "$IMAGE@$DIGEST"
+          test "$(docker buildx imagetools inspect "$IMAGE:test" --format '{{json .Manifest}}' | jq -r .digest)" = "$DIGEST"
 
   publish:
     name: Publish, sign and attest
@@ -111,13 +122,13 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+      # Pushed by digest only: no version tag points at it until it is checked, signed and verified (last step).
       - id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           target: base
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          outputs: type=image,"name=${{ env.IMAGE }}${{ vars.DOCKERHUB_REPOSITORY != '' && format(',docker.io/{0}', vars.DOCKERHUB_REPOSITORY) || '' }}",push-by-digest=true,name-canonical=true,push=true
           labels: ${{ steps.meta.outputs.labels }}
           sbom: true
           provenance: mode=max
@@ -162,3 +173,12 @@ jobs:
           done
           gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPO"
           docker buildx imagetools inspect "$IMAGE@$DIGEST" --format '{{json .SBOM}}' | jq -e '[.. | objects | select(has("SPDXID"))] | length > 0'
+      - name: Only now, the version tags, on the very digest that was signed
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          for t in $TAGS; do
+            docker buildx imagetools create -t "$t" "${t%:*}@$DIGEST"
+            test "$(docker buildx imagetools inspect "$t" --format '{{json .Manifest}}' | jq -r .digest)" = "$DIGEST"
+          done
