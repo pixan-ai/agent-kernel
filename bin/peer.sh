@@ -12,7 +12,7 @@ case "${1:-}" in
     printf '%s\n' "$PEER_PUBLIC_KEYS" > $D/authorized_keys
     exec "$(command -v sshd)" -f /dev/null -o Port=2222 -o HostKey=$D/host_key -o AuthorizedKeysFile=$D/authorized_keys -o PidFile=none \
       -o ForceCommand="$B/peer.sh" -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no \
-      -o PermitTTY=no -o AllowTcpForwarding=no -o AllowAgentForwarding=no -o X11Forwarding=no -o PermitUserRC=no ;;
+      -o PermitTTY=no -o DisableForwarding=yes -o AllowTcpForwarding=no -o AllowAgentForwarding=no -o X11Forwarding=no -o PermitUserRC=no ;;
   look)  # $2 is a host, or a name from PEERS or from config.sh peer (case-insensitive)
     h=$2; for p in ${PEERS:-} $(sed -n 's/^peer //p' /data/settings 2> /dev/null); do n=${p%%=*}; [ "${n,,}" != "${2,,}" ] || h=${p#*=}; done
     exec ssh -i $D/peer_key -p 2222 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=$D/known_hosts "agent@$h" "${3:-screen}" ;;

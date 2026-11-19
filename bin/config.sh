@@ -6,13 +6,14 @@
 #   config.sh job "M H D M W" NAME "PROMPT" [GROUP_ID]   run that prompt on that schedule; job.sh delivers the answer
 #                            to the owner in private, or to that group if this agent is in it
 #   config.sh drop VALUE     remove the lines with this value (a group, a super-user, a peer or a job name)
-#   config.sh done NAME      remove a one-off job that was delivered, without a notice (job.sh)
+#   config.sh done NAME      remove a one-off job that was delivered, without a notice (job.sh); a recurring one is refused
 #   config.sh notices jobs off|on   stop or resume the notices about jobs; groups, super-users and peers are always told
 #   config.sh show | apply   print the settings | rebuild the plugin's access list without changing anything (start.sh)
 # Nothing else can be set here: owner, tokens and keys only come from the host's variables.
 set -euo pipefail
 F=/data/settings; TG=/data/config/channels/telegram; J=/data/cron/jobs; B=$(dirname "$(readlink -f "$0")")
 mkdir -p /data/cron/prompts; touch $F $J
+exec 9> /data/cron/config.lock; flock 9  # one change at a time: they share the .tmp files, and two at once lost one
 valid() { printf '%s\n' "$1" > /data/cron/line.test && supercronic -test /data/cron/line.test > /dev/null 2>&1; }  # one bad line stops supercronic, and every job with it
 case "${1:-} ${2:-}" in
   "show ") cat $F $J; grep -r . /data/cron/prompts || true; exit ;;  # the jobs' prompts as FILE:TEXT
@@ -21,7 +22,7 @@ case "${1:-} ${2:-}" in
     [ -z "${5:-}" ] || grep -qxF "group $5" $F || { echo "a job can deliver to the owner or to a group this agent is in" >&2; exit 2; }
     ! grep -qx "quiet jobs" $F || S=1; printf '%s\n' "$4" > "/data/cron/prompts/$3"; printf '%s' "${5:-}" > "/data/cron/prompts/$3.to"; grep -vE " job\.sh $3$" $J > $J.tmp || true; echo "$2 job.sh $3" >> $J.tmp; mv $J.tmp $J; D=" ($2${5:+, to group $5}): ${4:0:200}"; set -- job "$3" ;;
   "apply ") ;;
-  "done "?*) [[ $2 =~ ^[A-Za-z0-9_-]+$ ]] || exit 2; grep -vE " job\.sh $2$" $J > $J.tmp || true; mv $J.tmp $J; rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to"; S=1 ;;
+  "done "?*) [[ $2 =~ ^[A-Za-z0-9_-]+$ ]] && grep -qE "^[^ ]+ [^ ]+ [0-9]+ [0-9]+ [^ ]+ job\.sh $2$" $J || { echo "done is only for a delivered one-off (a fixed day and month); to remove a job, drop it" >&2; exit 2; }; grep -vE " job\.sh $2$" $J > $J.tmp || true; mv $J.tmp $J; rm -f "/data/cron/prompts/$2" "/data/cron/prompts/$2.to"; S=1 ;;
   "notices jobs") case "${3:-}" in off) grep -qx "quiet jobs" $F || echo "quiet jobs" >> $F ;; on) grep -vx "quiet jobs" $F > $F.tmp || true; mv $F.tmp $F ;; *) exit 2 ;; esac
     U=" To change it, ask me to turn them $([ "$3" = off ] && echo on || echo off)."; set -- notices "jobs $3" ;;
   "group "*|"admin "*) [[ $2 =~ ^-?[0-9]+$ ]] || { echo "an id is a number" >&2; exit 2; }; grep -qxF "$1 $2" $F || echo "$1 $2" >> $F ;;

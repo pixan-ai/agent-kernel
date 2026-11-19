@@ -42,6 +42,8 @@ no_terminal() { grep -q "PTY allocation request failed" <<<"$(peer_ssh -tt agent
 no_tunnel() { grep -q "remote port forwarding failed" <<<"$(peer_ssh -o ExitOnForwardFailure=yes -N -R 0:127.0.0.1:2222 agent@localhost)"; }
 check "...no terminal (audit, M9)" no_terminal
 check "...and no tunnel through it (audit, M9)" no_tunnel
+# Unix-socket forwarding is already refused by an sshd that is not root; DisableForwarding=yes also says so (audit of 2026-11-18 v1, B5).
+check "...and every kind of forwarding is off in the server's options" grep -q -- "-o DisableForwarding=yes" "$BIN/peer.sh"
 check "the server's files are private to the agent" test "$(stat -c %a /data/ssh/host_key)" = 600
 by_name() { agent env PEERS="Other=nowhere.invalid Junior=localhost" "$BIN/peer.sh" look junior status 2>&1 | grep -q "claude: "; }
 check "a peer can be addressed by its name in PEERS, whatever the case" by_name
