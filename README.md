@@ -62,7 +62,7 @@ See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as 
 | `SCREEN_MIRROR` | no | Seconds between copies of the readable screen to the service log (e.g. `30`). Unset = off. The screen contains your conversation: enable only to debug |
 | `CLAUDE_FLAGS` | no | Extra `claude` flags. Empty = default interactive mode (auto mode). The advisor is on for every agent through the policy |
 | `ANTHROPIC_MODEL` | no | Pin the model. Unpinned, the model can differ between sessions |
-| `CLAUDE_CODE_VERSION` | no | Go back to a previous Claude Code (then redeploy). Unset = Claude Code's stable channel, updated by tested pull requests ([updates](docs/GETTING-STARTED.md#updates-and-how-to-go-back)) |
+| `CLAUDE_CODE_VERSION` | no | Go back to a previous Claude Code, 2.1.319 or later (then redeploy). Unset = Claude Code's stable channel, updated by tested pull requests ([updates](docs/GETTING-STARTED.md#updates-and-how-to-go-back)) |
 | `TZ` | no | Container time zone |
 
 The policy lives in [`policy/managed-settings.json`](policy/managed-settings.json). Edit it, rebuild, and it is loaded as a root-owned managed setting that the agent cannot change.

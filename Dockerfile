@@ -66,11 +66,15 @@ ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/start.sh"]
 FROM base AS agent
 # Claude Code's stable channel (about a week old, skipping releases with major regressions): Renovate opens a pull request when it
 # moves, CI builds and tests it, and only then does a host get it. To go back, set CLAUDE_CODE_VERSION on the host and redeploy.
+# Floor 2.1.319: the policy's denyInsteadOfPrompting needs it, and an older Claude Code ignores it, so an unattended agent could wait
+# on a prompt. An older version fails the build (the host keeps its previous deployment). Until the stable channel reaches the
+# floor, the version stays at 2.1.319: Renovate only proposes newer versions.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_CODE_VERSION=2.1.311
+ARG CLAUDE_CODE_VERSION=2.1.319
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
- && /home/agent/.local/bin/claude --version
+ && v=$(/home/agent/.local/bin/claude --version | cut -d' ' -f1) && echo "Claude Code $v" \
+ && { [ "$(printf '%s\n' 2.1.319 "$v" | sort -V | head -1)" = 2.1.319 ] || { echo "Claude Code $v is older than 2.1.319, which the policy needs" >&2; exit 1; }; }
 ENV PATH="/home/agent/.local/bin:${PATH}"
 
 # The official plugin is baked into /opt/seed/config; start.sh copies it to the volume at every start. The official marketplace only

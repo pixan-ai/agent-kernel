@@ -4,7 +4,7 @@
 
 | Piece | Role | Source |
 |---|---|---|
-| Claude Code (`CLAUDE_CODE_VERSION`, on the stable channel) | The agent harness | Anthropic, official installer |
+| Claude Code (`CLAUDE_CODE_VERSION`, on the stable channel, never below 2.1.319) | The agent harness | Anthropic, official installer |
 | `telegram@claude-plugins-official` | Channel: pushes messages into the session, exposes `reply`, `react`, `edit_message`, `download_attachment` | Anthropic, Apache-2.0 |
 | `script` | Provides the pty that interactive Claude needs | util-linux |
 | `bin/start.sh` | Seeds config, writes the allowlist, pre-accepts onboarding, starts claude | this repo |

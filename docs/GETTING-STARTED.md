@@ -112,7 +112,7 @@ Set once, at installation. Changing one restarts the agent.
 | `OWNER_TELEGRAM_ID` | required | The owner: the only private chat, and who gets every notice | step 1 |
 | `TZ` | `UTC` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
 | `ANTHROPIC_MODEL` | Claude's default | Pin the model | |
-| `CLAUDE_CODE_VERSION` | the stable channel | Go back to a previous Claude Code; read when the image is built, so redeploy | [Updates](#updates-and-how-to-go-back) |
+| `CLAUDE_CODE_VERSION` | the stable channel, never below 2.1.319 | Go back to a previous Claude Code (2.1.319 or later); read when the image is built, so redeploy | [Updates](#updates-and-how-to-go-back) |
 | `CLAUDE_FLAGS` | empty | Extra flags for `claude`. The advisor is already on for every agent (`advisorModel: opus` in the policy); `--advisor MODEL` here picks another one for this agent | |
 | `TELEGRAM_GROUP_IDS` | empty | Groups to join at the first start (the same as telling the agent); read only while `/data/settings` does not exist yet | [GROUPS.md](GROUPS.md) |
 | `IDLE_SLEEP_MINUTES` | empty = always on | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
@@ -258,7 +258,7 @@ Everything updates on its own; nothing is left behind. What changes is tested be
 
 | Part | How it updates | How to go back |
 |---|---|---|
-| **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged and the host builds it | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.311`) and redeploy. Remove the variable to follow the channel again |
+| **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged and the host builds it. **Never below 2.1.319**: the policy needs it (an older Claude Code would ignore the setting that keeps an unattended agent from waiting on a prompt), so while the channel is behind, the agent stays on 2.1.319 | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.322`) and redeploy. A version below 2.1.319 fails the build, and the host keeps the deployment it had. Remove the variable to follow the channel again |
 | **Telegram plugin** | Every build takes its latest version (the official marketplace cannot be pinned). If it does not install, the build fails and the host keeps the previous deployment; CI also tries it every week | The host's rollback to the previous deployment (on Railway: the deployment's **Rollback**) |
 | **Tools in the image** (uv, Typst, markitdown, the base image…) | Renovate pull requests, tested by CI, merged when green | Revert that pull request |
 
@@ -267,7 +267,7 @@ Everything updates on its own; nothing is left behind. What changes is tested be
 - **If you deploy from your own copy (fork) of this repository**, install Renovate on it as well ([github.com/apps/renovate](https://github.com/apps/renovate), "only select repositories"), or your copy stays on the versions of the day you copied it.
 - **What CI can and cannot tell.** It proves that a new Claude Code installs and runs and that a new plugin installs, and every tool is used for real in the tests; it cannot prove that the agent answers on Telegram, which needs a live bot. That is what the notice below, and going back in one step, are for.
 
-After every change you get a private notice: "🔄 Versions changed: Claude Code 2.1.311, Telegram plugin 0.0.7 → Claude Code 2.1.320, Telegram plugin 0.0.8". If the agent misbehaves after one, that notice tells you what to go back to.
+After every change you get a private notice: "🔄 Versions changed: Claude Code 2.1.322, Telegram plugin 0.0.7 → Claude Code 2.1.325, Telegram plugin 0.0.8". If the agent misbehaves after one, that notice tells you what to go back to.
 
 ## If something is wrong
 
