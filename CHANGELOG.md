@@ -6,7 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
-- The project describes itself as a "Claude Code-based personal agent on Telegram, 24/7", the same in the README, the Railway template and Docker Hub.
+- The project describes itself as a "Claude Code-based 24/7 personal agent on Telegram", the same in the README, the GitHub description, the Railway template and Docker Hub.
 - The base image is published (decided 2026-11-19): to GitHub's registry and to Docker Hub as `pixan/agent-kernel`, without asking Anthropic in writing, since it carries no Anthropic software (docs/PRODUCT-IMAGE.md).
 
 ## [1.0.0] - 2026-11-19
