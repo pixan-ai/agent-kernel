@@ -1,6 +1,6 @@
 # Threat model
 
-Status: lab / alpha. Not audited. Evidence labels as in [FINDINGS.md](FINDINGS.md): **Lab** (observed), **Docs**, **Code**, **Open** (not verified).
+Status: 1.0. No independent security audit; three external reviews were addressed (one on 2026-11-17, two on 2026-11-18). Evidence labels as in [FINDINGS.md](FINDINGS.md): **Lab** (observed), **Docs**, **Code**, **Open** (not verified).
 
 ## What is protected
 
@@ -54,7 +54,7 @@ Status: lab / alpha. Not audited. Evidence labels as in [FINDINGS.md](FINDINGS.m
 - It is **not a sandbox**: a shell command can do what the container's user can do.
 - It is **single-tenant**: one owner per deployment.
 - A Claude **subscription** is for an individual's own agent; an agent that serves groups or clients should use an API key, each on its own credential ([Anthropic's legal and compliance page](https://code.claude.com/docs/en/legal-and-compliance)).
-- It has not been audited and is not production-grade.
+- It has had **no independent security audit**; the reviews named at the top are not one.
 
 ## Hardening by host
 

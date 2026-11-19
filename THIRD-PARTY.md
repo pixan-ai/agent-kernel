@@ -8,7 +8,7 @@ Claude Code and the Telegram plugin are not part of the `base` image. Whoever ru
 
 | What | Where in the image | License | Source of that exact version |
 |---|---|---|---|
-| Debian packages under the GPL: `pandoc` 3.1.11.1, `poppler-utils` 25.03.0, `git`, `bash`, `coreutils` and others | the usual Debian paths | GPL-2.0 or GPL-3.0 (each package's `/usr/share/doc/PACKAGE/copyright`) | https://sources.debian.org (Debian 13.7); exact versions with `dpkg -l` in the image, and every past version at https://snapshot.debian.org |
+| Debian packages under the GPL: `pandoc`, `poppler-utils`, `git`, `bash`, `coreutils` and others | the usual Debian paths | GPL-2.0 or GPL-3.0 (each package's `/usr/share/doc/PACKAGE/copyright`) | https://sources.debian.org (Debian 13); exact versions with `dpkg -l` in the image, and every past version at https://snapshot.debian.org |
 
 There is no FFmpeg in the image. Voice and video are an optional stack ([policy/stack.md](policy/stack.md)) that the agent downloads from their own projects when asked; this project does not distribute them.
 
@@ -16,7 +16,7 @@ There is no FFmpeg in the image. Voice and video are an optional stack ([policy/
 
 | What | License |
 |---|---|
-| The `oven/bun` base image: Bun 1.4.4 (bundles JavaScriptCore, LGPL-2.1) and Debian 13 | MIT, and each Debian package's license |
+| The `oven/bun` base image: Bun (bundles JavaScriptCore, LGPL-2.1) and Debian 13 | MIT, and each Debian package's license |
 | Other Debian packages (`curl`, `jq`, `openssh`, `rclone`, `tini`, `age`, `python3`, `unzip`, `xz-utils` …) | Their own, in `/usr/share/doc/PACKAGE/copyright` |
 | supercronic | MIT |
 | uv | MIT or Apache-2.0 |
