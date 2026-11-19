@@ -3,7 +3,7 @@
 [![CI](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-A **Claude Code agent on Telegram, 24/7**, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, with less than 300 lines of [Bash](https://www.gnu.org/software/bash/) and no custom agent code.
+A **Claude Code-based personal agent on Telegram, 24/7**, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, with less than 300 lines of [Bash](https://www.gnu.org/software/bash/) and no custom agent code.
 
 > **Status: 1.0.** In daily use on Railway since November 2026. It has not had an independent security audit: what it protects and what it does not is in the [threat model](docs/THREAT-MODEL.md), and the evidence behind each claim in [docs/FINDINGS.md](docs/FINDINGS.md). What earlier fleets and this project taught us: [docs/LEARNINGS.md](docs/LEARNINGS.md).
 
