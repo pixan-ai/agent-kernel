@@ -61,6 +61,8 @@ rm -f "$(dirname "$CREDS")/me.json"
 check "...and still works without that file" says "The current date"
 printf 'TELEGRAM_BOT_TOKEN=123:abc\nOWNER_TELEGRAM_ID=42\n' > "$CREDS"
 check "SessionStart tells the agent who its owner is, since others can now talk to it in groups" says "Your owner is the Telegram user with id 42"
+host_owner() { env -i PATH=/usr/bin:/bin OWNER_TELEGRAM_ID=7 sh -c "$(hook '.hooks.SessionStart[0].hooks[0].command')" 2>&1 | grep "Your owner is the Telegram user with id 7\." > /dev/null; }
+check "...and the host's variable wins over the file, which the agent can write (audit of 2026-11-18 v1, M4)" host_owner
 echo "admin 777" > /data/settings
 check "...and who else may give instructions (the super-users)" says "These Telegram ids are super-users.*: 777"
 rm /data/settings

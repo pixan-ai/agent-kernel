@@ -76,7 +76,12 @@ check "...but groups still are, both ways" bash -c 'grep -q "Setting changed: gr
 check "notices jobs on: job notices are back" told "Setting changed: job loud_one"
 check "...and the notice of turning them on says how to turn them off (seen live: it said on)" told "ask me to turn them off"
 : > /data/curl-args; config "done" loud_one
-check "done NAME (a one-off that was delivered) removes the job without a notice" bash -c '! grep -q "job.sh loud_one" /data/cron/jobs && test ! -s /data/curl-args'
+check "done NAME refuses a recurring job, which stays (audit of 2026-11-18 v1, M2)" bash -c 'grep -q "job.sh loud_one" /data/cron/jobs && test ! -s /data/curl-args'
+config drop loud_one; config job "0 9 25 12 *" once_one "x"; : > /data/curl-args; config "done" once_one
+check "done NAME (a one-off that was delivered) removes the job without a notice" bash -c '! grep -q "job.sh once_one" /data/cron/jobs && test ! -s /data/curl-args'
+for i in 1 2 3 4 5 6 7 8; do config job "0 6 * * *" "par_$i" "x" & done; wait
+check "jobs set at the same time are all kept: one change at a time (audit of 2026-11-18 v1, B7)" test "$(grep -c ' job\.sh par_[0-9]$' /data/cron/jobs)" = 8
+for i in 1 2 3 4 5 6 7 8; do config drop "par_$i"; done
 config group -1010; config "done" -1010
 check "...and removes nothing but a job" grep -qx "group -1010" /data/settings
 config drop -1010

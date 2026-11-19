@@ -12,7 +12,7 @@ Opt-in. Lets a fellow agent (or its owner, through it) see what this agent is do
 | `group ID`, `admin ID`, `drop ID` | Changes this agent's groups and super-users through its own `config.sh`; this agent's owner is told |
 | anything else | Refused |
 
-No shell, no terminal, no port forwarding, no file transfer: the SSH server runs one fixed command per connection (`ForceCommand`), as the unprivileged `agent` user, on port 2222. The command does not receive this agent's environment, so it cannot return its tokens.
+No shell, no terminal, no forwarding of any kind (`DisableForwarding`), no file transfer: the SSH server runs one fixed command per connection (`ForceCommand`), as the unprivileged `agent` user, on port 2222. The command does not receive this agent's environment, so it cannot return its tokens.
 
 ## Set-up for two agents, A looks at B
 
