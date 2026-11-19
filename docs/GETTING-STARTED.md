@@ -176,7 +176,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 |---|---|
 | ⚙️ Setting changed: … | A group, super-user or fellow agent was added or removed (always), or a job (unless you said "Don't tell me about jobs"); for a job, with its schedule, destination and text. A one-off reminder that was delivered removes itself without a notice |
 | 🧰 Installed: … / 🧰 Removed: … | Something changed where tools live, or was uninstalled, with the command that did it |
-| ⚠️ … was changed by hand, not through config.sh | Its settings, jobs or bot files changed without its settings command |
+| ⚠️ … was changed by hand, not through config.sh | Its settings, jobs or bot files, the workspace's Claude settings, `CLAUDE.md` or MCP servers (also one added with `claude mcp add`), the jobs' Claude settings, or the record of installs changed without its settings command |
 | ⚠️ Claude plan limit: … used | The 5-hour or weekly limit passed 80% |
 | ⚠️ Tonight's memory consolidation failed | The nightly memory failed (at most once a day) |
 | ⚠️ Scheduled job … failed | A job failed, with the reason |
