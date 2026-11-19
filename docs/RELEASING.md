@@ -1,6 +1,6 @@
 # Releasing
 
-A release is a tag. Pushing a `v*` tag runs [`.github/workflows/release.yml`](../.github/workflows/release.yml): it first proves the release path against a throwaway registry, then publishes `ghcr.io/<owner>/<repo>:<version>` with an SBOM, SLSA provenance, a keyless cosign signature and a GitHub attestation, and verifies all of them. Nothing is published by a merge or a pull request.
+A release is a tag. Pushing a `v*` tag runs [`.github/workflows/release.yml`](../.github/workflows/release.yml): it first proves the release path against a throwaway registry, then publishes `ghcr.io/<owner>/<repo>:<version>` with an SBOM, SLSA provenance, a keyless cosign signature and a GitHub attestation, and verifies all of them. The image is pushed by digest, with no tag; the version tags (`X.Y.Z` and `X.Y`) are added last, on that same digest, only once it has passed the checks (no Claude Code, no fixable critical vulnerability) and is signed and verified. A release that fails on the way leaves an untagged digest that nobody pulls by version. Nothing is published by a merge or a pull request.
 
 > **Publishing is locked.** The workflow builds and publishes only the `base` target: no Claude Code, no plugin ([PRODUCT-IMAGE.md](PRODUCT-IMAGE.md)); its acceptance job fails if `base` contains either. The publish job runs only when the repository variable `PUBLISH_IMAGE` is `true`. Until then a tag runs the acceptance job against a throwaway registry and publishes nothing.
 

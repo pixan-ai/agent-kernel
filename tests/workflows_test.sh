@@ -23,7 +23,7 @@ count() { grep -h -- "$1" .github/workflows/*.yml | grep -c ''; }
 check "every checkout drops its credentials" test "$(count 'uses: actions/checkout@')" = "$(count 'persist-credentials: false')"
 
 # Only the `base` target (no Anthropic software) may leave the build machine.
-pushes=$(grep -c 'push: true' .github/workflows/release.yml); based=$(grep -B1 'push: true' .github/workflows/release.yml | grep -c 'target: base')
+pushes=$(grep -cE 'push: true|push=true' .github/workflows/release.yml); based=$(grep -B1 -E 'push: true|push=true' .github/workflows/release.yml | grep -c 'target: base')
 check "every image push in the release workflow builds the base target" test "$pushes" -gt 0 -a "$pushes" = "$based"
 check "the Dockerfile's default (last) target is the agent, built from base" test "$(grep -E '^FROM ' Dockerfile | tail -1 | grep -c 'FROM base AS agent$')" = 1
 check "Claude Code is installed only after the base target" test -z "$(sed '/^FROM base AS agent$/,$d' Dockerfile | grep -iE 'claude\.ai/install|claude plugin')"
@@ -54,6 +54,12 @@ pub=$(sed -n '/^  publish:/,$p' .github/workflows/release.yml)
 checked_first() { local s n c; s=$(grep -n 'Sign (keyless)' <<<"$pub" | cut -d: -f1); n=$(grep -n 'command -v claude' <<<"$pub" | cut -d: -f1); c=$(grep -n 'image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}' <<<"$pub" | cut -d: -f1)
   [ -n "$s" ] && [ -n "$n" ] && [ -n "$c" ] && [ "$n" -lt "$s" ] && [ "$c" -lt "$s" ]; }
 check "the publish job checks the pushed digest (no Claude Code, no fixable CRITICAL) before signing it" checked_first
+# No version tag before the checks and the signature (audit of 2026-11-18 v1, M1): pushed by digest, tagged at the very end, both jobs.
+acc=$(sed -n '/^  acceptance:/,/^  publish:/p' .github/workflows/release.yml)
+tagged_last() { local v t; v=$(grep -n "$2" <<<"$1" | tail -1 | cut -d: -f1); t=$(grep -n 'imagetools create -t' <<<"$1" | head -1 | cut -d: -f1)
+  grep -q 'push-by-digest=true' <<<"$1" && ! grep -qE '^ +tags: [^|]' <<<"$1" && [ -n "$v" ] && [ -n "$t" ] && [ "$t" -gt "$v" ]; }
+check "a release pushes by digest and adds its version tags only after it is checked, signed and verified" tagged_last "$pub" 'gh attestation verify'
+check "...and the release path rehearses that on every pull request" tagged_last "$acc" 'verification with the wrong key must fail'
 check "the throwaway registry of the release path is pinned by digest" grep -qE 'image: registry:3@sha256:[0-9a-f]{64}' .github/workflows/release.yml
 
 gate=$(grep -B2 -A8 'Trivy, blocking' .github/workflows/ci.yml)
