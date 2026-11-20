@@ -19,7 +19,7 @@ Pixan agent runs as one service with a volume at `/data`, where it keeps its mem
 - Your numeric Telegram id: ask @userinfobot.
 - A Claude credential: run `claude setup-token` on your computer for a personal agent on your Claude subscription. For an agent that serves groups or clients, use an Anthropic API key (`ANTHROPIC_API_KEY`) instead.
 
-### Implementation Details
+### Deployment Dependencies
 
 - Source, docs and issues: https://github.com/pixan-ai/agent-kernel
 - Step-by-step guide: https://github.com/pixan-ai/agent-kernel/blob/main/docs/GETTING-STARTED.md
