@@ -43,7 +43,7 @@ Use a **new bot token**. Two processes polling the same bot conflict (HTTP 409).
 
 ## Deploy on Railway
 
-See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as is; you add one volume at `/data` and four variables (a Claude credential, `TELEGRAM_BOT_TOKEN`, `OWNER_TELEGRAM_ID`, `RAILWAY_RUN_UID=0`).
+See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as is; you add one volume at `/data` and three variables (a Claude credential, `TELEGRAM_BOT_TOKEN`, `OWNER_TELEGRAM_ID`).
 
 ## Configuration
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2329,SC2016  # helpers are called through check "$@"; regexes and jq programs are single-quoted on purpose
-# Acceptance tests for bin/start.sh: run the real entrypoint as root (as Railway does with RAILWAY_RUN_UID=0)
+# Acceptance tests for bin/start.sh: run the real entrypoint as root (as the image starts)
 # against an empty /data, with a stub `script` that records what claude would have been started with.
 # CI runs this inside the built image; START points at the entrypoint under test.
 set -uo pipefail
@@ -177,5 +177,9 @@ run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 failed_fast_on_owner() { test "$RC" = 1 && grep -q "OWNER_TELEGRAM_ID" "$ERR" && test ! -e /data/probe; }
 check "no owner id -> fails fast naming it" failed_fast_on_owner
 
+# Started as another user, a root-owned /data cannot be fixed: say what to change instead of a bare "Permission denied" (seen live, 2026-11-20).
+find /data -mindepth 1 -delete; chown 0:0 /data; chmod 755 /data  # as a host mounts it: owned by root, not writable by others
+env -i PATH="$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42 CLAUDE_CODE_OAUTH_TOKEN=x setpriv --reuid=1001 --regid=1001 --init-groups timeout 20 "$START" > "$OUT" 2> "$ERR"; RC=$?
+check "started as a user who cannot write /data, it stops and says how to fix it" bash -c 'test "$0" = 1 && grep -q "/data is not writable by uid 1001" "$1" && grep -q "RAILWAY_RUN_UID" "$1"' "$RC" "$ERR"
 rm -rf "$STUBS" "$OUT" "$ERR"
 echo "$FAILS failed"; exit $((FAILS > 0))

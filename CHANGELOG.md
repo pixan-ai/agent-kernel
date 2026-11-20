@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Fixed
+
+- An agent deployed without `RAILWAY_RUN_UID=0` crashed at start with only "Permission denied" (seen on the template's first live test, 2026-11-20). The image now starts as root, gives the volume to the agent's user and drops to it before anything else, so no variable is needed; started as another user, it stops and says what to change.
+
 ### Added
 
 - A one-click Railway template, `pixan-agent` (https://railway.com/deploy/pixan-agent): the service, the volume and the variables with their descriptions, so a deployer only pastes three values. Its overview lives in `docs/railway-template-overview.md`; `docs/DEPLOY-RAILWAY.md` records its settings, Railway's limits and how it was made.

@@ -66,7 +66,7 @@ jobs:
       # A tool the agent's user cannot reach fails as "command not found", with no other sign: run each one as that user.
       - name: Every tool runs as the agent's own user
         run: |
-          docker run --rm --entrypoint sh agent-kernel:ci -ec 'test "$(id -u)" = 1001
+          docker run --rm --user 1001 --entrypoint sh agent-kernel:ci -ec 'test "$(id -u)" = 1001
             claude --version; bun --version; jq --version; curl --version; age --version; rclone version
             supercronic -version; ssh -V; script --version; realpath --version; tini --version
             markitdown --help; pandoc --version; typst --version; python-docs -c "import docx, pptx, openpyxl"
