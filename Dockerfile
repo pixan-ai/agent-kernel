@@ -1,7 +1,7 @@
 # Two targets. `base`: everything this project owns, with no Anthropic software; the only one that may be published.
 # `agent` (the default): base + Claude Code + the official Telegram channel plugin; built by whoever runs it, never published.
 # No tmux, no supervisor: `script` provides the pty, and the host restarts the container when claude exits (watchdog.sh covers a dead channel).
-FROM oven/bun:1-debian@sha256:93d5032fe06d163427822dc1598f420363759bb18155c9cc90eb1be05a64a19e AS base
+FROM oven/bun:1-debian@sha256:3dddea58e1f8f2240eca906b023fedb944f9a8352515a35309fd0c879fe00aaa AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Unpinned apt packages on purpose: pinned Debian versions vanish from the mirror; Renovate bumps the base image.
 # Second line: tools for skills (python3: documents and APIs; poppler-utils: PDFs; pandoc: Word and Markdown; unzip: archives).
