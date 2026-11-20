@@ -21,11 +21,11 @@ Notes:
 
 ## The one-click template
 
-A Railway template does steps 1 to 3 for whoever deploys: they only paste the three values. The owner of this repository creates and publishes it from the Railway dashboard; the settings to enter are these, kept here so they can be checked against the code.
+Published: **https://railway.com/deploy/agent-kernel-template-source** (the address keeps the name it was first generated with; the template is called "Pixan agent"). It does steps 1 to 3 for whoever deploys: they only paste the three values. The settings are kept here so they can be checked against the code; to change them, edit the template in the Railway dashboard (workspace settings → **Templates**) and press **Apply**.
 
-1. Railway dashboard → workspace settings → **Templates** → **New Template** (Railway's docs: "Create a Template", starting from scratch), and add a service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
-2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`.
-3. Add a **volume** mounted at `/data`.
+1. One service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
+2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`. Icon `https://devicons.railway.com/i/telegram.svg`.
+3. A **volume** mounted at `/data`.
 4. **Variables**: the three credentials with no default, so the deployer is asked for them, and each with its description (the composer's labels may differ from these words; the values must not):
 
 | Variable | Default | Description shown to the deployer |
@@ -36,5 +36,8 @@ A Railway template does steps 1 to 3 for whoever deploys: they only paste the th
 | `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
 | `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
 
-5. Template name `Pixan agent`, description "Claude Code-based 24/7 personal agent on Telegram in one container, using only official components. Memory, scheduled/cron jobs, groups and fellow agents, with less than 300 lines of Bash.", and the README as the overview. **Publish**.
-6. Deploy it once into a new project with real values and send the bot a message. Then add the template's link to the guide (docs/GETTING-STARTED.md, "Railway (the quick way)").
+5. Template: name `Pixan agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).
+
+Railway's limits, found while publishing on 2026-11-19: the description is 25 to 75 characters; the overview is at most 10,000 characters and must keep Railway's sections (`# Deploy and Host …`, `## About Hosting …`, `## Common Use Cases`, `## Dependencies for … Hosting`, `## Why Deploy … on Railway?`), so the README cannot be the overview. In the dashboard, **Stage changes** only queues an edit: it is saved by **Apply**, which on a phone may be out of view.
+
+How it was made: `railway templates create` turned a temporary project into a draft (connecting the repository there starts one deploy, which fails without credentials; `railway down` stops it), `railway templates publish --category AI/ML` published it, and the name, icons, variable descriptions and overview were set in the dashboard. The temporary project is not needed afterwards: the template is a copy.

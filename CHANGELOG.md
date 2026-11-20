@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- A one-click Railway template, "Pixan agent" (https://railway.com/deploy/agent-kernel-template-source): the service, the volume and the variables with their descriptions, so a deployer only pastes three values. Its overview lives in `docs/railway-template-overview.md`; `docs/DEPLOY-RAILWAY.md` records its settings, Railway's limits and how it was made.
+
 ### Changed
 
 - The project describes itself as a "Claude Code-based 24/7 personal agent on Telegram", the same in the README, the GitHub description, the Railway template and Docker Hub.
