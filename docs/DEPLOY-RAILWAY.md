@@ -9,7 +9,7 @@ Status: verified end to end on Railway (November 2026) with a Claude Max subscri
    - `TELEGRAM_BOT_TOKEN`
    - `OWNER_TELEGRAM_ID`
    - optional: `TZ`, `ANTHROPIC_MODEL`
-   - `RAILWAY_RUN_UID=0`: Railway volumes are owned by root. The entrypoint only fixes `/data` ownership as root, then drops to the `agent` user (uid 1001).
+   - No `RAILWAY_RUN_UID`: Railway mounts the volume owned by root, and the image starts as root only to give `/data` to the `agent` user (uid 1001), then drops to it. A non-zero `RAILWAY_RUN_UID` stops the start with a message saying to delete it.
 4. Deploy and message the bot.
 
 Notes:
@@ -34,7 +34,6 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 | `OWNER_TELEGRAM_ID` | none, required | Your numeric Telegram id (ask @userinfobot). Only you can talk to the agent at first. |
 | `CLAUDE_CODE_OAUTH_TOKEN` | none, optional | Set this OR ANTHROPIC_API_KEY. From `claude setup-token`, for a personal agent on your Claude subscription. |
 | `ANTHROPIC_API_KEY` | none, optional | Set this OR CLAUDE_CODE_OAUTH_TOKEN. An Anthropic Console API key, billed per use: for an agent that serves groups or clients. Wins if both are set. |
-| `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
 | `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
 
 5. Template: name `pixan-agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).

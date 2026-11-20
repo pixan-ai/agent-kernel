@@ -35,7 +35,6 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 | `TELEGRAM_BOT_TOKEN` | from step 1 |
 | `OWNER_TELEGRAM_ID` | from step 1 |
 | `CLAUDE_CODE_OAUTH_TOKEN` | from step 2 (or `ANTHROPIC_API_KEY`, not both) |
-| `RAILWAY_RUN_UID` | `0` |
 | `TZ` | your time zone, e.g. `America/Mexico_City` |
 
 5. Press **Deploy** (variables stay pending until you do).

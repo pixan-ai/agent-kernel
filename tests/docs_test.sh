@@ -62,7 +62,7 @@ check "THIRD-PARTY.md names no version of what moves on its own (Renovate, Debia
 check "no GPL FFmpeg in the image: voice and video are in the optional stack, which the agent is pointed to (decided 2026-11-18)" bash -c '! grep -v "^#" Dockerfile | grep -qiE "whisper|imageio|ffmpeg" && grep -q "/etc/claude-code/stack.md" policy/CLAUDE.md && grep -q "whisper-ctranslate2==" policy/stack.md && grep -q "imageio-ffmpeg==" policy/stack.md'
 # The Railway template's settings are kept in the repository: the same variables as the guide, the volume, the uid.
 tmpl=$(sed -n '/^## The one-click template/,$p' docs/DEPLOY-RAILWAY.md)
-for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_CODE_OAUTH_TOKEN RAILWAY_RUN_UID TZ; do
+for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_CODE_OAUTH_TOKEN TZ; do
   check "the Railway template sets $v, like the guide" bash -c 'grep -q "| \`$0\` |" <<<"$1" && grep -q "| \`$0\` |" docs/GETTING-STARTED.md' "$v" "$tmpl"
 done
 check "...a volume at /data and Restart Policy Always" bash -c 'grep -q "mounted at \`/data\`" <<<"$0" && grep -q "Restart Policy \*\*Always\*\*" <<<"$0"' "$tmpl"

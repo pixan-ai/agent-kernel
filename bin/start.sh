@@ -5,11 +5,12 @@ set -euo pipefail
 : "${TELEGRAM_BOT_TOKEN:?is not set}" "${OWNER_TELEGRAM_ID:?is not set}"
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }
-# Railway mounts volumes owned by root (it runs this as root via RAILWAY_RUN_UID=0): fix ownership, then drop to agent.
+# The image starts as root because hosts mount volumes owned by root: fix ownership, then drop to agent (uid 1001) for everything else.
 if [ "$(id -u)" = 0 ]; then
   mkdir -p /data/workspace && chown 1001:1001 /data /data/workspace
   exec setpriv --reuid=1001 --regid=1001 --init-groups env HOME=/home/agent "$0" "$@"
 fi
+[ -w /data ] || { echo "/data is not writable by uid $(id -u): start the container as root, as the image does by default (on Railway, delete RAILWAY_RUN_UID or set it to 0)" >&2; exit 1; }
 # A token copied from a phone often carries line breaks; tokens never contain whitespace, so strip it.
 # Then log a sanity check without printing any part of it.
 T="${CLAUDE_CODE_OAUTH_TOKEN:-}"; T="${T//[[:space:]]/}"; [ -z "$T" ] || export CLAUDE_CODE_OAUTH_TOKEN="$T"; [ -z "$T" ] || echo "oauth token: ${#T} chars, starts with sk-ant-oat01-: $([[ "$T" == sk-ant-oat01-* ]] && echo yes || echo NO)" >&2
