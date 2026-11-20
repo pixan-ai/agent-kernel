@@ -89,4 +89,5 @@ RUN export CLAUDE_CONFIG_DIR=/opt/seed/config && mkdir -p "$CLAUDE_CONFIG_DIR" \
 ENV DISABLE_UPDATES=1
 # Starts as root only to give the volume to the agent's user (hosts mount it owned by root); start.sh then drops to uid 1001 before
 # anything else, so Claude and all it runs are never root. Before 2026-11-20 this needed RAILWAY_RUN_UID=0 on Railway.
-USER root
+# hadolint ignore=DL3002
+USER 0

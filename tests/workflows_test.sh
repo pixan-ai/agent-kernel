@@ -27,7 +27,7 @@ pushes=$(grep -cE 'push: true|push=true' .github/workflows/release.yml); based=$
 check "every image push in the release workflow builds the base target" test "$pushes" -gt 0 -a "$pushes" = "$based"
 check "the Dockerfile's default (last) target is the agent, built from base" test "$(grep -E '^FROM ' Dockerfile | tail -1 | grep -c 'FROM base AS agent$')" = 1
 check "the agent image starts as root, so a host needs no setting to fix the volume (start.sh drops to uid 1001; 2026-11-20)" \
-  bash -c 'test "$(sed -n "/^FROM base AS agent$/,\$p" Dockerfile | grep -E "^USER " | tail -1)" = "USER root"'
+  bash -c 'test "$(sed -n "/^FROM base AS agent$/,\$p" Dockerfile | grep -E "^USER " | tail -1)" = "USER 0"'
 check "Claude Code is installed only after the base target" test -z "$(sed '/^FROM base AS agent$/,$d' Dockerfile | grep -iE 'claude\.ai/install|claude plugin')"
 
 check "the container's PID 1 is tini, which forwards signals to the entrypoint" grep -qE '^ENTRYPOINT \["tini", "-g", "--", "/usr/local/bin/start.sh"\]$' Dockerfile
