@@ -43,7 +43,11 @@ Use a **new bot token**. Two processes polling the same bot conflict (HTTP 409).
 
 ## Deploy on Railway
 
-See [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as is; you add one volume at `/data` and three variables (a Claude credential, `TELEGRAM_BOT_TOKEN`, `OWNER_TELEGRAM_ID`).
+One click: [the pixan-agent template](https://railway.com/deploy/pixan-agent). By hand: [docs/DEPLOY-RAILWAY.md](docs/DEPLOY-RAILWAY.md). The Dockerfile deploys as is; you add one volume at `/data` and three variables (a Claude credential, `TELEGRAM_BOT_TOKEN`, `OWNER_TELEGRAM_ID`).
+
+## Deploy on your own Linux server
+
+Any amd64 Linux server with Docker, with no incoming port: [docs/DEPLOY-LINUX.md](docs/DEPLOY-LINUX.md) (install, updates, backups, and what is not tested yet).
 
 ## Configuration
 
@@ -90,7 +94,7 @@ The full picture is in the [threat model](docs/THREAT-MODEL.md). Report vulnerab
 ## Repository layout
 
 ```
-Dockerfile                    image, non-root: `base` (no Anthropic software, the only publishable target) and `agent` (+ Claude Code and the official Telegram plugin)
+Dockerfile                    image (starts as root only to hand /data to uid 1001): `base` (no Anthropic software, the only publishable target) and `agent` (+ Claude Code and the official Telegram plugin)
 compose.yml                   local run, one volume at /data
 bin/start.sh                  entrypoint: seed config, allowlist, pre-accept, run claude in a pty
 bin/screen.sh                 readable view of the Claude screen log
