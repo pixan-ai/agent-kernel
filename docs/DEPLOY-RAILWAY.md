@@ -21,7 +21,7 @@ Notes:
 
 ## The one-click template
 
-Published: **https://railway.com/deploy/agent-kernel-template-source** (the address keeps the name it was first generated with; the template is called "Pixan agent"). It does steps 1 to 3 for whoever deploys: they only paste the three values. The settings are kept here so they can be checked against the code; to change them, edit the template in the Railway dashboard (workspace settings → **Templates**) and press **Apply**.
+Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for whoever deploys: they only paste the three values. The settings are kept here so they can be checked against the code; to change them, edit the template in the Railway dashboard (workspace settings → **Templates**) and press **Apply**.
 
 1. One service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
 2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`. Icon `https://devicons.railway.com/i/telegram.svg`.
@@ -40,4 +40,4 @@ Published: **https://railway.com/deploy/agent-kernel-template-source** (the addr
 
 Railway's limits, found while publishing on 2026-11-19: the description is 25 to 75 characters; the overview is at most 10,000 characters and must keep Railway's sections (`# Deploy and Host …`, `## About Hosting …`, `## Common Use Cases`, `## Dependencies for … Hosting` with `### Deployment Dependencies`, `## Why Deploy … on Railway?`; the CLI enforces the subsection, the dashboard does not), so the README cannot be the overview. In the dashboard, **Stage changes** only queues an edit: it is saved by **Apply**, which on a phone may be out of view.
 
-How it was made: `railway templates create` turned a temporary project into a draft (connecting the repository there starts one deploy, which fails without credentials; `railway down` stops it), `railway templates publish --category AI/ML` published it, and the name, icons, variable descriptions and overview were set in the dashboard. The temporary project is not needed afterwards: the template is a copy.
+How it was made: the address comes from the name the template has when it is generated, and no setting changes it later, so the temporary project is named `pixan-agent` from the start. `railway templates create` turned that project into a draft (connecting the repository there starts one deploy, which fails without credentials; `railway down` stops it), `railway templates publish --category AI/ML --description … --readme-file docs/railway-template-overview.md` published it, and the name, icons, variable descriptions and overview were set in the dashboard. The temporary project is not needed afterwards: the template is a copy.
