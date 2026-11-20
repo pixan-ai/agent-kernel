@@ -15,6 +15,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- `SECURITY.md` links the private reporting form, the releases and Anthropic's disclosure policy, and no longer speaks of releases to come. The Dockerfile says why the official installer is not pinned by hash.
 - The project describes itself as a "Claude Code-based 24/7 personal agent on Telegram", the same in the README, the GitHub description, the Railway template and Docker Hub.
 - The base image is published (decided 2026-11-19): to GitHub's registry and to Docker Hub as `pixan/agent-kernel`, without asking Anthropic in writing, since it carries no Anthropic software (docs/PRODUCT-IMAGE.md).
 

@@ -69,6 +69,8 @@ FROM base AS agent
 # Floor 2.1.319: the policy's denyInsteadOfPrompting needs it, and an older Claude Code ignores it, so an unattended agent could wait
 # on a prompt. An older version fails the build (the host keeps its previous deployment). Until the stable channel reaches the
 # floor, the version stays at 2.1.319: Renovate only proposes newer versions.
+# The official installer is not pinned by hash (OpenSSF Scorecard notes it): Anthropic updates it in place, and it checks the
+# checksum of the Claude Code it downloads; the version it installs is pinned below and checked after.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_CODE_VERSION=2.1.319
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

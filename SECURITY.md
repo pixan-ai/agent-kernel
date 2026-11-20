@@ -2,25 +2,25 @@
 
 ## Reporting a vulnerability
 
-Use GitHub's private vulnerability reporting: the **Security** tab, then **Report a vulnerability**. Please do not open a public issue with details. Include steps to reproduce, the impact you observed and the version (commit or tag).
+Use GitHub's private vulnerability reporting: https://github.com/pixan-ai/agent-kernel/security/advisories/new (the **Security** tab, then **Report a vulnerability**). Please do not open a public issue with details. Include steps to reproduce, the impact you observed and the version (commit or tag).
 
 If that option is not available to you, open a public issue that says only "I have a security report, please contact me", with no technical details, and a maintainer will arrange a private channel.
 
 ## What to expect
 
 - We acknowledge a report within 7 days and send a first assessment within 14 days.
-- We fix confirmed vulnerabilities on `main` and, once tagged releases exist, in the latest release.
+- We fix confirmed vulnerabilities on `main` and in the latest release.
 - We disclose in coordination with you, normally when a fix is released or after 90 days, whichever comes first, and credit you if you wish.
 - Good-faith research on your own deployment is welcome. Please do not test deployments you do not own, and do not access, change or copy other people's data.
 
 ## Supported versions
 
-Only the latest commit on `main` and, once there is one, the latest tagged release receive fixes.
+Only the latest commit on `main` and the latest release (now 1.0.x) receive fixes. Releases: https://github.com/pixan-ai/agent-kernel/releases
 
 ## Scope
 
 In scope: the Dockerfile, `bin/*`, `policy/managed-settings.json`, the CI workflows and the documentation claims about them.
-Out of scope: vulnerabilities in Claude Code or the official Telegram plugin (report those to Anthropic).
+Out of scope: vulnerabilities in Claude Code or the official Telegram plugin; report those to Anthropic: https://www.anthropic.com/responsible-disclosure-policy
 
 ## Security level by host
 
