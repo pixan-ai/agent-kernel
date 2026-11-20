@@ -36,7 +36,7 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 | `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
 | `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
 
-5. Template: name `Pixan agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).
+5. Template: name `pixan-agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).
 
 Railway's limits, found while publishing on 2026-11-19: the description is 25 to 75 characters; the overview is at most 10,000 characters and must keep Railway's sections (`# Deploy and Host …`, `## About Hosting …`, `## Common Use Cases`, `## Dependencies for … Hosting` with `### Deployment Dependencies`, `## Why Deploy … on Railway?`; the CLI enforces the subsection, the dashboard does not), so the README cannot be the overview. In the dashboard, **Stage changes** only queues an edit: it is saved by **Apply**, which on a phone may be out of view.
 

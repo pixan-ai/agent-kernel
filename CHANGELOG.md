@@ -6,7 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Added
 
-- A one-click Railway template, "Pixan agent" (https://railway.com/deploy/pixan-agent): the service, the volume and the variables with their descriptions, so a deployer only pastes three values. Its overview lives in `docs/railway-template-overview.md`; `docs/DEPLOY-RAILWAY.md` records its settings, Railway's limits and how it was made.
+- A one-click Railway template, `pixan-agent` (https://railway.com/deploy/pixan-agent): the service, the volume and the variables with their descriptions, so a deployer only pastes three values. Its overview lives in `docs/railway-template-overview.md`; `docs/DEPLOY-RAILWAY.md` records its settings, Railway's limits and how it was made.
 
 ### Changed
 

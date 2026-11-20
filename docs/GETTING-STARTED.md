@@ -23,7 +23,7 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 
 ### Railway (the quick way)
 
-**One click:** [deploy the Pixan agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2, and message your bot when the build finishes (several minutes). It sets up everything below for you. To do it by hand instead:
+**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2, and message your bot when the build finishes (several minutes). It sets up everything below for you. To do it by hand instead:
 
 1. New project → deploy from this repository.
 2. Service **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**.
