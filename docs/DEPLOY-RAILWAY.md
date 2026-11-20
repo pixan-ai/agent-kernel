@@ -26,13 +26,14 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 1. One service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
 2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`. Icon `https://devicons.railway.com/i/telegram.svg`.
 3. A **volume** mounted at `/data`.
-4. **Variables**: the three credentials with no default, so the deployer is asked for them, and each with its description (the composer's labels may differ from these words; the values must not):
+4. **Variables**: the two Telegram values required and the two Claude credentials optional (one of them is needed: the agent does not start without either and says so in its log), none with a default, and each with its description (the composer's labels may differ from these words; the values must not):
 
 | Variable | Default | Description shown to the deployer |
 |---|---|---|
 | `TELEGRAM_BOT_TOKEN` | none, required | Your bot's token from @BotFather. Use a new bot that nothing else polls. |
 | `OWNER_TELEGRAM_ID` | none, required | Your numeric Telegram id (ask @userinfobot). Only you can talk to the agent at first. |
-| `CLAUDE_CODE_OAUTH_TOKEN` | none, required | From `claude setup-token`, for a personal agent on your subscription. For an agent that serves groups or clients, delete this and set `ANTHROPIC_API_KEY` instead (see the guide). |
+| `CLAUDE_CODE_OAUTH_TOKEN` | none, optional | Set this OR ANTHROPIC_API_KEY. From `claude setup-token`, for a personal agent on your Claude subscription. |
+| `ANTHROPIC_API_KEY` | none, optional | Set this OR CLAUDE_CODE_OAUTH_TOKEN. An Anthropic Console API key, billed per use: for an agent that serves groups or clients. Wins if both are set. |
 | `RAILWAY_RUN_UID` | `0` | Leave as is: the volume is owned by root; the agent fixes it and runs as an unprivileged user. |
 | `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
 
