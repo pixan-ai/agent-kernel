@@ -29,13 +29,15 @@ m=$(sed -n 's/.*\/\([A-Za-z]*\)"$/\1/p'); echo "$m $*" >> /data/api-calls
 [ "$m" != setWebhook ] || { [ -e /data/webhook-refused ] && printf '{"ok":false,"description":"bad webhook: HTTPS url must be provided"}' || printf '{"ok":true}'; }
 [ "$m" != getWebhookInfo ] || printf '{"ok":true,"result":{"pending_update_count":%s}}' "$(cat /data/pending-count)"
 EOF
-printf '#!/usr/bin/env bash\n/bin/sleep 0.5; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
-printf '#!/usr/bin/env bash\n[ "$1" != 240 ] || { echo kept >> /data/keep-awake; exit 1; }\nexec /bin/sleep "$@"\n' > "$STUBS/sleep"
+printf '#!/usr/bin/env bash\n/bin/sleep "$(cat /data/ring-after 2> /dev/null || echo 0.5)"; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
+# A minute passes in 0.05 s. While /data/suspending exists, the clock jumps 1000 s per reading, as after the host froze the container.
+printf '#!/usr/bin/env bash\n[ "$1" != 240 ] || { echo kept >> /data/keep-awake; exit 1; }\n[ "$1" != 60 ] || exec /bin/sleep 0.05\nexec /bin/sleep "$@"\n' > "$STUBS/sleep"
+printf '#!/usr/bin/env bash\n[ "$1 $(ls /data/suspending 2> /dev/null)" = "+%%s /data/suspending" ] || exec /bin/date "$@"\nc=$(( $(cat /data/clock 2> /dev/null || echo 0) + 1000 )); echo $c > /data/clock; echo $c\n' > "$STUBS/date"
 printf '#!/usr/bin/env bash\necho run >> /data/backup-runs\n' > "$STUBS/backup.sh"
 printf '#!/usr/bin/env bash\necho "$1" >> /data/notified\n' > "$STUBS/notify.sh"
 chmod 755 "$STUBS"/*
 fresh() {
-  mkdir -p /data; find /data -mindepth 1 -delete; rm -f /tmp/sleep-warned; mkdir -p /data/config/channels/telegram /data/ssh /data/cron
+  mkdir -p /data; find /data -mindepth 1 -delete; rm -f /tmp/sleep-warned /tmp/suspend-warned; mkdir -p /data/config/channels/telegram /data/ssh /data/cron
   printf 'TELEGRAM_BOT_TOKEN=123:SECRET\nOWNER_TELEGRAM_ID=42\n' > /data/config/channels/telegram/.env; echo "$1" > /data/pending-count
 }
 # backup.sh is looked up next to doorbell.sh: run a copy that sits beside the stubs
@@ -52,6 +54,16 @@ check "a backup is made before sleeping when the last one is old" test -s /data/
 check "...and with no jobs, nothing keeps the container awake" test ! -e /data/keep-awake
 fresh 0; touch /data/cron/last-backup; echo "0 8 * * * job.sh news" > /data/cron/jobs; asleep DOORBELL_URL=https://agent.example
 check "with scheduled jobs, the container is kept awake every four minutes while Claude sleeps (audit, M9)" test -s /data/keep-awake
+
+check "...and a short sleep does not warn the owner" test ! -e /data/notified
+
+# With Serverless off the host never suspends a sleeping agent, and it is billed while it looks asleep (2026-11-21). Detect it.
+fresh 0; touch /data/cron/last-backup; echo 4 > /data/ring-after; asleep DOORBELL_URL=https://agent.example
+check "asleep for 30 minutes and never suspended by the host -> the owner is told to turn Serverless on" grep -q "Serverless" /data/notified
+fresh 0; touch /data/cron/last-backup /data/suspending; echo 4 > /data/ring-after; asleep DOORBELL_URL=https://agent.example
+check "...but not when the host does suspend it (the clock jumps)" test ! -e /data/notified
+fresh 0; touch /data/cron/last-backup; echo 4 > /data/ring-after; echo "0 8 * * * job.sh news" > /data/cron/jobs; asleep DOORBELL_URL=https://agent.example
+check "...nor when scheduled jobs keep the container on purpose" test ! -e /data/notified
 
 fresh 1; touch /data/cron/last-backup; asleep DOORBELL_URL=https://agent.example
 check "a message already waiting (it arrived while going to sleep, or the host woke the container) -> no waiting" test ! -e /data/bun-runs

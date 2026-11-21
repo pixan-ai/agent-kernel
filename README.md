@@ -59,7 +59,7 @@ Any amd64 Linux server with Docker, with no incoming port: [docs/DEPLOY-LINUX.md
 | `TELEGRAM_BOT_TOKEN` | yes | Bot token, read by the official plugin |
 | `OWNER_TELEGRAM_ID` | yes | The only user who can talk to the bot in private (allowlist), and who gets every notice. In groups the bot hears every member |
 | `TELEGRAM_GROUP_IDS` | no | Telegram groups the bot may take part in (see [docs/GROUPS.md](docs/GROUPS.md)). In a listed group it reads and answers every member, people and bots. Unset = private chat with the owner only |
-| `IDLE_SLEEP_MINUTES` | no | Sleep after this many idle minutes and wake on the next message, so an idle agent stops costing (see [docs/SLEEP.md](docs/SLEEP.md)). Unset = always on |
+| `IDLE_SLEEP_MINUTES` | no | Sleep after this many idle minutes and wake on the next message, so an idle agent stops costing (see [docs/SLEEP.md](docs/SLEEP.md)). Unset = always on; the Railway template sets 3 |
 | `RCLONE_CONF` | no | Storage credentials for the nightly encrypted backup (see [docs/BACKUP.md](docs/BACKUP.md), which lists the other backup variables) |
 | `BACKUP_AGE_KEY` | no | Only to restore: the private key, on a new empty volume. Remove it afterwards |
 | `PEER_PUBLIC_KEYS` | no | Public SSH keys of fellow agents allowed to read this agent's screen and conversation and to add or drop its groups and super-users (see [docs/PEERS.md](docs/PEERS.md)). Unset = no SSH server |

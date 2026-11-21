@@ -23,15 +23,21 @@ api setWebhook --data-urlencode "url=$url/doorbell" -d "secret_token=$(cat $S)" 
 echo "$(date '+%F %T') asleep: waiting for the doorbell" >&2
 # Scheduled jobs need the container: with jobs, one packet every four minutes keeps the host from suspending it (Claude still sleeps).
 K=; [ ! -s /data/cron/jobs ] || { (while sleep 240; do curl -s -m 5 -o /dev/null https://api.telegram.org || true; done) & K=$!; }
+# Without jobs nothing here talks to the network, so a host that suspends idle containers does so within minutes, and the clock
+# then jumps. 30 minutes without a jump: the host keeps it running and billed (on Railway, Serverless is off). Tell the owner, once per start.
+unsuspended() { n=0; t=$(date +%s); while sleep 60; do s=$(date +%s); if (( s - t < 90 )); then n=$((n + 1)); else n=0; fi; t=$s
+  (( n < 30 )) || { [ -e /tmp/suspend-warned ] || { touch /tmp/suspend-warned; "$B/notify.sh" "⚠️ I am asleep, but the host keeps me running and billed. On Railway: turn Serverless on in the service's Settings, then redeploy (docs/SLEEP.md)." || true; }; return; }; done; }
+W=
 # Telegram accepts any https address, also one that does not reach this listener (a wrong port): the agent would sleep for ever.
 # So the first time, call it through the public address, without the secret, and expect the listener's own 403.
 reaches() { for _ in 1 2 3 4 5 6 7 8 9 10; do [ "$(curl -s -o /dev/null -w '%{http_code}' -m 5 -X POST "$url/doorbell" < /dev/null)" != 403 ] || return 0; sleep 1; done; return 1; }
 until waiting; do
   DOORBELL_SECRET=$(cat $S) bun "$B/doorbell.js" & L=$!
-  [ -n "${C:-}" ] || reaches || { kill "$L" "$K" 2> /dev/null; api deleteWebhook -o /dev/null
+  [ -n "${C:-}" ] || reaches || { kill "$L" "$K" "$W" 2> /dev/null; api deleteWebhook -o /dev/null
     cannot "$url/doorbell does not reach this service on port ${PORT:-8080}"; }
+  [ -n "${C:-}$K" ] || { unsuspended & W=$!; }
   C=1; wait "$L" || sleep 5
 done
-[ -z "$K" ] || kill "$K" 2> /dev/null
+kill "$K" "$W" 2> /dev/null
 api deleteWebhook -o /dev/null
 echo "$(date '+%F %T') awake: a message is waiting" >&2
