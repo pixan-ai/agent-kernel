@@ -53,6 +53,13 @@ check "...and only Renovate: no second bot, no weekly issue" test ! -e .github/d
 deploy() { grep -q "workflows: \[CI\]" "$1" && grep -q "github.event.workflow_run.conclusion == 'success'" "$1" && grep -q "github.event.workflow_run.actor.login == 'renovate\[bot\]'" "$1" \
   && grep -q "^permissions: {}" "$1" && grep -q "Project-Access-Token" "$1" && grep -q 'nothing to deploy"; exit 0' "$1"; }
 check "Railway gets Renovate's commits after CI passed, with a project token and no repository permissions, and nothing happens without the token" deploy .github/workflows/deploy.yml
+# Audit of 2026-11-21, L1: a manual run could deploy any branch, untested, and that branch could read the token. The token lives in
+# a GitHub environment that only main may use. L2: two runs at once raced, and the loop reported only its last service.
+guarded() { grep -qE '^    environment: railway$' "$1" && grep -q "github.event.workflow_run.event == 'push'" "$1" && grep -qE '^    branches: \[main\]$' "$1" \
+  && ! grep -qE 'actions/checkout|pull_request' "$1"; }
+check "deploy.yml reads the token only through the main-only 'railway' environment, and runs no code from the repository (L1)" guarded .github/workflows/deploy.yml
+serial() { grep -qE '^  group: deploy-railway$' "$1" && grep -qE '^  cancel-in-progress: false$' "$1" && grep -q 'fail=1; fi' "$1" && grep -q 'exit "${fail:-0}"' "$1"; }
+check "...one deploy at a time, never cancelled halfway, and any service that fails fails the run (L2)" serial .github/workflows/deploy.yml
 
 # Docker Hub as a second registry (decision of 2026-11-17): same digest, signed and verified there too, credentials only from secrets.
 hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" && grep -q 'password: \${{ secrets.DOCKERHUB_TOKEN }}' "$1" \

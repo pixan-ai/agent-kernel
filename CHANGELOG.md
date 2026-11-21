@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- **Security** (audit of 2026-11-21, L1, L2): `deploy.yml` could be run by hand from any branch, deploying untested code, and that branch could read the Railway token. The token now lives in a GitHub environment, `railway`, that only `main` may use, and nothing from the repository is checked out. Two deploys no longer run at once (a second one waits), and a service that fails to deploy fails the run instead of being hidden by the next one. Whoever set up the token moves it into that environment (GETTING-STARTED.md).
 - A bot token with a space inside (pasted from a phone) survived the trim, and the bot went mute with no error. `start.sh` now stops saying the token does not look like one from @BotFather, without printing it (audit of 2026-11-21, L7).
 - Sleep: an agent that could not sleep (no public address, a webhook Telegram refused, an address that does not reach it) only said so in the log, so it stayed awake and billed without anyone knowing (seen 2026-11-21). It now also tells the owner on Telegram, with the reason, once per start.
 - Sleep: with Serverless off the host keeps a sleeping agent running and billed, and the agent cannot read that setting. Asleep for 30 minutes without the clock jump a suspension leaves, and with no scheduled jobs, it now tells the owner to turn Serverless on, once per start.
