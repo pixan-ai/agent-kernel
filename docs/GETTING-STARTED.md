@@ -111,7 +111,7 @@ Set once, at installation. Changing one restarts the agent.
 | `ANTHROPIC_API_KEY` | | Console API key instead of the subscription; wins if both are set | step 2 |
 | `TELEGRAM_BOT_TOKEN` | required | This agent's own bot | step 1 |
 | `OWNER_TELEGRAM_ID` | required | The owner: the only private chat, and who gets every notice | step 1 |
-| `TZ` | `UTC` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
+| `TZ` | `UTC`; the Railway template sets `America/Mexico_City` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
 | `ANTHROPIC_MODEL` | Claude's default | Pin the model | |
 | `CLAUDE_CODE_VERSION` | the stable channel, never below 2.1.319 | Go back to a previous Claude Code (2.1.319 or later); read when the image is built, so redeploy | [Updates](#updates-and-how-to-go-back) |
 | `CLAUDE_FLAGS` | empty | Extra flags for `claude`. The advisor is already on for every agent (`advisorModel: opus` in the policy); `--advisor MODEL` here picks another one for this agent | |
