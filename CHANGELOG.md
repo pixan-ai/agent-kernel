@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A mistyped owner id (a username, or a line break pasted with it) left the bot mute with no error; a deployment without a volume lost its memory, settings and jobs at every redeploy without a word. `start.sh` now removes whitespace from the owner id and the bot token, stops on an owner id that is not a number saying what to use, and warns the owner when `/data` is not a volume (audit of 2026-11-21, M1, M2). The guide says how each kind of installation receives updates.
 - **Security** (audit of 2026-11-21, A1, A2, B5): an agent could make the next start, which runs as root, act on what it had planted. A symlink at `/data/workspace` handed its target (for example the managed policy) to the agent, and a program in its own bin folder, first on `PATH`, ran as root. While root, `start.sh` now uses only the system's programs (fixed `PATH`; `tini` and `start.sh` by absolute path, `#!/bin/bash`), changes ownership without following symlinks, and drops to uid 1001 with no new privileges. CI starts the image's real entrypoint and checks the published `base` image stays non-root (B4).
 - An agent deployed without `RAILWAY_RUN_UID=0` crashed at start with only "Permission denied" (seen on the template's first live test, 2026-11-20). The image now starts as root, gives the volume to the agent's user and drops to it before anything else, so no variable is needed; started as another user, it stops and says what to change.
 

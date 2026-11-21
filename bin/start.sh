@@ -3,6 +3,9 @@
 # If claude dies, the container exits and the restart policy brings it back; watchdog.sh (a scheduled job) covers a dead Telegram channel.
 set -euo pipefail
 : "${TELEGRAM_BOT_TOKEN:?is not set}" "${OWNER_TELEGRAM_ID:?is not set}"
+# Neither ever contains whitespace, which a value pasted from a phone often carries; a mistyped owner id would leave the bot mute.
+export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN//[[:space:]]/}" OWNER_TELEGRAM_ID="${OWNER_TELEGRAM_ID//[[:space:]]/}"
+[[ $OWNER_TELEGRAM_ID =~ ^[0-9]+$ ]] || { echo "OWNER_TELEGRAM_ID must be your numeric Telegram id (ask @userinfobot), not \"$OWNER_TELEGRAM_ID\"" >&2; exit 1; }
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }
 # The image starts as root because hosts mount volumes owned by root: fix ownership, then drop to agent (uid 1001) for everything else.
@@ -36,6 +39,8 @@ rm -rf "$CFG/plugins" && cp -r /opt/seed/config/plugins "$CFG/" && sed -i "s#/op
 config.sh apply
 # Claude Code and the plugin come with the image, which follows Claude Code's stable channel (docs/GETTING-STARTED.md): say when they changed.
 v="Claude Code $(claude --version 2> /dev/null | cut -d' ' -f1 || true), Telegram plugin $(find "$CFG/plugins/cache/claude-plugins-official/telegram" -mindepth 1 -maxdepth 1 -printf '%f\n' 2> /dev/null | sort -V | tail -1 || true)"
+# Without a volume everything above is lost at the next redeploy, silently: say so.
+mountpoint -q /data || { echo "warning: /data is not a volume" >&2; notify.sh "⚠️ /data is not a volume: my memory, settings and jobs will be lost at the next redeploy. Add a volume mounted at /data." || true; }
 [ ! -s /data/cron/versions ] || [ "$(cat /data/cron/versions)" = "$v" ] || notify.sh "🔄 Versions changed: $(cat /data/cron/versions) → $v. If something broke, set CLAUDE_CODE_VERSION on the host to the previous version and redeploy, or use the host's rollback." || true
 echo "$v" > /data/cron/versions
 # A revoked or mistyped bot token would leave the bot mute with no error anywhere: ask Telegram once (the answer also tells the agent its own bot name, see the SessionStart hook). Only a clear 401 stops the start; a network hiccup does not. The URL goes through stdin so the token is not in a process list.
