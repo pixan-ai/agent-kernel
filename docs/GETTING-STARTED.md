@@ -23,7 +23,7 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 
 ### Railway (the quick way)
 
-**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2, and message your bot when the build finishes (several minutes). It sets up everything below for you. To do it by hand instead:
+**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2, and message your bot when the build finishes (several minutes). It sets up everything below for you, and the agent sleeps when idle (see below) once you turn **Serverless** on in the service's **Settings** and redeploy: Railway does not let a template do that switch. To do it by hand instead:
 
 1. New project → deploy from this repository.
 2. Service **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**.
@@ -41,7 +41,7 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 
 Details and notes: [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md). Cost: an agent that is always on uses about 0.3 to 0.7 GB of memory, billed by the minute. 
 
-**Optional: sleep when idle.** Off by default: the agent is always on. To pay only while it works, add the variable `IDLE_SLEEP_MINUTES` (for example `10`) and give the service a public address; the agent then stops after that many quiet minutes and wakes on the next message, a few seconds later. Remove the variable to go back to always on. Steps and limits: [SLEEP.md](SLEEP.md).
+**Sleep when idle.** On with the template (it sets `IDLE_SLEEP_MINUTES` and a public domain on port 8080; you turn Serverless on); off when you deploy by hand or on your own server, where the agent is always on. To pay only while it works, set `IDLE_SLEEP_MINUTES` (for example `10`), give the service a public address on port 8080 and turn Serverless on; the agent then stops after that many quiet minutes and wakes on the next message, a few seconds later. If a piece is missing, the agent tells you on Telegram. Remove the variable to go back to always on. Steps and limits: [SLEEP.md](SLEEP.md).
 
 ### Your own server or computer (Docker)
 
@@ -116,7 +116,7 @@ Set once, at installation. Changing one restarts the agent.
 | `CLAUDE_CODE_VERSION` | the stable channel, never below 2.1.319 | Go back to a previous Claude Code (2.1.319 or later); read when the image is built, so redeploy | [Updates](#updates-and-how-to-go-back) |
 | `CLAUDE_FLAGS` | empty | Extra flags for `claude`. The advisor is already on for every agent (`advisorModel: opus` in the policy); `--advisor MODEL` here picks another one for this agent | |
 | `TELEGRAM_GROUP_IDS` | empty | Groups to join at the first start (the same as telling the agent); read only while `/data/settings` does not exist yet | [GROUPS.md](GROUPS.md) |
-| `IDLE_SLEEP_MINUTES` | empty = always on | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
+| `IDLE_SLEEP_MINUTES` | empty = always on (the Railway template sets `3`) | Sleep after this many quiet minutes | [SLEEP.md](SLEEP.md) |
 | `DOORBELL_URL` | `https://` + `RAILWAY_PUBLIC_DOMAIN` | Public address Telegram calls to wake a sleeping agent. Needed outside Railway | [SLEEP.md](SLEEP.md) |
 | `RAILWAY_PUBLIC_DOMAIN` | set by Railway | Not yours to set: Railway provides it when the service has a public domain | [SLEEP.md](SLEEP.md) |
 | `PORT` | `8080` | Port the wake-up listener uses | [SLEEP.md](SLEEP.md) |
@@ -297,7 +297,8 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
 | "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
-| It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
+| "⚠️ I am asleep, but the host keeps me running and billed" | Serverless is off: in the service's **Settings**, turn **Serverless** on, then redeploy ([SLEEP.md](SLEEP.md)) |
+| "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
 | "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
 | Something broke right after "🔄 Versions changed" | Go back to the previous version ([Updates, and how to go back](#updates-and-how-to-go-back)) and tell the project |

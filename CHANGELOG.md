@@ -4,7 +4,14 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Fixed
+
+- Sleep: an agent that could not sleep (no public address, a webhook Telegram refused, an address that does not reach it) only said so in the log, so it stayed awake and billed without anyone knowing (seen 2026-11-21). It now also tells the owner on Telegram, with the reason, once per start.
+- Sleep: with Serverless off the host keeps a sleeping agent running and billed, and the agent cannot read that setting. Asleep for 30 minutes without the clock jump a suspension leaves, and with no scheduled jobs, it now tells the owner to turn Serverless on, once per start.
+
 ### Changed
+
+- The Railway template sleeps when idle: it sets `IDLE_SLEEP_MINUTES` to 3 and a public domain on port 8080. Serverless, the one switch a template cannot set, is turned on by whoever deploys; the guide says so.
 
 - README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.
 

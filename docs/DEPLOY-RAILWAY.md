@@ -15,7 +15,7 @@ Status: verified end to end on Railway (November 2026) with a Claude Max subscri
 Notes:
 
 - This repository carries no `railway.json`: Railway deprecated Config as Code (it stops reading `railway.json` and `railway.toml` on 2026-12-01, and new services cannot use it). The service settings above are the configuration. `.railway/railway.ts` (Infrastructure as Code) is the official alternative for teams that manage several services.
-- Railway bills per minute for CPU and memory. Long polling keeps a Serverless service awake, so leave Serverless off, unless you use the opt-in sleep (`IDLE_SLEEP_MINUTES`), which needs it on ([SLEEP.md](SLEEP.md)).
+- Railway bills per minute for CPU and memory. Long polling keeps a Serverless service awake, so Serverless on costs nothing for an always-on agent; the sleep (`IDLE_SLEEP_MINUTES`) needs it on ([SLEEP.md](SLEEP.md)). A template cannot turn it on: the agent tells its owner when it is off.
 - Use a dedicated bot token. Do not reuse one that another process polls.
 - Rotate a credential if it is ever pasted into a chat, a log or a screenshot ([SECRETS.md](SECRETS.md)).
 
@@ -25,7 +25,7 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 
 1. One service from the GitHub repository `pixan-ai/agent-kernel` (branch `main`).
 2. In the service's **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**, Watch Paths `Dockerfile`, `bin/**`, `policy/**`. Icon `https://devicons.railway.com/i/telegram.svg`.
-3. A **volume** mounted at `/data`.
+3. A **volume** mounted at `/data`, and in **Networking** an **HTTP Proxy** with port `8080` (Railway generates the domain at deploy; the sleep needs it).
 4. **Variables**: the two Telegram values required and the two Claude credentials optional (one of them is needed: the agent does not start without either and says so in its log), none with a default, and each with its description (the composer's labels may differ from these words; the values must not):
 
 | Variable | Default | Description shown to the deployer |
@@ -34,6 +34,7 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 | `OWNER_TELEGRAM_ID` | none, required | Your numeric Telegram id (ask @userinfobot). Only you can talk to the agent at first. |
 | `CLAUDE_CODE_OAUTH_TOKEN` | none, optional | Set this OR ANTHROPIC_API_KEY. From `claude setup-token`, for a personal agent on your Claude subscription. |
 | `ANTHROPIC_API_KEY` | none, optional | Set this OR CLAUDE_CODE_OAUTH_TOKEN. An Anthropic Console API key, billed per use: for an agent that serves groups or clients. Wins if both are set. |
+| `IDLE_SLEEP_MINUTES` | `3`, optional | Minutes without messages before the agent sleeps and stops costing. Empty = always on |
 | `TZ` | `America/Mexico_City`, required with that default | Your time zone, for scheduled jobs. |
 
 5. Template: name `pixan-agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).
