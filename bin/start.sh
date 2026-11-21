@@ -3,8 +3,10 @@
 # If claude dies, the container exits and the restart policy brings it back; watchdog.sh (a scheduled job) covers a dead Telegram channel.
 set -euo pipefail
 : "${TELEGRAM_BOT_TOKEN:?is not set}" "${OWNER_TELEGRAM_ID:?is not set}"
-# Neither ever contains whitespace, which a value pasted from a phone often carries; a mistyped owner id would leave the bot mute.
-export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN//[[:space:]]/}" OWNER_TELEGRAM_ID="${OWNER_TELEGRAM_ID//[[:space:]]/}"
+# A value pasted from a phone often carries spaces or line breaks around it: trim them. One inside is a typo, and a mistyped owner
+# id would leave the bot mute, so it stops the start below.
+trim() { local v=${!1}; v=${v#"${v%%[![:space:]]*}"}; printf -v "$1" '%s' "${v%"${v##*[![:space:]]}"}"; }
+trim TELEGRAM_BOT_TOKEN; trim OWNER_TELEGRAM_ID
 [[ $OWNER_TELEGRAM_ID =~ ^[0-9]+$ ]] || { echo "OWNER_TELEGRAM_ID must be your numeric Telegram id (ask @userinfobot), not \"$OWNER_TELEGRAM_ID\"" >&2; exit 1; }
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }

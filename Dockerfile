@@ -77,7 +77,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
  && v=$(/home/agent/.local/bin/claude --version | cut -d' ' -f1) && echo "Claude Code $v" \
  && { [ "$(printf '%s\n' 2.1.319 "$v" | sort -V | head -1)" = 2.1.319 ] || { echo "Claude Code $v is older than 2.1.319, which the policy needs" >&2; exit 1; }; }
-ENV PATH="/home/agent/.local/bin:${PATH}"
+# Last on PATH, like /data/bin: the agent can write both, so a program it plants there never shadows the system's, whoever runs a
+# command in the container, root included (audit of 2026-11-21, A3). Claude Code has no namesake among the system's programs.
+ENV PATH="${PATH}:/home/agent/.local/bin"
 
 # The official plugin is baked into /opt/seed/config; start.sh copies it to the volume at every start. The official marketplace only
 # follows its main branch (a commit cannot be pinned), so each build takes the latest plugin: a plugin that does not install fails

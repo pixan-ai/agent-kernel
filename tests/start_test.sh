@@ -185,6 +185,9 @@ check "an owner id that is not a number -> fails fast saying it must be the nume
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=$'123:abc\n' OWNER_TELEGRAM_ID=$' 42\r\n')
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 check "...while spaces and line breaks pasted around the owner id and the bot token are removed" creds_file_ok /data/config/channels/telegram/.env
+base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID="123 456")
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
+check "...but a space inside the owner id is a typo, not padding: it fails fast (audit of 2026-11-21, L4)" bash -c 'test "$0" = 1 && grep -q "OWNER_TELEGRAM_ID must be your numeric Telegram id" "$1"' "$RC" "$ERR"
 # Without a volume, memory, settings and jobs vanish at the next redeploy: say so (audit of 2026-11-21, M1).
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42)
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x NOT_A_VOLUME=1

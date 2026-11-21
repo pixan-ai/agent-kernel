@@ -33,9 +33,11 @@ In `.env`:
 | To | Run, in the `agent-kernel` folder |
 |---|---|
 | See what it is doing | `docker compose logs -f` |
-| See its screen | `docker compose exec agent screen.sh` |
+| See its screen | `docker compose exec --user 1001 agent screen.sh` |
 | Restart it | `docker compose restart` |
 | Stop it | `docker compose down` (the volume, with its memory and settings, stays) |
+
+Always pass `--user 1001` to `docker compose exec`: the image starts as root (only to hand the volume to the agent), so without it the command runs as root, inside a container the agent can write to.
 
 If the agent stops, Docker starts it again (`restart: unless-stopped`), also after the server reboots.
 

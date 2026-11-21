@@ -30,6 +30,8 @@ check "the agent image starts as root, so a host needs no setting to fix the vol
   bash -c 'test "$(sed -n "/^FROM base AS agent$/,\$p" Dockerfile | grep -E "^USER " | tail -1)" = "USER 0"'
 check "root runs nothing found through PATH at start: tini and start.sh by absolute path, start.sh on /bin/bash (audit of 2026-11-21, A2)" \
   bash -c 'grep -qx "ENTRYPOINT \[\"/usr/bin/tini\", \"-g\", \"--\", \"/usr/local/bin/start.sh\"\]" Dockerfile && test "$(head -1 bin/start.sh)" = "#!/bin/bash"'
+check "no folder the agent can write comes before the system's on PATH: whoever runs a command in the container, root included, gets the system's program (A3)" \
+  bash -c '! grep -E "^ENV PATH=" Dockerfile | grep -vE "^ENV PATH=\"\\\$\{PATH\}:"'
 check "Claude Code is installed only after the base target" test -z "$(sed '/^FROM base AS agent$/,$d' Dockerfile | grep -iE 'claude\.ai/install|claude plugin')"
 
 check "the container's PID 1 is tini, which forwards signals to the entrypoint" grep -qE '^ENTRYPOINT \["/usr/bin/tini", "-g", "--", "/usr/local/bin/start.sh"\]$' Dockerfile

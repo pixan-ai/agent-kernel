@@ -72,6 +72,8 @@ floor=$(grep -oE "^ \&\& \{ \[.*\}; \}$" Dockerfile)
 check "the build's Claude Code floor refuses 2.1.311 and takes 2.1.319 and 2.1.320" bash -c 'v=2.1.311; ! (eval "$0") 2> /dev/null && v=2.1.319 && (eval "$0") && v=2.1.320 && (eval "$0")' "${floor# && }"
 check "...and the default version is not below the floor" bash -c '[ -n "$0" ] && v=$(grep -oE "^ARG CLAUDE_CODE_VERSION=\S+" Dockerfile | cut -d= -f2) && (eval "$0")' "${floor# && }"
 check "Docker Compose passes CLAUDE_CODE_VERSION to the build, as Railway does (v1 audit, B1)" grep -qF "args: [CLAUDE_CODE_VERSION]" compose.yml
+# The image starts as root, so an exec without --user is root, and the agent can plant programs in its own folders (audit of 2026-11-21, A3).
+check "every docker exec in the docs runs as the agent, never root (A3)" bash -c '! grep -rhoE "docker( compose)? exec [^|]*" docs README.md CONTRIBUTING.md | grep -v -- "--user 1001"'
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))
