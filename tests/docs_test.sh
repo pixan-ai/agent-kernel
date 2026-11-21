@@ -73,7 +73,10 @@ check "the build's Claude Code floor refuses 2.1.311 and takes 2.1.319 and 2.1.3
 check "...and the default version is not below the floor" bash -c '[ -n "$0" ] && v=$(grep -oE "^ARG CLAUDE_CODE_VERSION=\S+" Dockerfile | cut -d= -f2) && (eval "$0")' "${floor# && }"
 check "Docker Compose passes CLAUDE_CODE_VERSION to the build, as Railway does (v1 audit, B1)" grep -qF "args: [CLAUDE_CODE_VERSION]" compose.yml
 # The image starts as root, so an exec without --user is root, and the agent can plant programs in its own folders (audit of 2026-11-21, A3).
-check "every docker exec in the docs runs as the agent, never root (A3)" bash -c '! grep -rhoE "docker( compose)? exec [^|]*" docs README.md CONTRIBUTING.md | grep -v -- "--user 1001"'
+check "every docker exec in the docs runs as the agent, never root (A3; any spelling of it, L8)" bash -c '! grep -rhoE "docker(-compose| compose| container)? exec [^|]*" docs README.md CONTRIBUTING.md | grep -v -- "--user 1001"'
+# railway ssh has no --user: it opens a shell as the image's user, root. The docs say so, and how to drop to the agent (L6).
+check "DEPLOY-RAILWAY.md warns that railway ssh opens a root shell (L6)" grep -q "railway ssh.*root" docs/DEPLOY-RAILWAY.md
+check "...and every mention of railway ssh says how to drop to the agent's user (L6, L8)" bash -c '! grep -rh "railway ssh" docs README.md CONTRIBUTING.md | grep -v -- "setpriv --reuid=1001"'
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))
