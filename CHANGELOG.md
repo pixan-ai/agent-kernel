@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Fixed
+
+- Sleep: an agent that could not sleep (no public address, a webhook Telegram refused, an address that does not reach it) only said so in the log, so it stayed awake and billed without anyone knowing (seen 2026-11-21). It now also tells the owner on Telegram, with the reason, once per start.
+
 ### Changed
 
 - README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.

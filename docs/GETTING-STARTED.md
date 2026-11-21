@@ -297,7 +297,7 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
 | "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
-| It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
+| "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
 | "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
 | Something broke right after "🔄 Versions changed" | Go back to the previous version ([Updates, and how to go back](#updates-and-how-to-go-back)) and tell the project |

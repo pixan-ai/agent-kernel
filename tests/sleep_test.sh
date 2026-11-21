@@ -32,9 +32,10 @@ EOF
 printf '#!/usr/bin/env bash\n/bin/sleep 0.5; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
 printf '#!/usr/bin/env bash\n[ "$1" != 240 ] || { echo kept >> /data/keep-awake; exit 1; }\nexec /bin/sleep "$@"\n' > "$STUBS/sleep"
 printf '#!/usr/bin/env bash\necho run >> /data/backup-runs\n' > "$STUBS/backup.sh"
+printf '#!/usr/bin/env bash\necho "$1" >> /data/notified\n' > "$STUBS/notify.sh"
 chmod 755 "$STUBS"/*
 fresh() {
-  mkdir -p /data; find /data -mindepth 1 -delete; mkdir -p /data/config/channels/telegram /data/ssh /data/cron
+  mkdir -p /data; find /data -mindepth 1 -delete; rm -f /tmp/sleep-warned; mkdir -p /data/config/channels/telegram /data/ssh /data/cron
   printf 'TELEGRAM_BOT_TOKEN=123:SECRET\nOWNER_TELEGRAM_ID=42\n' > /data/config/channels/telegram/.env; echo "$1" > /data/pending-count
 }
 # backup.sh is looked up next to doorbell.sh: run a copy that sits beside the stubs
@@ -67,10 +68,15 @@ fresh 0; touch /data/unreachable /data/cron/last-backup
 unreachable() { ! env PATH="$STUBS:$PATH" DOORBELL_URL=https://agent.example "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q "not sleeping: https://agent.example/doorbell does not reach this service" /data/err; }
 check "an address that does not reach this service -> it does not go to sleep, and says why" unreachable
 check "...and the webhook is removed again, as the last call to Telegram" test "$(calls | awk '{print $NF}')" = deleteWebhook
+# An agent that cannot sleep is billed around the clock: the log alone was never read (Spike, 2026-11-21). Tell the owner, once per start.
+check "...and the owner is told on Telegram, with the reason" grep -q "cannot sleep: https://agent.example/doorbell does not reach this service" /data/notified
+env PATH="$STUBS:$PATH" DOORBELL_URL=https://agent.example "$STUBS/doorbell.sh" > /dev/null 2>&1
+check "...only once per start, not at every retry" test "$(wc -l < /data/notified)" = 1
 
 fresh 0
 no_address() { ! env PATH="$STUBS:$PATH" "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q DOORBELL_URL /data/err && test ! -e /data/api-calls; }
 check "without a public address it refuses to sleep, and says why" no_address
+check "...also to the owner, naming what Railway needs: a public domain on the port and Serverless" grep -q "public domain on port 18181.*Serverless" /data/notified
 
 rm -rf "$STUBS"
 echo "$FAILS failed"; exit $((FAILS > 0))
