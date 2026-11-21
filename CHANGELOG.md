@@ -4,6 +4,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-21
+
 ### Fixed
 
 - **Security** (audit of 2026-11-21, A3): an administrator's `docker compose exec` runs as root, and the agent's own bin folder came first on `PATH`, so a program the agent planted there could run as root. The agent's folders now come last on `PATH`, and the guide always uses `--user 1001`. A space inside the owner id is no longer removed but reported as a typo (L4); the guide no longer says updates reach every host on their own (L5).
