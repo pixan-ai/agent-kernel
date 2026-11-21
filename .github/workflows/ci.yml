@@ -88,6 +88,11 @@ jobs:
           load: true
           tags: agent-kernel:base
           cache-from: type=gha
+      # The tests above replace the entrypoint: start the image as a host does, and keep the publishable base non-root (audit of 2026-11-21, A2, B4).
+      - name: The agent image starts its real entrypoint, and the base stays non-root
+        run: |
+          docker run --rm agent-kernel:ci 2>&1 | grep -q "TELEGRAM_BOT_TOKEN: is not set"
+          test "$(docker inspect -f '{{.Config.User}}' agent-kernel:base)" = 1001
       - name: Vulnerabilities in the base target (Trivy, blocking)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
