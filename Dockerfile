@@ -61,7 +61,7 @@ ENV PATH="${PATH}:/data/bin" VIRTUAL_ENV=/data/tools/venv UV_TOOL_DIR=/data/tool
     BUN_INSTALL_GLOBAL_DIR=/data/tools/bun BUN_INSTALL_BIN=/data/bin
 WORKDIR /data/workspace
 # tini is PID 1: it forwards SIGTERM (bash as PID 1 ignores it, so the host had to kill the container) and reaps orphans.
-ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/usr/local/bin/start.sh"]
 
 FROM base AS agent
 # Claude Code's stable channel (about a week old, skipping releases with major regressions): Renovate opens a pull request when it

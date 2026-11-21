@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Runs interactive Claude Code (the mode that wakes up on channel events) inside a minimal pty (`script`), without tmux.
 # If claude dies, the container exits and the restart policy brings it back; watchdog.sh (a scheduled job) covers a dead Telegram channel.
 set -euo pipefail
@@ -6,11 +6,14 @@ set -euo pipefail
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }
 # The image starts as root because hosts mount volumes owned by root: fix ownership, then drop to agent (uid 1001) for everything else.
-if [ "$(id -u)" = 0 ]; then
-  mkdir -p /data/workspace && chown 1001:1001 /data /data/workspace
-  exec setpriv --reuid=1001 --regid=1001 --init-groups env HOME=/home/agent "$0" "$@"
+# As root, nothing the agent can write is trusted: only the system's own programs (the agent's bin folders are on its PATH), no
+# symlink followed (-h), and no way back to root after the drop (--no-new-privs). Audit of 2026-11-21, A1, A2, B5.
+if [ "$EUID" = 0 ]; then
+  P=$PATH; PATH=/usr/sbin:/usr/bin:/sbin:/bin
+  mkdir -p /data/workspace && chown -h 1001:1001 /data /data/workspace
+  exec setpriv --reuid=1001 --regid=1001 --init-groups --no-new-privs env HOME=/home/agent PATH="$P" "$0" "$@"
 fi
-[ -w /data ] || { echo "/data is not writable by uid $(id -u): start the container as root, as the image does by default (on Railway, delete RAILWAY_RUN_UID or set it to 0)" >&2; exit 1; }
+[ -w /data ] || { echo "/data is not writable by uid $(id -u): start the container as root, as the agent image does by default (on Railway, delete RAILWAY_RUN_UID or set it to 0)" >&2; exit 1; }
 # A token copied from a phone often carries line breaks; tokens never contain whitespace, so strip it.
 # Then log a sanity check without printing any part of it.
 T="${CLAUDE_CODE_OAUTH_TOKEN:-}"; T="${T//[[:space:]]/}"; [ -z "$T" ] || export CLAUDE_CODE_OAUTH_TOKEN="$T"; [ -z "$T" ] || echo "oauth token: ${#T} chars, starts with sk-ant-oat01-: $([[ "$T" == sk-ant-oat01-* ]] && echo yes || echo NO)" >&2

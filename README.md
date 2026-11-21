@@ -80,7 +80,7 @@ Defense in depth, each layer using an official mechanism:
 3. **Permission classifier (auto mode)**: reviews every action that is not explicitly allowed.
 4. **Never waits for a person**: `permissions.denyInsteadOfPrompting` denies any call that would need an approval prompt; the agent is told and carries on. Nothing is ever allowed by it.
 5. **Hooks**: every change to the agent's tools, and any change to its settings or the bot's files that did not go through its settings command, told to the owner; credential failures alerted on Telegram; the agent's memory and recent deliveries given to every session.
-6. **Container**: non-root user (uid 1001), one volume, no secrets baked into the image.
+6. **Container**: Claude and all it runs are a non-root user (uid 1001); the entrypoint is root only to hand over `/data`, trusting nothing the agent can write. One volume, no secrets baked into the image.
 
 Known limits (read before trusting it):
 

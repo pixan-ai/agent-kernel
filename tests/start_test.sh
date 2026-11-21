@@ -13,7 +13,7 @@ chmod 755 "$STUBS"; chmod 644 "$OUT" "$ERR"
 cat > "$STUBS/script" <<'EOF'
 #!/bin/bash
 # Stub pty: record who would run claude, with which credentials and command, then "exit" like claude dying.
-{ echo "uid=$(id -u)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "peerkey=${PEER_SSH_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
+{ echo "uid=$(id -u)"; echo "nnp=$(awk '/^NoNewPrivs/ {print $2}' /proc/self/status)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "peerkey=${PEER_SSH_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
 echo "owner said: SCREEN-MARKER" > /data/tui.log; sleep 3  # long enough for a 1 s mirror to fire
 [ ! -e /data/long-claude ] || /bin/sleep 60 < /dev/null  # a Claude that keeps running, for the idle watcher (off the pipe, as a killed Claude would be)
 EOF
@@ -59,6 +59,7 @@ check "claude dies -> entrypoint exits 1 (restart policy is the watchdog)" test 
 check "...and says so in the log" grep -q "claude exited" "$ERR"
 check "claude runs as uid 1001, never root" probe "uid=1001"
 check "/data is handed to uid 1001" test "$(stat -c %u /data)" = 1001
+check "...with no way back to root: no new privileges after the drop (audit of 2026-11-21, B5)" probe "nnp=1"
 check "line breaks in the OAuth token are stripped" probe "oauth=sk-ant-oat01-abcdef"
 check "token sanity line, without the token" grep -q "oauth token: 19 chars, starts with sk-ant-oat01-: yes$" "$ERR"
 check "the token value never reaches the log" token_not_logged
@@ -181,5 +182,21 @@ check "no owner id -> fails fast naming it" failed_fast_on_owner
 find /data -mindepth 1 -delete; chown 0:0 /data; chmod 755 /data  # as a host mounts it: owned by root, not writable by others
 env -i PATH="$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42 CLAUDE_CODE_OAUTH_TOKEN=x setpriv --reuid=1001 --regid=1001 --init-groups timeout 20 "$START" > "$OUT" 2> "$ERR"; RC=$?
 check "started as a user who cannot write /data, it stops and says how to fix it" bash -c 'test "$0" = 1 && grep -q "/data is not writable by uid 1001" "$1" && grep -q "RAILWAY_RUN_UID" "$1"' "$RC" "$ERR"
+# The agent owns /data and its own bin folders; the next start as root must not act on what it planted there (audit of 2026-11-21).
+victim=$(mktemp -d); chown 0:0 "$victim"; chmod 755 "$victim"
+run CLAUDE_CODE_OAUTH_TOKEN=x; rm -rf /data/workspace; ln -s "$victim" /data/workspace
+env -i PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42 CLAUDE_CODE_OAUTH_TOKEN=x timeout 20 "$START" > "$OUT" 2> "$ERR"; pkill -u 1001 2> /dev/null
+check "a symlink planted at /data/workspace does not hand its target to the agent (A1)" test "$(stat -c %u "$victim")" = 0
+rm -rf "$victim"
+planted=/home/agent/.local/bin; mkdir -p "$planted"; : > /tmp/planted-root
+for c in id mkdir chown setpriv env bash tini; do
+  printf '#!/bin/sh
+[ "$(/usr/bin/id -u)" != 0 ] || echo %s >> /tmp/planted-root
+exec /usr/bin/%s "$@"
+' "$c" "$c" > "$planted/$c"; chmod 755 "$planted/$c"
+done
+env -i PATH="$planted:$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42 CLAUDE_CODE_OAUTH_TOKEN=x timeout 20 "$START" > "$OUT" 2> "$ERR"; pkill -u 1001 2> /dev/null
+check "a program the agent puts in its own bin folder never runs as root at start (A2)" test ! -s /tmp/planted-root
+for c in id mkdir chown setpriv env bash tini; do rm -f "$planted/$c"; done; rm -f /tmp/planted-root
 rm -rf "$STUBS" "$OUT" "$ERR"
 echo "$FAILS failed"; exit $((FAILS > 0))

@@ -9,7 +9,7 @@ Status: verified end to end on Railway (November 2026) with a Claude Max subscri
    - `TELEGRAM_BOT_TOKEN`
    - `OWNER_TELEGRAM_ID`
    - optional: `TZ`, `ANTHROPIC_MODEL`
-   - No `RAILWAY_RUN_UID`: Railway mounts the volume owned by root, and the image starts as root only to give `/data` to the `agent` user (uid 1001), then drops to it. A non-zero `RAILWAY_RUN_UID` stops the start with a message saying to delete it.
+   - No `RAILWAY_RUN_UID`: Railway mounts the volume owned by root, and the image starts as root only to give `/data` to the `agent` user (uid 1001), then drops to it. If `RAILWAY_RUN_UID` makes it start as a user who cannot write `/data`, it stops with a message saying to delete that variable.
 4. Deploy and message the bot.
 
 Notes:

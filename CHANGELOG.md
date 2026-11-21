@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- **Security** (audit of 2026-11-21, A1, A2, B5): an agent could make the next start, which runs as root, act on what it had planted. A symlink at `/data/workspace` handed its target (for example the managed policy) to the agent, and a program in its own bin folder, first on `PATH`, ran as root. While root, `start.sh` now uses only the system's programs (fixed `PATH`; `tini` and `start.sh` by absolute path, `#!/bin/bash`), changes ownership without following symlinks, and drops to uid 1001 with no new privileges. CI starts the image's real entrypoint and checks the published `base` image stays non-root (B4).
 - An agent deployed without `RAILWAY_RUN_UID=0` crashed at start with only "Permission denied" (seen on the template's first live test, 2026-11-20). The image now starts as root, gives the volume to the agent's user and drops to it before anything else, so no variable is needed; started as another user, it stops and says what to change.
 
 ### Added
