@@ -47,6 +47,10 @@ for v in $(grep -oE '^ARG [A-Z][A-Z0-9_]*=' Dockerfile | cut -c5- | tr -d = | gr
   check "Renovate updates $v: a '# renovate:' line comes right before it" bash -c 'grep -B1 "^ARG $0=" Dockerfile | head -1 | grep -q "^# renovate: datasource="' "$v"
 done
 check "...and only Renovate: no second bot, no weekly issue" test ! -e .github/dependabot.yml -a ! -e .github/workflows/pins.yml
+# On Railway a commit merged by Renovate waits for approval; deploy.yml deploys it after CI with a project token (decided 2026-11-21).
+deploy() { grep -q "workflows: \[CI\]" "$1" && grep -q "github.event.workflow_run.conclusion == 'success'" "$1" && grep -q "github.event.workflow_run.actor.login == 'renovate\[bot\]'" "$1" \
+  && grep -q "^permissions: {}" "$1" && grep -q "Project-Access-Token" "$1" && grep -q 'nothing to deploy"; exit 0' "$1"; }
+check "Railway gets Renovate's commits after CI passed, with a project token and no repository permissions, and nothing happens without the token" deploy .github/workflows/deploy.yml
 
 # Docker Hub as a second registry (decision of 2026-11-17): same digest, signed and verified there too, credentials only from secrets.
 hub() { grep -q "name=docker.io/\${{ vars.DOCKERHUB_REPOSITORY }},enable=" "$1" && grep -q 'password: \${{ secrets.DOCKERHUB_TOKEN }}' "$1" \

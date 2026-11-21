@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Everything updates on its own, by pull request, and merges only when CI is green (docs/GETTING-STARTED.md#updates-and-how-to-go-back).",
+  "description": "Every pinned version updates by pull request and merges only when CI is green; how it then reaches a host: docs/GETTING-STARTED.md#updates-and-how-to-go-back.",
   "extends": ["config:recommended"],
   "automerge": true,
   "platformAutomerge": false,

@@ -33,4 +33,4 @@ Railway is a singular platform to deploy your infrastructure stack. Railway will
 By deploying Pixan agent on Railway, you are one step closer to supporting a complete full-stack application with minimal burden. Host your servers, databases, AI agents, and more on Railway.
 <!-- End recommended section -->
 
-Updates arrive as tested releases from the repository, and going back is one click with Railway's Rollback.
+Railway tells you when the template has an update, tested by the project's CI, and you apply it when you choose; going back is one click with Railway's Rollback.
