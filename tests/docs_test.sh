@@ -76,7 +76,7 @@ check "Docker Compose passes CLAUDE_CODE_VERSION to the build, as Railway does (
 check "every docker exec in the docs runs as the agent, never root (A3; any spelling of it, L8)" bash -c '! grep -rhoE "docker(-compose| compose| container)? exec [^|]*" docs README.md CONTRIBUTING.md | grep -v -- "--user 1001"'
 # railway ssh has no --user: it opens a shell as the image's user, root. The docs say so, and how to drop to the agent (L6).
 check "DEPLOY-RAILWAY.md warns that railway ssh opens a root shell (L6)" grep -q "railway ssh.*root" docs/DEPLOY-RAILWAY.md
-check "...and every mention of railway ssh says how to drop to the agent's user (L6, L8)" bash -c '! grep -rh "railway ssh" docs README.md CONTRIBUTING.md | grep -v -- "setpriv --reuid=1001"'
+check "...and every mention of railway ssh says how to drop to the agent's user, or links to where it does (L6, L8)" bash -c '! grep -rh "railway ssh" docs README.md CONTRIBUTING.md | grep -v -e "setpriv --reuid=1001" -e "(DEPLOY-RAILWAY.md)"'
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
 echo "$FAILS failed"; exit $((FAILS > 0))
