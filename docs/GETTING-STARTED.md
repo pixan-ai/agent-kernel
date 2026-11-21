@@ -255,7 +255,7 @@ Like any install, it lives on the volume: it survives restarts, redeploys and ne
 
 ## Updates, and how to go back
 
-Everything updates on its own once it is set up (below); nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
+Everything is kept current; how a new version reaches your agent depends on how you installed it (the table below), and nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
 
 **How does my agent update?** It depends on how it was installed:
 
@@ -267,7 +267,7 @@ Everything updates on its own once it is set up (below); nothing is left behind.
 
 | Part | How it updates | How to go back |
 |---|---|---|
-| **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged and the host builds it. **Never below 2.1.319**: the policy needs it (an older Claude Code would ignore the setting that keeps an unattended agent from waiting on a prompt), so while the channel is behind, the agent stays on 2.1.319 | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.322`) and redeploy. A version below 2.1.319 fails the build, and the host keeps the deployment it had. Remove the variable to follow the channel again |
+| **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged, and it reaches the agent as the table above says. **Never below 2.1.319**: the policy needs it (an older Claude Code would ignore the setting that keeps an unattended agent from waiting on a prompt), so while the channel is behind, the agent stays on 2.1.319 | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.322`) and redeploy. A version below 2.1.319 fails the build, and the host keeps the deployment it had. Remove the variable to follow the channel again |
 | **Telegram plugin** | Every build takes its latest version (the official marketplace cannot be pinned). If it does not install, the build fails and the host keeps the previous deployment; CI also tries it every week | The host's rollback to the previous deployment (on Railway: the deployment's **Rollback**) |
 | **Tools in the image** (uv, Typst, markitdown, the base image…) | Renovate pull requests, tested by CI, merged when green | Revert that pull request |
 

@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- **Security** (audit of 2026-11-21, A3): an administrator's `docker compose exec` runs as root, and the agent's own bin folder came first on `PATH`, so a program the agent planted there could run as root. The agent's folders now come last on `PATH`, and the guide always uses `--user 1001`. A space inside the owner id is no longer removed but reported as a typo (L4); the guide no longer says updates reach every host on their own (L5).
 - The guide said `TZ` defaults to UTC without saying that the Railway template sets `America/Mexico_City` (audit of 2026-11-21, B3).
 - Sleep (audit of 2026-11-21, M3): Telegram accepts a webhook to an address that does not reach the agent, such as a domain pointed at the wrong port; the agent then slept for ever and no one was told. Before sleeping it now calls itself through that address, and if its own listener does not answer it removes the webhook, stays awake and says so in the log.
 - A mistyped owner id (a username, or a line break pasted with it) left the bot mute with no error; a deployment without a volume lost its memory, settings and jobs at every redeploy without a word. `start.sh` now removes whitespace from the owner id and the bot token, stops on an owner id that is not a number saying what to use, and warns the owner when `/data` is not a volume (audit of 2026-11-21, M1, M2). The guide says how each kind of installation receives updates.
