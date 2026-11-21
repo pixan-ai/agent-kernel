@@ -23,6 +23,8 @@ check "...and the listener ends: one wake, however many times Telegram retries" 
 cat > "$STUBS/curl" <<'EOF'
 #!/usr/bin/env bash
 # Stub Telegram Bot API. The method is the last path element of the URL given on stdin.
+# A call to this agent's own public address answers as the listener would (403 without the secret), unless it is unreachable.
+case " $*" in *" https://agent.example/doorbell"*) [ -e /data/unreachable ] && printf 502 || printf 403; exit 0 ;; esac
 m=$(sed -n 's/.*\/\([A-Za-z]*\)"$/\1/p'); echo "$m $*" >> /data/api-calls
 [ "$m" != setWebhook ] || { [ -e /data/webhook-refused ] && printf '{"ok":false,"description":"bad webhook: HTTPS url must be provided"}' || printf '{"ok":true}'; }
 [ "$m" != getWebhookInfo ] || printf '{"ok":true,"result":{"pending_update_count":%s}}' "$(cat /data/pending-count)"
@@ -59,6 +61,12 @@ fresh 0; touch /data/webhook-refused /data/cron/last-backup
 deaf() { ! asleep DOORBELL_URL=https://agent.example; }
 check "Telegram refuses the webhook -> it does not go to sleep (it would never hear a message)" deaf
 check "...and never waits for a ring" test ! -e /data/bun-runs
+
+# Telegram accepts a webhook to an address that does not reach this service (a wrong port): the agent would sleep for ever (audit of 2026-11-21, M3).
+fresh 0; touch /data/unreachable /data/cron/last-backup
+unreachable() { ! env PATH="$STUBS:$PATH" DOORBELL_URL=https://agent.example "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q "not sleeping: https://agent.example/doorbell does not reach this service" /data/err; }
+check "an address that does not reach this service -> it does not go to sleep, and says why" unreachable
+check "...and the webhook is removed again, as the last call to Telegram" test "$(calls | awk '{print $NF}')" = deleteWebhook
 
 fresh 0
 no_address() { ! env PATH="$STUBS:$PATH" "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q DOORBELL_URL /data/err && test ! -e /data/api-calls; }
