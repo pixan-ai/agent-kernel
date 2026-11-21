@@ -9,11 +9,12 @@ BIN=${BIN:-/usr/local/bin}; STUBS=$(mktemp -d); CURL=$(command -v curl); PORT=18
 
 # --- the listener: only Telegram's ring wakes the agent, and one ring is one wake
 ring() { "$CURL" -s -o /dev/null -w '%{http_code}' -m 5 -X POST "http://127.0.0.1:$PORT/doorbell" "$@" -d '{"message":{"text":"hi"}}'; }
-DOORBELL_SECRET=s3cret bun "$BIN/doorbell.js" & L=$!
+DOORBELL_SECRET=s3cret DOORBELL_NONCE=n0nce bun "$BIN/doorbell.js" & L=$!
 for _ in 1 2 3 4 5 6 7 8 9 10; do (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2> /dev/null && break; sleep 0.3; done
 check "a caller without the secret is refused" test "$(ring)" = 403
 check "...and with a wrong one" test "$(ring -H 'X-Telegram-Bot-Api-Secret-Token: guess')" = 403
 check "...and does not wake the agent" kill -0 "$L"
+check "...and is answered with this sleep's nonce, so the agent can tell its own listener from anything else that says 403 (L3)" test "$("$CURL" -s -m 5 -X POST "http://127.0.0.1:$PORT/doorbell")" = n0nce
 check "Telegram's ring is answered 503, so Telegram keeps the message" test "$(ring -H 'X-Telegram-Bot-Api-Secret-Token: s3cret')" = 503
 ring -H 'X-Telegram-Bot-Api-Secret-Token: s3cret' > /dev/null 2>&1  # a retry right behind the first ring
 gone() { for _ in 1 2 3 4 5 6 7 8 9 10; do kill -0 "$L" 2> /dev/null || return 0; sleep 0.3; done; return 1; }
@@ -23,13 +24,16 @@ check "...and the listener ends: one wake, however many times Telegram retries" 
 cat > "$STUBS/curl" <<'EOF'
 #!/usr/bin/env bash
 # Stub Telegram Bot API. The method is the last path element of the URL given on stdin.
-# A call to this agent's own public address answers as the listener would (403 without the secret), unless it is unreachable.
-case " $*" in *" https://agent.example/doorbell"*) [ -e /data/unreachable ] && printf 502 || printf 403; exit 0 ;; esac
+# A call to this agent's own public address answers as the listener would (403, with the nonce bun was given), unless it is
+# unreachable, or something else in front of it (a CDN) answers a bare 403.
+case " $*" in *" https://agent.example/doorbell"*)
+  if [ -e /data/unreachable ]; then b=; c=502; elif [ -e /data/cdn ]; then b=no; c=403; else b=$(cat /data/nonce 2> /dev/null); c=403; fi
+  case " $*" in *http_code*) printf %s "$c" ;; *) printf %s "$b" ;; esac; exit 0 ;; esac
 m=$(sed -n 's/.*\/\([A-Za-z]*\)"$/\1/p'); echo "$m $*" >> /data/api-calls
 [ "$m" != setWebhook ] || { [ -e /data/webhook-refused ] && printf '{"ok":false,"description":"bad webhook: HTTPS url must be provided"}' || printf '{"ok":true}'; }
 [ "$m" != getWebhookInfo ] || printf '{"ok":true,"result":{"pending_update_count":%s}}' "$(cat /data/pending-count)"
 EOF
-printf '#!/usr/bin/env bash\n/bin/sleep "$(cat /data/ring-after 2> /dev/null || echo 0.5)"; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
+printf '#!/usr/bin/env bash\nprintf %%s "$DOORBELL_NONCE" > /data/nonce\n/bin/sleep "$(cat /data/ring-after 2> /dev/null || echo 0.5)"; echo ring >> /data/bun-runs; echo 1 > /data/pending-count\n' > "$STUBS/bun"
 # A minute passes in 0.05 s. While /data/suspending exists, the clock jumps 1000 s per reading, as after the host froze the container.
 printf '#!/usr/bin/env bash\n[ "$1" != 240 ] || { echo kept >> /data/keep-awake; exit 1; }\n[ "$1" != 60 ] || exec /bin/sleep 0.05\nexec /bin/sleep "$@"\n' > "$STUBS/sleep"
 printf '#!/usr/bin/env bash\n[ "$1 $(ls /data/suspending 2> /dev/null)" = "+%%s /data/suspending" ] || exec /bin/date "$@"\nc=$(( $(cat /data/clock 2> /dev/null || echo 0) + 1000 )); echo $c > /data/clock; echo $c\n' > "$STUBS/date"
@@ -84,6 +88,11 @@ check "...and the webhook is removed again, as the last call to Telegram" test "
 check "...and the owner is told on Telegram, with the reason" grep -q "cannot sleep: https://agent.example/doorbell does not reach this service" /data/notified
 env PATH="$STUBS:$PATH" DOORBELL_URL=https://agent.example "$STUBS/doorbell.sh" > /dev/null 2>&1
 check "...only once per start, not at every retry" test "$(wc -l < /data/notified)" = 1
+
+# Something in front of the address that answers 403 itself (a CDN, another service) passed the self-check (audit of 2026-11-21, L3).
+fresh 0; touch /data/cdn /data/cron/last-backup
+cdn() { ! env PATH="$STUBS:$PATH" DOORBELL_URL=https://agent.example "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q "does not reach this service" /data/err; }
+check "an address where something else answers 403 -> it does not go to sleep (L3)" cdn
 
 fresh 0
 no_address() { ! env PATH="$STUBS:$PATH" "$STUBS/doorbell.sh" > /dev/null 2> /data/err && grep -q DOORBELL_URL /data/err && test ! -e /data/api-calls; }
