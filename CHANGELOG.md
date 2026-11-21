@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.
+
 ## [1.1.0] - 2026-11-21
 
 ### Fixed
