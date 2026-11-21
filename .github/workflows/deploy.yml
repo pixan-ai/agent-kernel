@@ -1,0 +1,37 @@
+name: Deploy to Railway
+
+# Railway deploys a commit on its own only when the GitHub user who pushed it is linked to a Railway account; a commit that
+# Renovate merges waits for someone to approve it. After CI passes on main, this deploys such a commit with a Railway project
+# token, which needs no approval (docs/GETTING-STARTED.md#updates-and-how-to-go-back). Without the token it does nothing.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.actor.login == 'renovate[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      SERVICES: ${{ vars.RAILWAY_SERVICE_IDS }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Deploy the tested commit to the listed services
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$SERVICES" ]; then echo "RAILWAY_TOKEN or RAILWAY_SERVICE_IDS is not set: nothing to deploy"; exit 0; fi
+          api() { curl -fsS https://backboard.railway.com/graphql/v2 -H "Project-Access-Token: $TOKEN" -H 'Content-Type: application/json' -d "$1"; }
+          env=$(api '{"query":"query { projectToken { environmentId } }"}' | jq -er .data.projectToken.environmentId)
+          for s in $SERVICES; do
+            api "$(jq -cn --arg s "$s" --arg e "$env" --arg c "$SHA" \
+              '{query: "mutation($s: String!, $e: String!, $c: String) { serviceInstanceDeployV2(serviceId: $s, environmentId: $e, commitSha: $c) }", variables: {s: $s, e: $e, c: $c}}')" \
+              | jq -e '.data.serviceInstanceDeployV2' > /dev/null && echo "deploying $SHA to $s"
+          done

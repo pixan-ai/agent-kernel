@@ -41,7 +41,7 @@ If the agent stops, Docker starts it again (`restart: unless-stopped`), also aft
 
 ## Updates, and going back
 
-On Railway a new version arrives by notification; here whoever looks after the server applies it, after reading the [changelog](../CHANGELOG.md):
+On Railway a new version can reach the agent by itself ([updates](GETTING-STARTED.md#updates-and-how-to-go-back)); here whoever looks after the server applies it, after reading the [changelog](../CHANGELOG.md):
 
 ```bash
 git pull

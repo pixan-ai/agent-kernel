@@ -2,7 +2,7 @@
 
 For someone who has never run this. About 20 minutes. You need a Telegram account and a Claude subscription (or an Anthropic API key).
 
-After the installation everything else is done **by talking to the agent**: adding groups, scheduling jobs, pointing it at fellow agents. You come back to the host only to change a credential.
+After the installation everything else is done **by talking to the agent**: adding groups, scheduling jobs, pointing it at fellow agents. You come back to the host only to change a credential (and, on Railway, once to [let updates reach the agent by themselves](#updates-and-how-to-go-back)).
 
 ## 1. Create the bot (Telegram, 3 minutes)
 
@@ -255,7 +255,7 @@ Like any install, it lives on the volume: it survives restarts, redeploys and ne
 
 ## Updates, and how to go back
 
-Everything updates on its own; nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
+Everything updates on its own once it is set up (below); nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
 
 | Part | How it updates | How to go back |
 |---|---|---|
@@ -263,8 +263,15 @@ Everything updates on its own; nothing is left behind. What changes is tested be
 | **Telegram plugin** | Every build takes its latest version (the official marketplace cannot be pinned). If it does not install, the build fails and the host keeps the previous deployment; CI also tries it every week | The host's rollback to the previous deployment (on Railway: the deployment's **Rollback**) |
 | **Tools in the image** (uv, Typst, markitdown, the base image…) | Renovate pull requests, tested by CI, merged when green | Revert that pull request |
 
-**Who does the updating: Renovate.** [Renovate](https://docs.renovatebot.com) is a free GitHub app that watches every version this project pins (Claude Code, uv, Typst, supercronic, the Python packages, the base image, the CI actions, the optional stack). When one moves, it opens a pull request with the new version, and its checksum where there is one; CI builds the image and runs every test; Renovate merges it only if all of that is green, and the host then builds the new image. Its settings are in [`renovate.json`](../renovate.json). Nobody has to remember to update anything; a pull request that fails stays open, and nothing reaches the agents.
+**Who does the updating: Renovate.** [Renovate](https://docs.renovatebot.com) is a free GitHub app that watches every version this project pins (Claude Code, uv, Typst, supercronic, the Python packages, the base image, the CI actions, the optional stack). When one moves, it opens a pull request with the new version, and its checksum where there is one; CI builds the image and runs every test; Renovate merges it only if all of that is green. Its settings are in [`renovate.json`](../renovate.json). A pull request that fails stays open, and nothing reaches the agents.
 
+- **On Railway, one more step makes it reach the agent by itself.** Railway deploys a commit on its own only when the GitHub user who pushed it has a Railway account; a commit that Renovate merges waits on the service's page under "Deploy this commit from an external contributor?" until someone clicks **Deploy**. To skip that, let GitHub deploy it after CI passes ([`deploy.yml`](../.github/workflows/deploy.yml)), once:
+  1. Railway → your project → **Settings → Tokens** → create a token for the environment (usually `production`).
+  2. GitHub → this repository (or your copy) → **Settings → Secrets and variables → Actions**: a secret `RAILWAY_TOKEN` with that token, and a variable `RAILWAY_SERVICE_IDS` with the id of each agent's service, separated by spaces (the id is in the service's address: `…/service/<id>`).
+  3. Check it once: **Actions → Deploy to Railway → Run workflow**, and the agents redeploy without asking.
+
+  Without these, the workflow does nothing, and each update waits for your click. Someone who deployed from the one-click template gets a notice from Railway when there is an update and chooses when to apply it; Railway does not let a template apply updates by itself.
+- **On your own server**, whoever looks after it applies updates ([DEPLOY-LINUX.md](DEPLOY-LINUX.md#updates-and-going-back)).
 - **If you deploy from your own copy (fork) of this repository**, install Renovate on it as well ([github.com/apps/renovate](https://github.com/apps/renovate), "only select repositories"), or your copy stays on the versions of the day you copied it.
 - **What CI can and cannot tell.** It proves that a new Claude Code installs and runs and that a new plugin installs, and every tool is used for real in the tests; it cannot prove that the agent answers on Telegram, which needs a live bot. That is what the notice below, and going back in one step, are for.
 
