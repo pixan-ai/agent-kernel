@@ -40,6 +40,7 @@ printf '#!/usr/bin/env bash\necho "$*" >> /data/backup-args\n' > "$STUBS/backup.
 printf '#!/usr/bin/env bash\necho yes > /data/dream-runs\n' > "$STUBS/dream.sh"; chmod 755 "$STUBS/dream.sh"
 printf '#!/usr/bin/env bash\necho rang >> /data/doorbell-runs; [ ! -e /data/slow-doorbell ] || sleep 61\n' > "$STUBS/doorbell.sh"; chmod 755 "$STUBS/doorbell.sh"
 chmod 755 "$STUBS/curl"
+printf '#!/usr/bin/env bash\n[ -z "${NOT_A_VOLUME:-}" ]\n' > "$STUBS/mountpoint"; chmod 755 "$STUBS/mountpoint"  # /data is a volume unless NOT_A_VOLUME is set
 
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42)
 run() {  # run the entrypoint on a fresh, root-owned /data with the given extra env vars
@@ -177,6 +178,19 @@ base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc)
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 failed_fast_on_owner() { test "$RC" = 1 && grep -q "OWNER_TELEGRAM_ID" "$ERR" && test ! -e /data/probe; }
 check "no owner id -> fails fast naming it" failed_fast_on_owner
+# A mistyped owner id or a pasted line break left the bot mute with no error (audit of 2026-11-21, M2).
+base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=@me)
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
+check "an owner id that is not a number -> fails fast saying it must be the numeric id" bash -c 'test "$0" = 1 && grep -q "OWNER_TELEGRAM_ID must be your numeric Telegram id" "$1" && test ! -e /data/probe' "$RC" "$ERR"
+base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=$'123:abc\n' OWNER_TELEGRAM_ID=$' 42\r\n')
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
+check "...while spaces and line breaks pasted around the owner id and the bot token are removed" creds_file_ok /data/config/channels/telegram/.env
+# Without a volume, memory, settings and jobs vanish at the next redeploy: say so (audit of 2026-11-21, M1).
+base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42)
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x NOT_A_VOLUME=1
+check "/data that is not a volume -> warned in the log and told to the owner" bash -c 'grep -q "/data is not a volume" "$0" && grep -q "is not a volume" /data/curl-calls' "$ERR"
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
+check "...and a volume is not" bash -c '! grep -q "is not a volume" "$0" /data/curl-calls' "$ERR"
 
 # Started as another user, a root-owned /data cannot be fixed: say what to change instead of a bare "Permission denied" (seen live, 2026-11-20).
 find /data -mindepth 1 -delete; chown 0:0 /data; chmod 755 /data  # as a host mounts it: owned by root, not writable by others

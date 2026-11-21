@@ -257,6 +257,14 @@ Like any install, it lives on the volume: it survives restarts, redeploys and ne
 
 Everything updates on its own once it is set up (below); nothing is left behind. What changes is tested before an agent gets it, and going back is one step.
 
+**How does my agent update?** It depends on how it was installed:
+
+| Installed from | An update arrives | What you do |
+|---|---|---|
+| The one-click Railway template | Railway tells you on the project's page that the template has an update | Apply it when you choose: one click |
+| Your own copy (fork) of this repository, on Railway | By itself, once you install Renovate on your copy and give it a Railway token (below) | Set it up once, about 10 minutes |
+| Your own server with Docker | When whoever looks after it runs `git pull` and rebuilds | [DEPLOY-LINUX.md](DEPLOY-LINUX.md#updates-and-going-back) |
+
 | Part | How it updates | How to go back |
 |---|---|---|
 | **Claude Code** | Its **stable channel**: a release about a week old that skips the ones with major regressions (Anthropic's [setup page](https://code.claude.com/docs/en/setup)). Renovate opens a pull request when it moves; CI builds the image, checks that Claude Code installs and runs, and runs every test; only then is it merged and the host builds it. **Never below 2.1.319**: the policy needs it (an older Claude Code would ignore the setting that keeps an unattended agent from waiting on a prompt), so while the channel is behind, the agent stays on 2.1.319 | On the host, set `CLAUDE_CODE_VERSION` to the previous version (for example `2.1.322`) and redeploy. A version below 2.1.319 fails the build, and the host keeps the deployment it had. Remove the variable to follow the channel again |
@@ -287,6 +295,8 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | It does not remember something from yesterday | The nightly memory left it out. Ask "What do you remember about …?", and say "Remember that …" for what must stay ([MEMORY.md](MEMORY.md)) |
 | A job's answer came to you instead of the group | The agent is no longer in that group; tell it to join again |
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
+| The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
+| "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
 | It never sleeps although sleep is on | The log says `not sleeping: Telegram did not accept the webhook`: the public address is missing or wrong ([SLEEP.md](SLEEP.md)) |
 | "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
