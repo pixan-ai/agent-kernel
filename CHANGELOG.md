@@ -15,8 +15,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- RELEASING.md says that a release also moves the image's `latest` tag (not for a pre-release).
 - The Railway template sleeps when idle: it sets `IDLE_SLEEP_MINUTES` to 3 and a public domain on port 8080. Serverless, the one switch a template cannot set, is turned on by whoever deploys; the guide says so.
-
 - README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.
 
 ## [1.1.0] - 2026-11-21
