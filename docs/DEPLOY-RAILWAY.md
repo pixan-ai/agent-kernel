@@ -34,7 +34,7 @@ Published: **https://railway.com/deploy/pixan-agent**. It does steps 1 to 3 for 
 | `OWNER_TELEGRAM_ID` | none, required | Your numeric Telegram id (ask @userinfobot). Only you can talk to the agent at first. |
 | `CLAUDE_CODE_OAUTH_TOKEN` | none, optional | Set this OR ANTHROPIC_API_KEY. From `claude setup-token`, for a personal agent on your Claude subscription. |
 | `ANTHROPIC_API_KEY` | none, optional | Set this OR CLAUDE_CODE_OAUTH_TOKEN. An Anthropic Console API key, billed per use: for an agent that serves groups or clients. Wins if both are set. |
-| `TZ` | `America/Mexico_City` | Your time zone, for scheduled jobs. |
+| `TZ` | `America/Mexico_City`, required with that default | Your time zone, for scheduled jobs. |
 
 5. Template: name `pixan-agent`, the same icon, description "Claude Code-based 24/7 personal agent on Telegram in one container.", category **AI/ML**, and the overview in [railway-template-overview.md](railway-template-overview.md).
 
