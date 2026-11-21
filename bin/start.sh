@@ -8,6 +8,7 @@ set -euo pipefail
 trim() { local v=${!1}; v=${v#"${v%%[![:space:]]*}"}; printf -v "$1" '%s' "${v%"${v##*[![:space:]]}"}"; }
 trim TELEGRAM_BOT_TOKEN; trim OWNER_TELEGRAM_ID
 [[ $OWNER_TELEGRAM_ID =~ ^[0-9]+$ ]] || { echo "OWNER_TELEGRAM_ID must be your numeric Telegram id (ask @userinfobot), not \"$OWNER_TELEGRAM_ID\"" >&2; exit 1; }
+[[ $TELEGRAM_BOT_TOKEN =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || { echo "TELEGRAM_BOT_TOKEN does not look like a token from @BotFather (digits, a colon, then letters, digits, - or _; no spaces)" >&2; exit 1; }
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
 [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }
 # The image starts as root because hosts mount volumes owned by root: fix ownership, then drop to agent (uid 1001) for everything else.

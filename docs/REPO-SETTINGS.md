@@ -14,6 +14,7 @@ Settings that cannot live in the repository's files. Checked against the public 
 | 8 | Immutable releases | on (set by the owner) | A published release and its tag cannot be changed afterwards | Settings, General, Releases |
 | 9 | Renovate | installed | Updates every pinned version by pull request and merges it when CI is green (`renovate.json`) | Install the Renovate app (github.com/apps/renovate) on this repository only |
 | 10 | Delete head branches after merge; Wiki and Projects off | on; off | No stale branches, no empty tabs | Settings, General |
+| 11 | Environment `railway` | only where `deploy.yml` is used | Holds `RAILWAY_TOKEN`; only `main` may use it, so a manual run from another branch gets no token (audit of 2026-11-21, L1) | Settings, Environments: deployment branches = `main`; the secret in the environment, not in the repository ([GETTING-STARTED.md](GETTING-STARTED.md#updates-and-how-to-go-back)) |
 
 ## Ruleset for `main`
 

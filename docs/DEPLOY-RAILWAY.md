@@ -16,6 +16,7 @@ Notes:
 
 - This repository carries no `railway.json`: Railway deprecated Config as Code (it stops reading `railway.json` and `railway.toml` on 2026-12-01, and new services cannot use it). The service settings above are the configuration. `.railway/railway.ts` (Infrastructure as Code) is the official alternative for teams that manage several services.
 - Railway bills per minute for CPU and memory. Long polling keeps a Serverless service awake, so Serverless on costs nothing for an always-on agent; the sleep (`IDLE_SLEEP_MINUTES`) needs it on ([SLEEP.md](SLEEP.md)). A template cannot turn it on: the agent tells its owner when it is off.
+- `railway ssh` opens a shell as the image's user, which is root: the image starts as root to give `/data` to the agent (audit of 2026-11-21, L6; not yet confirmed with `railway ssh -- id`). Reading logs is fine. For anything else, first drop to the agent's user with `exec setpriv --reuid=1001 --regid=1001 --init-groups --no-new-privs env HOME=/home/agent bash`, and never run `claude` or a program from `/data/bin` or `/home/agent/.local/bin` as root: the agent can write those.
 - Use a dedicated bot token. Do not reuse one that another process polls.
 - Rotate a credential if it is ever pasted into a chat, a log or a screenshot ([SECRETS.md](SECRETS.md)).
 

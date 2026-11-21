@@ -35,12 +35,12 @@ Without Serverless the agent still stops Claude, but the host keeps the containe
 
 ## What changes when an agent sleeps
 
-- **If Telegram refuses the webhook** (no HTTPS), the agent does not sleep: the log says `not sleeping: Telegram did not accept the webhook`. Telegram does accept an address that does not reach the agent (for example a domain pointed at the wrong port), so before sleeping the agent also calls itself through that address; if its own listener does not answer, the log says `not sleeping: … does not reach this service on port …` and it removes the webhook. Either way it keeps working, always on, and tells the owner on Telegram why it cannot sleep (once per start), since an agent that stays awake is billed around the clock.
+- **If Telegram refuses the webhook** (no HTTPS), the agent does not sleep: the log says `not sleeping: Telegram did not accept the webhook`. Telegram does accept an address that does not reach the agent (for example a domain pointed at the wrong port), so before sleeping the agent also calls itself through that address and expects its own listener's answer, which carries a code made new for each sleep (something else in front of the address, such as a CDN that answers 403 itself, cannot know it); if that answer does not come, the log says `not sleeping: … does not reach this service on port …` and it removes the webhook. Either way it keeps working, always on, and tells the owner on Telegram why it cannot sleep (once per start), since an agent that stays awake is billed around the clock.
 - **Scheduled jobs.** A suspended container runs nothing. If the agent has jobs, the doorbell sends one packet every four minutes so the host keeps the container (Claude still sleeps: about a third of the memory). An agent without jobs is suspended completely.
 - **Nightly backup.** It would not run in a suspended container, so a backup is made when going to sleep if the last one is older than 20 hours.
 - **The first answer** after a sleep takes a few seconds longer.
 - **The peer view** of a suspended agent: untested. Private-network traffic should wake the container, and the first attempt may fail.
-- The public address only wakes the container; without the secret the doorbell answers 403 and Claude is not started. After a wake with no message waiting, the agent goes straight back to waiting.
+- The public address only wakes the container; without the secret the doorbell answers 403 (with that sleep's code, which is no credential) and Claude is not started. After a wake with no message waiting, the agent goes straight back to waiting.
 
 ## Not verified yet
 

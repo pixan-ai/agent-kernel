@@ -275,7 +275,7 @@ Everything is kept current; how a new version reaches your agent depends on how 
 
 - **On Railway, one more step makes it reach the agent by itself.** Railway deploys a commit on its own only when the GitHub user who pushed it has a Railway account; a commit that Renovate merges waits on the service's page under "Deploy this commit from an external contributor?" until someone clicks **Deploy**. To skip that, let GitHub deploy it after CI passes ([`deploy.yml`](../.github/workflows/deploy.yml)), once:
   1. Railway → your project → **Settings → Tokens** → create a token for the environment (usually `production`).
-  2. GitHub → this repository (or your copy) → **Settings → Secrets and variables → Actions**: a secret `RAILWAY_TOKEN` with that token, and a variable `RAILWAY_SERVICE_IDS` with the id of each agent's service, separated by spaces (the id is in the service's address: `…/service/<id>`).
+  2. GitHub → this repository (or your copy) → **Settings → Environments → New environment** named `railway`. Under **Deployment branches and tags** choose **Selected branches and tags** and add `main` only. In that environment add a secret `RAILWAY_TOKEN` with the token, and a variable `RAILWAY_SERVICE_IDS` with the id of each agent's service, separated by spaces (the id is in the service's address: `…/service/<id>`). Keep the token there, not under the repository's own secrets: then a run started from any other branch cannot read it.
   3. Check it once: **Actions → Deploy to Railway → Run workflow**, and the agents redeploy without asking.
 
   Without these, the workflow does nothing, and each update waits for your click. Someone who deployed from the one-click template gets a notice from Railway when there is an update and chooses when to apply it; Railway does not let a template apply updates by itself.
@@ -296,6 +296,7 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | A job's answer came to you instead of the group | The agent is no longer in that group; tell it to join again |
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
+| The agent never starts; the log says `TELEGRAM_BOT_TOKEN does not look like a token from @BotFather` | The token was mistyped or pasted with a space inside: copy it again with @BotFather's copy button |
 | "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
 | "⚠️ I am asleep, but the host keeps me running and billed" | Serverless is off: in the service's **Settings**, turn **Serverless** on, then redeploy ([SLEEP.md](SLEEP.md)) |
 | "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |

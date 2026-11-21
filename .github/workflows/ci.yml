@@ -92,7 +92,10 @@ jobs:
       - name: The agent image starts its real entrypoint, and the base stays non-root
         run: |
           docker run --rm agent-kernel:ci 2>&1 | grep -q "TELEGRAM_BOT_TOKEN: is not set"
-          docker run --rm --entrypoint sh agent-kernel:ci -c 'case ":$PATH:" in *:/home/agent/*:/usr/bin:*|*:/data/*:/usr/bin:*) echo "agent folder before /usr/bin: $PATH"; exit 1 ;; esac'
+          # The agent's folders come last on PATH, and every folder before them is root's alone (L8: a PATH like /usr/bin:/data/bin:/usr/local/bin passed).
+          docker run --rm --entrypoint bash agent-kernel:ci -c 'a=; IFS=: read -ra P <<< "$PATH"; for d in "${P[@]}"; do case $d in /home/agent/*|/data/*) a=1; continue ;; esac
+            [ -z "$a" ] || { echo "system folder $d after an agent folder: $PATH"; exit 1; }
+            [ ! -e "$d" ] || { [ "$(stat -Lc %u "$d")" = 0 ] && [ -z "$(find -L "$d" -maxdepth 0 -perm /022)" ]; } || { echo "$d is not root-only: $PATH"; exit 1; }; done'
           test "$(docker inspect -f '{{.Config.User}}' agent-kernel:base)" = 1001
       - name: Vulnerabilities in the base target (Trivy, blocking)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0

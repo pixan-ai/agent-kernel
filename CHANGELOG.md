@@ -6,13 +6,17 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- Sleep (audit of 2026-11-21, L3): the check that the public address reaches this agent accepted any 403, so something else in front of it (a CDN, another service) could pass it and the agent would sleep for ever. The listener now answers with a code made new for each sleep, and the agent checks that code.
+- **Security** (audit of 2026-11-21, L6, L8): `railway ssh` opens a root shell in the agent's container; DEPLOY-RAILWAY.md and the threat model now say so and how to drop to the agent's user first. CI checks that every folder on `PATH` before the agent's own is root's alone and that none of the system's comes after them (a `PATH` like `/usr/bin:/data/bin:/usr/local/bin` passed before), and the docs check covers every spelling of `docker exec` and `railway ssh`.
+- **Security** (audit of 2026-11-21, L1, L2): `deploy.yml` could be run by hand from any branch, deploying untested code, and that branch could read the Railway token. The token now lives in a GitHub environment, `railway`, that only `main` may use, and nothing from the repository is checked out. Two deploys no longer run at once (a second one waits), and a service that fails to deploy fails the run instead of being hidden by the next one. Whoever set up the token moves it into that environment (GETTING-STARTED.md).
+- A bot token with a space inside (pasted from a phone) survived the trim, and the bot went mute with no error. `start.sh` now stops saying the token does not look like one from @BotFather, without printing it (audit of 2026-11-21, L7).
 - Sleep: an agent that could not sleep (no public address, a webhook Telegram refused, an address that does not reach it) only said so in the log, so it stayed awake and billed without anyone knowing (seen 2026-11-21). It now also tells the owner on Telegram, with the reason, once per start.
 - Sleep: with Serverless off the host keeps a sleeping agent running and billed, and the agent cannot read that setting. Asleep for 30 minutes without the clock jump a suspension leaves, and with no scheduled jobs, it now tells the owner to turn Serverless on, once per start.
 
 ### Changed
 
+- RELEASING.md says that a release also moves the image's `latest` tag (not for a pre-release).
 - The Railway template sleeps when idle: it sets `IDLE_SLEEP_MINUTES` to 3 and a public domain on port 8080. Serverless, the one switch a template cannot set, is turned on by whoever deploys; the guide says so.
-
 - README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.
 
 ## [1.1.0] - 2026-11-21

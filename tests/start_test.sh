@@ -188,6 +188,10 @@ check "...while spaces and line breaks pasted around the owner id and the bot to
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID="123 456")
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
 check "...but a space inside the owner id is a typo, not padding: it fails fast (audit of 2026-11-21, L4)" bash -c 'test "$0" = 1 && grep -q "OWNER_TELEGRAM_ID must be your numeric Telegram id" "$1"' "$RC" "$ERR"
+# A space inside the bot token survives the trim, and the bot went mute with no error (audit of 2026-11-21, L7).
+base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN="123:a b" OWNER_TELEGRAM_ID=42)
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x
+check "a bot token that is not digits:letters -> fails fast saying so, without printing the token (L7)" bash -c 'test "$0" = 1 && grep -q "TELEGRAM_BOT_TOKEN does not look like" "$1" && ! grep -q "a b" "$1" && test ! -e /data/probe' "$RC" "$ERR"
 # Without a volume, memory, settings and jobs vanish at the next redeploy: say so (audit of 2026-11-21, M1).
 base_env=(PATH="$STUBS:$PATH" TELEGRAM_BOT_TOKEN=123:abc OWNER_TELEGRAM_ID=42)
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x NOT_A_VOLUME=1
