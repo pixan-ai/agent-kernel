@@ -40,3 +40,5 @@ Renovate opens a pull request for every pinned version that moves and merges it 
 ## Commit messages
 
 Imperative, one subject line, explain why in the body when it is not obvious.
+
+A pull request's title becomes the commit on `main`, and hosts such as Railway show it to whoever runs an agent: say what changes for them ("Clearer error for a mistyped bot token"), not internal codes. Audit references (L7, A3…) go in the description and the CHANGELOG.

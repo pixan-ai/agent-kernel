@@ -38,7 +38,7 @@ cp .env.example .env   # then fill in one credential and the two Telegram values
 docker compose up -d --build
 ```
 
-4. Message your bot. The first build takes several minutes.
+4. Message your bot. The first build takes several minutes. `/start` shows pairing instructions from the official plugin: ignore them, the owner needs no pairing.
 
 Use a **new bot token**. Two processes polling the same bot conflict (HTTP 409).
 
@@ -54,8 +54,9 @@ Any amd64 Linux server with Docker, with no incoming port: [docs/DEPLOY-LINUX.md
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `CLAUDE_CODE_OAUTH_TOKEN` | one of the two | Claude subscription (Pro/Max) token from `claude setup-token`; for a personal agent ([which credential](https://code.claude.com/docs/en/legal-and-compliance)) |
-| `ANTHROPIC_API_KEY` | one of the two | Console API key, billed per use; for an agent that serves groups or clients. Takes precedence if both are set |
+| `CLAUDE_KEY` | yes | Your Claude key, either kind: its start says which. A Claude subscription (Pro/Max) token from `claude setup-token` (`sk-ant-oat01-…`), for a personal agent, or a Console API key (`sk-ant-api03-…`), billed per use, for an agent that serves groups or clients ([which credential](https://code.claude.com/docs/en/legal-and-compliance)). To switch, replace it and redeploy |
+| `CLAUDE_CODE_OAUTH_TOKEN` | instead of `CLAUDE_KEY` | Claude subscription (Pro/Max) token from `claude setup-token`; for a personal agent ([which credential](https://code.claude.com/docs/en/legal-and-compliance)) |
+| `ANTHROPIC_API_KEY` | instead of `CLAUDE_KEY` | Console API key, billed per use; for an agent that serves groups or clients. Takes precedence if both are set |
 | `TELEGRAM_BOT_TOKEN` | yes | Bot token, read by the official plugin |
 | `OWNER_TELEGRAM_ID` | yes | The only user who can talk to the bot in private (allowlist), and who gets every notice. In groups the bot hears every member |
 | `TELEGRAM_GROUP_IDS` | no | Telegram groups the bot may take part in (see [docs/GROUPS.md](docs/GROUPS.md)). In a listed group it reads and answers every member, people and bots. Unset = private chat with the owner only |

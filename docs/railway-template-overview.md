@@ -4,7 +4,7 @@ Pixan agent is a Claude Code-based 24/7 personal agent on Telegram, in one conta
 
 ## About Hosting Pixan agent
 
-Pixan agent runs as one service with a volume at `/data`, where it keeps its memory, settings, jobs and installed tools across restarts and redeploys. Railway builds the image from the repository's Dockerfile, which installs Claude Code with Anthropic's official installer during your own build. You paste three values (a new Telegram bot token, your Telegram id and a Claude credential), deploy, and message your bot; the first build takes several minutes. The service restarts on its own if the agent stops, and a watchdog tells you on Telegram if the channel dies or a message goes unanswered.
+Pixan agent runs as one service with a volume at `/data`, where it keeps its memory, settings, jobs and installed tools across restarts and redeploys. Railway builds the image from the repository's Dockerfile, which installs Claude Code with Anthropic's official installer during your own build. You paste three values (your Claude key, your Telegram id and a new Telegram bot token), deploy, and message your bot; the first build takes several minutes. The plugin answers `/start` with pairing instructions: ignore them, the owner needs no pairing. The service restarts on its own if the agent stops, and a watchdog tells you on Telegram if the channel dies or a message goes unanswered.
 
 ## Common Use Cases
 
@@ -17,7 +17,7 @@ Pixan agent runs as one service with a volume at `/data`, where it keeps its mem
 
 - A new Telegram bot: talk to @BotFather, `/newbot`, and copy its token. Use a bot that nothing else polls.
 - Your numeric Telegram id: ask @userinfobot.
-- A Claude credential: run `claude setup-token` on your computer for a personal agent on your Claude subscription. For an agent that serves groups or clients, use an Anthropic API key (`ANTHROPIC_API_KEY`) instead.
+- A Claude key, in one field whatever its kind: run `claude setup-token` on your computer for a personal agent on your Claude subscription, or create an Anthropic Console API key for an agent that serves groups or clients.
 
 ### Deployment Dependencies
 
