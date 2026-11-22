@@ -13,7 +13,7 @@ chmod 755 "$STUBS"; chmod 644 "$OUT" "$ERR"
 cat > "$STUBS/script" <<'EOF'
 #!/bin/bash
 # Stub pty: record who would run claude, with which credentials and command, then "exit" like claude dying.
-{ echo "uid=$(id -u)"; echo "nnp=$(awk '/^NoNewPrivs/ {print $2}' /proc/self/status)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "peerkey=${PEER_SSH_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
+{ echo "uid=$(id -u)"; echo "nnp=$(awk '/^NoNewPrivs/ {print $2}' /proc/self/status)"; echo "oauth=${CLAUDE_CODE_OAUTH_TOKEN:-}"; echo "apikey=${ANTHROPIC_API_KEY-unset}"; echo "bottoken=${TELEGRAM_BOT_TOKEN:-}"; echo "backupsecrets=${RCLONE_CONF:-}${BACKUP_AGE_KEY:-}"; echo "peerkey=${PEER_SSH_KEY:-}"; echo "cmd=$2"; echo "dreamt=$(cat /data/dream-runs 2> /dev/null)"; } > /data/probe
 echo "owner said: SCREEN-MARKER" > /data/tui.log; sleep 3  # long enough for a 1 s mirror to fire
 [ ! -e /data/long-claude ] || /bin/sleep 60 < /dev/null  # a Claude that keeps running, for the idle watcher (off the pipe, as a killed Claude would be)
 EOF
@@ -164,6 +164,20 @@ run
 check "no Claude credential -> fails fast" test "$RC" = 1
 check "...naming both options" grep -q "CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" "$ERR"
 check "...before starting claude" test ! -e /data/probe
+
+# The template sets both Claude fields to none, so that both exist on the host and one can switch later; none means unset (2026-11-22).
+run CLAUDE_CODE_OAUTH_TOKEN=none ANTHROPIC_API_KEY=none
+check "none in both Claude fields -> fails fast naming both options" bash -c 'test "$0" = 1 && grep -q "CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" "$1"' "$RC" "$ERR"
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x ANTHROPIC_API_KEY=none
+check "none in the API key field -> starts on the subscription, and Claude never sees the none" probe "apikey=unset"
+# A subscription token pasted into the API key field left the agent mute, waiting for an organization's policy (seen live, 2026-11-22).
+wrong_field() { test "$RC" = 1 && grep -q "$1" "$ERR" && grep -q "$1" /data/curl-calls && ! grep -q secretvalue "$ERR" /data/curl-calls && test ! -e /data/probe; }
+run ANTHROPIC_API_KEY=sk-ant-oat01-secretvalue
+check "a subscription token in ANTHROPIC_API_KEY -> stops, and tells the owner on Telegram where it goes, without the token" wrong_field "put it in CLAUDE_CODE_OAUTH_TOKEN"
+env -i "${base_env[@]}" ANTHROPIC_API_KEY=sk-ant-oat01-secretvalue timeout 20 "$START" > "$OUT" 2> "$ERR"; pkill -u 1001 2> /dev/null
+check "...once: the restart that follows does not message again" test "$(grep -c "put it in CLAUDE_CODE_OAUTH_TOKEN" /data/curl-calls)" = 1
+run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-api03-secretvalue
+check "a Console API key in CLAUDE_CODE_OAUTH_TOKEN -> the same, the other way round" wrong_field "put it in ANTHROPIC_API_KEY"
 
 run CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-x TG_STATUS=401
 check "Telegram rejects the bot token (401) -> fails fast, says so" rejected_by_telegram
