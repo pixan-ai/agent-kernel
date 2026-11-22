@@ -6,6 +6,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- A subscription token pasted into the API key field left an agent mute, waiting for an organization's policy (seen live, 2026-11-22). The Claude key is now one field, `CLAUDE_KEY`, whatever its kind: the agent tells by its start (`sk-ant-oat01-` subscription, `sk-ant-api03-` Console) and stops, saying so, on anything else. `CLAUDE_CODE_OAUTH_TOKEN` and `ANTHROPIC_API_KEY` still work; `CLAUDE_KEY` wins over them.
 - Sleep (audit of 2026-11-21, L3): the check that the public address reaches this agent accepted any 403, so something else in front of it (a CDN, another service) could pass it and the agent would sleep for ever. The listener now answers with a code made new for each sleep, and the agent checks that code.
 - **Security** (audit of 2026-11-21, L6, L8): `railway ssh` opens a root shell in the agent's container; DEPLOY-RAILWAY.md and the threat model now say so and how to drop to the agent's user first. CI checks that every folder on `PATH` before the agent's own is root's alone and that none of the system's comes after them (a `PATH` like `/usr/bin:/data/bin:/usr/local/bin` passed before), and the docs check covers every spelling of `docker exec` and `railway ssh`.
 - **Security** (audit of 2026-11-21, L1, L2): `deploy.yml` could be run by hand from any branch, deploying untested code, and that branch could read the Railway token. The token now lives in a GitHub environment, `railway`, that only `main` may use, and nothing from the repository is checked out. Two deploys no longer run at once (a second one waits), and a service that fails to deploy fails the run instead of being hidden by the next one. Whoever set up the token moves it into that environment (GETTING-STARTED.md).
@@ -15,6 +16,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- The Railway template asks for three values in order, each saying where to get it: `CLAUDE_KEY`, the owner's id, the bot token. Railway had listed the optional Claude fields out of sight.
+- CONTRIBUTING.md: a pull request's title says what changes for whoever runs an agent, since hosts show it; audit codes go in the description.
 - RELEASING.md says that a release also moves the image's `latest` tag (not for a pre-release).
 - The Railway template sleeps when idle: it sets `IDLE_SLEEP_MINUTES` to 3 and a public domain on port 8080. Serverless, the one switch a template cannot set, is turned on by whoever deploys; the guide says so.
 - README shows the OpenSSF Best Practices badge ("passing", project 16964, 2026-11-20) and status 1.1; RELEASING.md describes publishing a release from the GitHub web page, as 1.0.0 and 1.1.0 were.

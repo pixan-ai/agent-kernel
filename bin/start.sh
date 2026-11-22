@@ -7,10 +7,18 @@ set -euo pipefail
 # id would leave the bot mute, so it stops the start below.
 trim() { local v=${!1}; v=${v#"${v%%[![:space:]]*}"}; printf -v "$1" '%s' "${v%"${v##*[![:space:]]}"}"; }
 trim TELEGRAM_BOT_TOKEN; trim OWNER_TELEGRAM_ID
+# One field for the Claude credential, CLAUDE_KEY: its prefix says which kind it is, so it cannot be in the wrong field (2026-11-22).
+# It wins over the two official variables, which still work. Claude gets the official one, never CLAUDE_KEY.
+[ -z "${CLAUDE_KEY:-}" ] || trim CLAUDE_KEY
+case ${CLAUDE_KEY:-} in
+  sk-ant-oat*) export CLAUDE_CODE_OAUTH_TOKEN=$CLAUDE_KEY; unset ANTHROPIC_API_KEY ;;
+  sk-ant-api*) export ANTHROPIC_API_KEY=$CLAUDE_KEY; unset CLAUDE_CODE_OAUTH_TOKEN ;;
+  ?*) echo "CLAUDE_KEY does not look like a Claude key: a subscription token starts with sk-ant-oat01-, a Console API key with sk-ant-api03-" >&2; exit 1 ;;
+esac; unset CLAUDE_KEY
 [[ $OWNER_TELEGRAM_ID =~ ^[0-9]+$ ]] || { echo "OWNER_TELEGRAM_ID must be your numeric Telegram id (ask @userinfobot), not \"$OWNER_TELEGRAM_ID\"" >&2; exit 1; }
 [[ $TELEGRAM_BOT_TOKEN =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || { echo "TELEGRAM_BOT_TOKEN does not look like a token from @BotFather (digits, a colon, then letters, digits, - or _; no spaces)" >&2; exit 1; }
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
-[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY" >&2; exit 1; }
+[ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}${ANTHROPIC_API_KEY:-}" ] || { echo "missing CLAUDE_KEY (or CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY)" >&2; exit 1; }
 # The image starts as root because hosts mount volumes owned by root: fix ownership, then drop to agent (uid 1001) for everything else.
 # As root, nothing the agent can write is trusted: only the system's own programs (the agent's bin folders are on its PATH), no
 # symlink followed (-h), and no way back to root after the drop (--no-new-privs). Audit of 2026-11-21, A1, A2, B5.

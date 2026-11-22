@@ -23,7 +23,7 @@ In `.env`:
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | A new bot from @BotFather that nothing else polls |
 | `OWNER_TELEGRAM_ID` | The owner's numeric Telegram id (ask @userinfobot) |
-| `ANTHROPIC_API_KEY` | For a company agent: a Console API key in the company's name, with its own billing. A subscription token (`CLAUDE_CODE_OAUTH_TOKEN`) is for one person's own agent ([which credential](https://code.claude.com/docs/en/legal-and-compliance)) |
+| `CLAUDE_KEY` | For a company agent: a Console API key (`sk-ant-api03-…`) in the company's name, with its own billing. A subscription token (`sk-ant-oat01-…`) is for one person's own agent ([which credential](https://code.claude.com/docs/en/legal-and-compliance)) |
 | `TZ` | The time zone for scheduled jobs, e.g. `America/Mexico_City` |
 
 `.env` holds secrets: keep it readable only by the administrator (`chmod 600 .env`) and out of any shared folder. The first build takes several minutes; then message the bot.

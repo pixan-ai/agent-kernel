@@ -23,7 +23,7 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 
 ### Railway (the quick way)
 
-**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2, and message your bot when the build finishes (several minutes). It sets up everything below for you, and the agent sleeps when idle (see below) once you turn **Serverless** on in the service's **Settings** and redeploy: Railway does not let a template do that switch. To do it by hand instead:
+**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2 (your Claude key goes in `CLAUDE_KEY`, whichever kind it is), and message your bot when the build finishes (several minutes). It sets up everything below for you, and the agent sleeps when idle (see below) once you turn **Serverless** on in the service's **Settings** and redeploy: Railway does not let a template do that switch. To do it by hand instead:
 
 1. New project → deploy from this repository.
 2. Service **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**.
@@ -34,7 +34,7 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | from step 1 |
 | `OWNER_TELEGRAM_ID` | from step 1 |
-| `CLAUDE_CODE_OAUTH_TOKEN` | from step 2 (or `ANTHROPIC_API_KEY`, not both) |
+| `CLAUDE_KEY` | from step 2: your subscription token or your Console API key |
 | `TZ` | your time zone, e.g. `America/Mexico_City` |
 
 5. Press **Deploy** (variables stay pending until you do).
@@ -107,8 +107,8 @@ Set once, at installation. Changing one restarts the agent.
 
 | Variable | Default | What it does | More |
 |---|---|---|---|
-| `CLAUDE_CODE_OAUTH_TOKEN` | required, or the next | Claude subscription token | step 2 |
-| `ANTHROPIC_API_KEY` | | Console API key instead of the subscription; wins if both are set | step 2 |
+| `CLAUDE_KEY` | required | Your Claude key: a subscription token (`sk-ant-oat01-…`) or a Console API key (`sk-ant-api03-…`); its start says which. To switch, replace it and redeploy | step 2 |
+| `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY` | | Claude Code's own names, still read; `CLAUDE_KEY` wins over them | step 2 |
 | `TELEGRAM_BOT_TOKEN` | required | This agent's own bot | step 1 |
 | `OWNER_TELEGRAM_ID` | required | The owner: the only private chat, and who gets every notice | step 1 |
 | `TZ` | `UTC`; the Railway template sets `America/Mexico_City` | Time zone for jobs, the nightly recycle and the dates the agent sees | [CRON.md](CRON.md) |
@@ -297,6 +297,7 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
 | The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
 | The agent never starts; the log says `TELEGRAM_BOT_TOKEN does not look like a token from @BotFather` | The token was mistyped or pasted with a space inside: copy it again with @BotFather's copy button |
+| The agent never starts; the log says `CLAUDE_KEY does not look like a Claude key` | Paste the whole key again: a subscription token starts with `sk-ant-oat01-`, a Console API key with `sk-ant-api03-` |
 | "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
 | "⚠️ I am asleep, but the host keeps me running and billed" | Serverless is off: in the service's **Settings**, turn **Serverless** on, then redeploy ([SLEEP.md](SLEEP.md)) |
 | "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
