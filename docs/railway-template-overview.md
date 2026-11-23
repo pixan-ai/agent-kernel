@@ -1,6 +1,6 @@
 # Deploy and Host Pixan agent on Railway
 
-Pixan agent is a Claude Code-based 24/7 personal agent on Telegram, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. It has memory, scheduled jobs, groups and fellow agents, with less than 300 lines of Bash. Open source, Apache-2.0.
+Pixan agent is a Claude Code-based 24/7 personal agent on Telegram, in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. It has memory, scheduled jobs, groups and fellow agents, within 247 lines of Bash. Open source, Apache-2.0.
 
 ## About Hosting Pixan agent
 

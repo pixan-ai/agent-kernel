@@ -6,15 +6,11 @@ set -euo pipefail
 # A value pasted from a phone often carries spaces or line breaks around it: trim them. One inside is a typo, and a mistyped owner
 # id would leave the bot mute, so it stops the start below.
 trim() { local v=${!1}; v=${v#"${v%%[![:space:]]*}"}; printf -v "$1" '%s' "${v%"${v##*[![:space:]]}"}"; }
-trim TELEGRAM_BOT_TOKEN; trim OWNER_TELEGRAM_ID
+trim TELEGRAM_BOT_TOKEN; trim OWNER_TELEGRAM_ID; [ -z "${CLAUDE_KEY:-}" ] || trim CLAUDE_KEY
 # One field for the Claude credential, CLAUDE_KEY: its prefix says which kind it is, so it cannot be in the wrong field (2026-11-22).
 # It wins over the two official variables, which still work. Claude gets the official one, never CLAUDE_KEY.
-[ -z "${CLAUDE_KEY:-}" ] || trim CLAUDE_KEY
-case ${CLAUDE_KEY:-} in
-  sk-ant-oat*) export CLAUDE_CODE_OAUTH_TOKEN=$CLAUDE_KEY; unset ANTHROPIC_API_KEY ;;
-  sk-ant-api*) export ANTHROPIC_API_KEY=$CLAUDE_KEY; unset CLAUDE_CODE_OAUTH_TOKEN ;;
-  ?*) echo "CLAUDE_KEY does not look like a Claude key: a subscription token starts with sk-ant-oat01-, a Console API key with sk-ant-api03-" >&2; exit 1 ;;
-esac; unset CLAUDE_KEY
+case ${CLAUDE_KEY:-} in sk-ant-oat*) export CLAUDE_CODE_OAUTH_TOKEN=$CLAUDE_KEY; unset ANTHROPIC_API_KEY ;; sk-ant-api*) export ANTHROPIC_API_KEY=$CLAUDE_KEY; unset CLAUDE_CODE_OAUTH_TOKEN ;;
+  ?*) echo "CLAUDE_KEY does not look like a Claude key: a subscription token starts with sk-ant-oat01-, a Console API key with sk-ant-api03-" >&2; exit 1 ;; esac; unset CLAUDE_KEY
 [[ $OWNER_TELEGRAM_ID =~ ^[0-9]+$ ]] || { echo "OWNER_TELEGRAM_ID must be your numeric Telegram id (ask @userinfobot), not \"$OWNER_TELEGRAM_ID\"" >&2; exit 1; }
 [[ $TELEGRAM_BOT_TOKEN =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || { echo "TELEGRAM_BOT_TOKEN does not look like a token from @BotFather (digits, a colon, then letters, digits, - or _; no spaces)" >&2; exit 1; }
 # Without a Claude credential, claude would sit on a login screen nobody sees: fail fast instead.
@@ -23,10 +19,8 @@ esac; unset CLAUDE_KEY
 # As root, nothing the agent can write is trusted: only the system's own programs (the agent's bin folders are on its PATH), no
 # symlink followed (-h), and no way back to root after the drop (--no-new-privs). Audit of 2026-11-21, A1, A2, B5.
 if [ "$EUID" = 0 ]; then
-  P=$PATH; PATH=/usr/sbin:/usr/bin:/sbin:/bin
-  mkdir -p /data/workspace && chown -h 1001:1001 /data /data/workspace
-  exec setpriv --reuid=1001 --regid=1001 --init-groups --no-new-privs env HOME=/home/agent PATH="$P" "$0" "$@"
-fi
+  P=$PATH; PATH=/usr/sbin:/usr/bin:/sbin:/bin; mkdir -p /data/workspace && chown -h 1001:1001 /data /data/workspace
+  exec setpriv --reuid=1001 --regid=1001 --init-groups --no-new-privs env HOME=/home/agent PATH="$P" "$0" "$@"; fi
 [ -w /data ] || { echo "/data is not writable by uid $(id -u): start the container as root, as the agent image does by default (on Railway, delete RAILWAY_RUN_UID or set it to 0)" >&2; exit 1; }
 # A token copied from a phone often carries line breaks; tokens never contain whitespace, so strip it.
 # Then log a sanity check without printing any part of it.
@@ -52,8 +46,7 @@ config.sh apply
 v="Claude Code $(claude --version 2> /dev/null | cut -d' ' -f1 || true), Telegram plugin $(find "$CFG/plugins/cache/claude-plugins-official/telegram" -mindepth 1 -maxdepth 1 -printf '%f\n' 2> /dev/null | sort -V | tail -1 || true)"
 # Without a volume everything above is lost at the next redeploy, silently: say so.
 mountpoint -q /data || { echo "warning: /data is not a volume" >&2; notify.sh "⚠️ /data is not a volume: my memory, settings and jobs will be lost at the next redeploy. Add a volume mounted at /data." || true; }
-[ ! -s /data/cron/versions ] || [ "$(cat /data/cron/versions)" = "$v" ] || notify.sh "🔄 Versions changed: $(cat /data/cron/versions) → $v. If something broke, set CLAUDE_CODE_VERSION on the host to the previous version and redeploy, or use the host's rollback." || true
-echo "$v" > /data/cron/versions
+[ ! -s /data/cron/versions ] || [ "$(cat /data/cron/versions)" = "$v" ] || notify.sh "🔄 Versions changed: $(cat /data/cron/versions) → $v. If something broke, set CLAUDE_CODE_VERSION on the host to the previous version and redeploy, or use the host's rollback." || true; echo "$v" > /data/cron/versions
 # A revoked or mistyped bot token would leave the bot mute with no error anywhere: ask Telegram once (the answer also tells the agent its own bot name, see the SessionStart hook). Only a clear 401 stops the start; a network hiccup does not. The URL goes through stdin so the token is not in a process list.
 code=$(printf 'url = "https://api.telegram.org/bot%s/getMe"\n' "$TELEGRAM_BOT_TOKEN" | curl -sS -K - -o "$TG/me.json" -w '%{http_code}' -m 10 2>/dev/null || true)
 [ "$code" != 401 ] || { echo "Telegram rejected TELEGRAM_BOT_TOKEN (HTTP 401): create a new one with BotFather" >&2; exit 1; }
@@ -61,9 +54,7 @@ unset TELEGRAM_BOT_TOKEN RCLONE_CONF BACKUP_AGE_KEY PEER_SSH_KEY  # Claude and w
 # Nobody is at the screen: pre-accept onboarding, the API key (if one is used) and trust for the workspace folder.
 # Auth: ANTHROPIC_API_KEY (Console, billed per use) or CLAUDE_CODE_OAUTH_TOKEN (subscription, from `claude setup-token`).
 [ -s "$CFG/.claude.json" ] || echo '{}' > "$CFG/.claude.json"
-KEY="${ANTHROPIC_API_KEY:-}"
-jq --arg k "${KEY: -20}" --arg ws "$WS" \
-  '.hasCompletedOnboarding=true | (if $k=="" then . else .customApiKeyResponses.approved=(((.customApiKeyResponses.approved//[])-[$k])+[$k]) end) | .projects[$ws].hasTrustDialogAccepted=true | .projects[$ws].hasCompletedProjectOnboarding=true' \
+KEY="${ANTHROPIC_API_KEY:-}"; jq --arg k "${KEY: -20}" --arg ws "$WS" '.hasCompletedOnboarding=true | (if $k=="" then . else .customApiKeyResponses.approved=(((.customApiKeyResponses.approved//[])-[$k])+[$k]) end) | .projects[$ws].hasTrustDialogAccepted=true | .projects[$ws].hasCompletedProjectOnboarding=true' \
   "$CFG/.claude.json" > "$CFG/.claude.json.tmp" && mv "$CFG/.claude.json.tmp" "$CFG/.claude.json"
 cd "$WS"
 # Opt-in via SCREEN_MIRROR, the seconds between copies: copy the readable screen to the service log when it changes. Off by default: the screen holds the owner's conversation.
@@ -75,9 +66,8 @@ cd "$WS"
 [ ! -f "$WS/sent.jsonl" ] || { tail -n 500 "$WS/sent.jsonl" > "$WS/sent.tmp" && mv "$WS/sent.tmp" "$WS/sent.jsonl"; }
 # Scheduled jobs: config.sh apply (above) built /data/cron/crontab from the image's jobs and the agent's. If the last heartbeat is old, say so: jobs due meanwhile did not run.
 [ ! -e /data/cron/alive ] || [ -e /data/idle ] || (( $(date +%s) - $(stat -c %Y /data/cron/alive) < 300 )) || notify.sh "Back online. I was down from $(date -r /data/cron/alive '+%F %H:%M') to $(date '+%H:%M'); jobs scheduled in between did not run." || true
-(while touch /data/cron/alive; do sleep 30; done) &
+(while touch /data/cron/alive; do sleep 30; done) & supercronic -quiet -inotify /data/cron/crontab &
 installs.sh replay &  # what was installed comes back if it went missing (docs/GETTING-STARTED.md); never blocks the start
-supercronic -quiet -inotify /data/cron/crontab &
 # Opt-in sleep (IDLE_SLEEP_MINUTES, docs/SLEEP.md): after that long without activity Claude is stopped and doorbell.sh waits for
 # Telegram to announce a message; then Claude starts again and continues the conversation. /data/idle marks "asleep".
 while :; do

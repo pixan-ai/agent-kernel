@@ -78,5 +78,6 @@ check "every docker exec in the docs runs as the agent, never root (A3; any spel
 check "DEPLOY-RAILWAY.md warns that railway ssh opens a root shell (L6)" grep -q "railway ssh.*root" docs/DEPLOY-RAILWAY.md
 check "...and every mention of railway ssh says how to drop to the agent's user, or links to where it does (L6, L8)" bash -c '! grep -rh "railway ssh" docs README.md CONTRIBUTING.md | grep -v -e "setpriv --reuid=1001" -e "(DEPLOY-RAILWAY.md)"'
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
-check "README's \"less than 300 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -lt 300
+# 247 is a budget, not a target: a 24/7 agent within 247 lines. A change that needs a line finds one to give back (CONTRIBUTING.md).
+check "README's \"within 247 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -le 247
 echo "$FAILS failed"; exit $((FAILS > 0))
