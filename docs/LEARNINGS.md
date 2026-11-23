@@ -86,4 +86,4 @@ Rule: a stub must demand what the real thing demands.
 
 - **A test that did not fail first is not a test.** Each one here was run against the old code and seen to fail before the change was written.
 - **Instructions are not locks.** Where the two differ, the documents say which one protects what (`THREAT-MODEL.md`).
-- **Fewer lines.** A suggestion that adds a mechanism is weighed against the risk it removes; several audit proposals were answered with one line, or with none.
+- **Fewer lines.** A suggestion that adds a mechanism is weighed against the risk it removes; several audit proposals were answered with one line, or with none. The scripts have a budget, 247 lines of code, and a test holds it. The number was first met by joining short statements, not by removing a function (2026-11-23: 277 to 247, every test unchanged): a budget kept by packing lines is kept in name only, so the next lines are to come from functions that go.

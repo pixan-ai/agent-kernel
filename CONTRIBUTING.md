@@ -37,6 +37,10 @@ CI runs the same checks. Never commit `.env` or any real credential.
 
 Renovate opens a pull request for every pinned version that moves and merges it itself once CI is green ([how updates work](docs/GETTING-STARTED.md#updates-and-how-to-go-back)). A Renovate pull request that stays red is a real finding: read the failing check before closing it or pinning the old version.
 
+## The line budget
+
+The scripts in `bin/` stay within 247 lines of code (comments and blank lines are not counted; `tests/docs_test.sh` checks it). A change that needs a line gives one back: first by removing what is no longer needed, not by joining statements until a line is hard to read.
+
 ## Commit messages
 
 Imperative, one subject line, explain why in the body when it is not obvious.

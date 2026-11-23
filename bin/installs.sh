@@ -25,18 +25,15 @@ sums() { find "${KEPT[@]}" -type f -print0 2> /dev/null | sort -z | xargs -0 -r 
   for f in /data/config/.claude.json /data/cron/config/.claude.json; do  # Claude Code rewrites it all the time: only its MCP servers count
     s=$(jq -cS '[.mcpServers // {}, (.projects // {} | .[] | .mcpServers // {})] | add | select(length > 0)' $f 2> /dev/null) && [ -n "$s" ] && echo "$(sha256sum <<<"$s" | cut -d' ' -f1)  $f"; done; true; }
 case "${1:-}" in
-  record)
-    t=$(changed "${TOOLS[@]}"); k=$([ ! -e "$SUMS" ] || diff <(sums) "$SUMS" | sed -n 's/^< [0-9a-f]* *//p' | head -1); touch "$SEEN"; trap 'sums > "$SUMS"' EXIT; c=$(field '.tool_input.command // .tool_input.file_path // .tool_input.notebook_path')
+  record) t=$(changed "${TOOLS[@]}"); k=$([ ! -e "$SUMS" ] || diff <(sums) "$SUMS" | sed -n 's/^< [0-9a-f]* *//p' | head -1); touch "$SEEN"; trap 'sums > "$SUMS"' EXIT; c=$(field '.tool_input.command // .tool_input.file_path // .tool_input.notebook_path')
     [ -z "$k" ] || "$B/notify.sh" "⚠️ $k was changed by hand, not through config.sh, after: ${c:0:300}" || true
     g=$(tr ';|&' '\n' <<<"$c" | sed -E 's/^ +//' | grep -E -- "$GONE")  # deleting files is not seen as a change: an uninstall is read from the command
     [ -n "$t$g" ] || exit 0
     jq -cn --arg t "$(field .tool_name)" --arg c "$c" '{at: (now | todate), tool: $t, command: $c}' >> "$LOG"
     "$B/notify.sh" "🧰 $([ -n "$t" ] && echo Installed || echo Removed): ${c:0:300}" || true ;;
   mark) touch "$SEEN"; sums > "$SUMS" ;;
-  replay)
-    trap 'touch "$SEEN"; sums > "$SUMS"' EXIT  # what the start wrote and puts back is not news to the owner
-    cd / && export UV_NO_CONFIG=1  # a uv.toml planted in the workspace must not choose the package index
-    mkdir -p /data/bin /data/tools
+  replay) trap 'touch "$SEEN"; sums > "$SUMS"' EXIT  # what the start wrote and puts back is not news to the owner
+    mkdir -p /data/bin /data/tools; cd / && export UV_NO_CONFIG=1  # a uv.toml planted in the workspace must not choose the package index
     ! command -v uv > /dev/null || [ -x /data/tools/venv/bin/python ] || uv venv -q --python /usr/bin/python3 /data/tools/venv || echo "installs: no Python environment (not fatal)" >&2
     [ -s "$LOG" ] || exit 0
     # The agent chains commands on one line: take each part on its own, without its redirections, and keep the installs and uninstalls.
