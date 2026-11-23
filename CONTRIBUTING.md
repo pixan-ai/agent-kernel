@@ -22,7 +22,7 @@ hadolint Dockerfile
 docker build -t agent-kernel .
 bash tests/docs_test.sh
 bash tests/workflows_test.sh
-for t in start tools policy cron peer config backup sleep dream install; do
+for t in start tools policy cron peer config backup sleep dream install unsent; do
   docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel "/tests/${t}_test.sh" || break
 done
 docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel /tests/media_test.sh

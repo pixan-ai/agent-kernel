@@ -65,6 +65,11 @@
             "type": "command",
             "command": "[ \"$CLAUDE_CONFIG_DIR\" = /data/cron/config ] || rm -f /data/cron/pending /data/cron/pending.told",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "unsent.sh stop",
+            "timeout": 25
           }
         ]
       }
@@ -80,6 +85,11 @@
           {
             "type": "command",
             "command": "[ \"$CLAUDE_CONFIG_DIR\" = /data/cron/config ] || [ -e /data/cron/pending ] || date +%s > /data/cron/pending",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "unsent.sh in",
             "timeout": 5
           }
         ]
@@ -104,6 +114,16 @@
             "type": "command",
             "command": "installs.sh record",
             "timeout": 25
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_telegram_telegram__(reply|react|edit_message)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "unsent.sh out",
+            "timeout": 5
           }
         ]
       }

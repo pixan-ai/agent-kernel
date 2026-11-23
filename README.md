@@ -81,7 +81,7 @@ Defense in depth, each layer using an official mechanism:
 2. **Managed policy**: root-owned file; `deny` rules, enforced on Claude's file tools only, for credentials and for writes to the config, plugin and policy paths (a shell command can still write them, see below).
 3. **Permission classifier (auto mode)**: reviews every action that is not explicitly allowed.
 4. **Never waits for a person**: `permissions.denyInsteadOfPrompting` denies any call that would need an approval prompt; the agent is told and carries on. Nothing is ever allowed by it.
-5. **Hooks**: every change to the agent's tools, and any change to its settings or the bot's files that did not go through its settings command, told to the owner; credential failures alerted on Telegram; the agent's memory and recent deliveries given to every session.
+5. **Hooks**: every change to the agent's tools, and any change to its settings or the bot's files that did not go through its settings command, told to the owner; credential failures alerted on Telegram; the agent's memory and recent deliveries given to every session; a private message from the owner never left with its answer only in the terminal.
 6. **Container**: Claude and all it runs are a non-root user (uid 1001); the entrypoint is root only to hand over `/data`, trusting nothing the agent can write. One volume, no secrets baked into the image.
 
 Known limits (read before trusting it):
@@ -109,6 +109,7 @@ bin/doorbell.js               the listener Telegram calls while the agent sleeps
 bin/backup.sh                 nightly encrypted backup, and restore onto an empty volume (see docs/BACKUP.md)
 bin/watchdog.sh               tells the owner about a message left unanswered and a plan limit past 80%, and restarts when the Telegram plugin is gone
 bin/notify.sh                 one Telegram message to the owner
+bin/unsent.sh                 the owner's private message always gets an answer on Telegram, also when Claude wrote it only in its terminal
 bin/installs.sh               records what the agent installs and tells the owner; reinstalls it at start (see docs/GETTING-STARTED.md)
 bin/system.cron               the image's own scheduled jobs (daily recycle, watchdog, nightly backup)
 policy/managed-settings.json  the managed policy and hooks

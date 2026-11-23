@@ -60,7 +60,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Acceptance tests (inside the built image)
         run: |
-          for t in start tools policy cron peer config backup sleep dream install; do
+          for t in start tools policy cron peer config backup sleep dream install unsent; do
             docker run --rm --user 0 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel:ci "/tests/${t}_test.sh" || exit 1
           done
       # A tool the agent's user cannot reach fails as "command not found", with no other sign: run each one as that user.
