@@ -27,6 +27,10 @@ run_hook() {  # run_hook JQ-PATH-TO-COMMAND STDIN-JSON: runs the hook with an em
 
 check "the policy is valid JSON" setting .
 check "the agent's instructions are managed: next to the policy, out of its reach" test -s "$(dirname "$POLICY")/CLAUDE.md"
+# Claude Code defers MCP tools by default: in each new session the model has to search for the Telegram reply tool before its first
+# answer, and a session that answered without searching wrote to a terminal nobody sees (seen live, 2026-11-22). Loaded upfront, it is there.
+check "the image loads MCP tools upfront, so the reply tool never has to be searched for (ENABLE_TOOL_SEARCH=false)" test "${ENABLE_TOOL_SEARCH:-}" = false
+check "...and the managed instructions say that an answer exists only if it is sent with the reply tool" grep -q "reply. tool.*terminal" "$(dirname "$POLICY")/CLAUDE.md"
 for expr in '.advisorModel == "opus"' '.allowManagedHooksOnly == true' '.allowManagedPermissionRulesOnly == true' '.channelsEnabled == true' '.disableClaudeAiConnectors == true' \
             '.permissions.denyInsteadOfPrompting == true' '.permissions.disableBypassPermissionsMode == "disable"' \
             '.skipDangerousModePermissionPrompt == null'; do

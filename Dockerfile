@@ -55,7 +55,12 @@ COPY policy/ /etc/claude-code/
 COPY --chmod=755 bin/ /usr/local/bin/
 
 USER 1001
-ENV LANG=C.UTF-8 DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=/data/config TELEGRAM_STATE_DIR=/data/config/channels/telegram CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false CLAUDE_CODE_DISABLE_CRON=1
+# ENABLE_TOOL_SEARCH=false: by default Claude Code defers MCP tools, so in every new session the model has to search for the Telegram
+# reply tool before its first answer. A session that answered without searching wrote to a terminal nobody reads, and the owner saw
+# "typing…" and then nothing (seen live, 2026-11-22; anthropics/claude-code#95011, #88932). Loaded upfront, reply is there from the first
+# message. Cost: every MCP tool's definition travels with each turn (docs/LEARNINGS.md, "Telegram").
+ENV LANG=C.UTF-8 DISABLE_AUTOUPDATER=1 CLAUDE_CONFIG_DIR=/data/config TELEGRAM_STATE_DIR=/data/config/channels/telegram CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false CLAUDE_CODE_DISABLE_CRON=1 \
+    ENABLE_TOOL_SEARCH=false
 # What the agent installs (bin/installs.sh) lives on the volume, and comes after the image's own commands in PATH.
 ENV PATH="${PATH}:/data/bin" VIRTUAL_ENV=/data/tools/venv UV_TOOL_DIR=/data/tools/uv UV_TOOL_BIN_DIR=/data/bin UV_LINK_MODE=copy \
     BUN_INSTALL_GLOBAL_DIR=/data/tools/bun BUN_INSTALL_BIN=/data/bin

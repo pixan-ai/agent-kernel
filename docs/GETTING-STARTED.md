@@ -289,7 +289,7 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 
 | Symptom | Likely cause |
 |---|---|
-| "typing…" and no answer | Claude credential truncated or expired (see the start log) |
+| "typing…" and no answer | Claude credential truncated or expired (see the start log). On an image older than 2026-11-23, also a session that answered in its terminal instead of sending: update, or restart the agent ([LEARNINGS.md](LEARNINGS.md), "Telegram") |
 | No reaction at all | Wrong bot token, or variables not deployed. The log says `Telegram rejected TELEGRAM_BOT_TOKEN` for a bad token |
 | Silent in a group | The bot was added before privacy mode was disabled, or the group id changed when it became a supergroup ([GROUPS.md](GROUPS.md)) |
 | It does not remember something from yesterday | The nightly memory left it out. Ask "What do you remember about …?", and say "Remember that …" for what must stay ([MEMORY.md](MEMORY.md)) |
