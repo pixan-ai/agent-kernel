@@ -66,6 +66,9 @@ Rule: a stub must demand what the real thing demands.
 - **A group that becomes a supergroup changes its id.** The old id fails without an error.
 - **A job's session has no Telegram.** Asked to "send" something, it reports failure. It is told to write only the message; the script delivers it.
 - **A reply tool that takes file paths is an exfiltration path** when it is pre-approved. A hook limits where attachments come from.
+- **An answer written in the terminal is an answer to nobody.** A new agent received "Hola" twice, showed "typing…", wrote a correct answer on its own screen in under a second, and sent nothing (*measured*, 2026-11-22: two turns that ended normally, text only, no tool call). Cause: Claude Code defers MCP tools by default (tool search), so in every new session the model must search for the reply tool before it can use it. The healthy session next to it made two searches before its first reply; the failed one answered at once and never saw the tool. The plugin's instructions and its tool names reached the session only after a first tool call. Nothing failed to load, and no log said anything: the agent was alive, the message came in, the turn ended. An agent that sleeps when idle starts a new session at every wake, so it meets this first message many times a day.
+  Rule: what an agent needs in order to be heard must be in front of it from the first message, not behind a search it may not make.
+  Here: the image sets `ENABLE_TOOL_SEARCH=false`, which loads MCP tools upfront, and the managed instructions say that an answer exists only when it is sent with the reply tool. Not covered by this: a model that has the tool and still answers a trivial message in the terminal, which other fleets have *measured* (five turns in a row, with the rule written in the agent's own instructions). A rule is not a mechanism.
 
 ## Hosting
 
