@@ -186,6 +186,7 @@ When someone else asks for one of these, the agent says that you or a super-user
 | My Telegram channel was down … Restarting | The watchdog found the Telegram plugin gone and restarted Claude |
 | ⚠️ Tonight's backup failed | The nightly backup could not be sent (only when backups are on) |
 | ⏳ I received a message more than 10 minutes ago … | A message is still unanswered |
+| An answer in plain text, without the usual formatting, or "⚠️ I received your message and have no answer to send" | Claude wrote its answer in its terminal and did not send it, also after being told to; the agent sent it for it ([LEARNINGS.md](LEARNINGS.md), "Telegram"). One is harmless; if it keeps happening, restart the agent and report it |
 
 ## Self-improvement: installing skills and tools
 
