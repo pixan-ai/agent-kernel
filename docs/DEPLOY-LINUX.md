@@ -33,9 +33,12 @@ In `.env`:
 | To | Run, in the `agent-kernel` folder |
 |---|---|
 | See what it is doing | `docker compose logs -f` |
-| See its screen | `docker compose exec --user 1001 agent screen.sh` |
+| See its screen | `docker compose exec --user 1001 agent screen.sh` (add a number for more lines, e.g. `screen.sh 60`) |
+| Read its recent conversation | `docker compose exec --user 1001 -e SSH_ORIGINAL_COMMAND=transcript agent peer.sh` (the last 40 messages, what you wrote and what it answered) |
+| See if Claude is running | `docker compose exec --user 1001 -e SSH_ORIGINAL_COMMAND=status agent peer.sh` |
 | Restart it | `docker compose restart` |
-| Stop it | `docker compose down` (the volume, with its memory and settings, stays) |
+| Apply a change to `.env` | `docker compose up -d`: `restart` does not read .env again, so a new or changed variable would not reach the agent. The volume stays |
+| Stop it | `docker compose down` (the volume, with its memory and settings, stays). Never `docker compose down -v`: `-v` deletes the volume, with the agent's memory, settings, jobs and the tools it installed |
 
 Always pass `--user 1001` to `docker compose exec`: the image starts as root (only to hand the volume to the agent), so without it the command runs as root, inside a container the agent can write to.
 
