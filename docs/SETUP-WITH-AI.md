@@ -86,3 +86,7 @@ When everything works, tell me the agent is ready, and point me to the guide for
 - **Secrets stay out of the chat.** A conversation with an assistant is stored by its provider; a key pasted there has to be replaced.
 - **The traps are the ones people met.** Each one in the prompt happened in a real installation: a subscription token pasted into the API key field, the `export …` line copied instead of the token, Serverless left off, the template added as a plain GitHub repository, the `/start` pairing text taken for an error.
 - **The error lines are quoted as the agent prints them.** `tests/docs_test.sh` checks that every start-up error naming a credential in `bin/start.sh` appears here, so the prompt cannot drift from the code.
+
+## Not verified yet
+
+- The prompt with a real assistant and a real person, on Railway and on a Linux server.

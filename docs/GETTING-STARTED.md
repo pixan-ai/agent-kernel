@@ -93,7 +93,7 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 - **When the Claude plan runs low** you get one notice at 80% of the 5-hour or the weekly limit, and the reason if a job or the nightly memory is stopped by it. With an API key there are no such figures and no notice.
 - **Every change to its settings** (a group, a super-user, a job, a fellow agent) reaches you as a private notice, whoever asked for it.
 - **If you turned on the optional sleep** ([SLEEP.md](SLEEP.md)), the first message after a quiet period takes a few seconds longer.
-- **In groups** it answers when addressed or when a message is for everyone, and stays silent otherwise. Anyone there may ask it for ordinary work (transcribe, read a document, search, summarise); only you and the super-users can make it install something, change its settings, schedule jobs, act on other agents or share what is private.
+- **In groups** it answers when addressed or when a message is for everyone, and stays silent otherwise. With several agents in a group, give them names that cannot be confused and address one by its @username ([GROUPS.md](GROUPS.md#several-agents-in-one-group)). Anyone there may ask it for ordinary work (transcribe, read a document, search, summarise); only you and the super-users can make it install something, change its settings, schedule jobs, act on other agents or share what is private.
 
 ## 7. Before you rely on it
 
