@@ -35,6 +35,8 @@ Here: the instructions name one file. Claude Code's own memory is not switched o
 Rule: watchers observe and signal. They never write into a session.
 Here: `watchdog.sh` tells the owner and restarts Claude; `doorbell.sh` never reads a message. Nothing in this repository writes to the session's input.
 
+- **A watcher can go on watching something that stopped mattering.** A credential check that reads the file on disk keeps reporting green after an environment variable became what authenticates: its green says nothing and its red is a false alarm. When what authenticates moves, the check moves with it.
+
 ## Tools and capability
 
 **A tool the agent's user cannot reach just vanishes.** In a path that user cannot traverse, a tool fails as "command not found", with no other sign.
@@ -80,6 +82,8 @@ Rule: a stub must demand what the real thing demands.
 - **A session that never ends gets more expensive with every message.** The dream ends it once a day.
 - **A pasted credential can arrive truncated.** The start log prints its length and prefix, never its value.
 - **An agent out of quota fails without a word.** For two days the nightly dream failed with nothing in the log, most likely on a used-up subscription that several agents share. Now the owner is warned at 80% and told the reason when a job or a dream is stopped.
+- **An environment token beats a login and does not fall back to it.** *Measured*, four cells: no key is `Not logged in`, a good `CLAUDE_CODE_OAUTH_TOKEN` alone answers, a bad one alone gives `401` — and a bad one beside a healthy `.credentials.json` still gives `401`. Only the fourth cell decides, and it means the variable is a single point of failure wherever it is set. Set host-wide, it moves every Claude Code on that machine onto it at its next restart.
+- **A subscription token says nothing about itself.** Not which account issued it, not when it expires. What you need to know later has to be written down when it is made.
 - **A sleep that cannot be woken is worse than no sleep.** If the wake-up call cannot be registered, the agent stays awake.
 
 ## Method
