@@ -57,6 +57,8 @@ cp .env.example .env    # fill in the same values as above
 docker compose up -d --build
 ```
 
+After changing `.env` later, run `docker compose up -d` (a plain `restart` does not read it), and never `docker compose down -v`, which deletes the agent's memory. Day-to-day commands: [DEPLOY-LINUX.md](DEPLOY-LINUX.md#day-to-day).
+
 A fixed-price server suits several agents better than per-minute billing, and a host that allows user namespaces can add the hard isolation that Railway cannot ([THREAT-MODEL.md](THREAT-MODEL.md)).
 
 ## 4. Check that it works

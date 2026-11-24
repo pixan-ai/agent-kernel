@@ -85,6 +85,12 @@ lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 # A prompt a newcomer gives to their own AI assistant to be walked through the setup (2026-11-24). It must say what the code does now.
 A=docs/SETUP-WITH-AI.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
+# A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
+for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do
+  check "$f: a change to .env is applied with docker compose up -d, not restart" grep -qE "docker compose up -d.*restart. does not read .env" "$f"
+  check "$f: warns that docker compose down -v deletes the agent's memory" grep -q "down -v" "$f"
+done
+check "DEPLOY-LINUX.md says how to read the agent's conversation on the server" grep -q "SSH_ORIGINAL_COMMAND=transcript" docs/DEPLOY-LINUX.md
 for w in CLAUDE_KEY OWNER_TELEGRAM_ID TELEGRAM_BOT_TOKEN sk-ant-oat01- sk-ant-api03- "Enable Serverless" "docker compose up -d --build"; do
   check "the setup prompt names $w" grep -qF -- "$w" "$A"
 done

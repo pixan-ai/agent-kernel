@@ -63,7 +63,7 @@ There is one field for it, CLAUDE_KEY, whatever its kind; the agent tells the ki
    Leave IDLE_SLEEP_MINUTES unset: on a server, sleeping saves nothing and needs an incoming address. Then: chmod 600 .env
 5. Start it: docker compose up -d --build   (the first build takes several minutes)
 6. Watch it: docker compose logs -f   (Ctrl+C stops watching, not the agent). Then message the bot.
-7. Day to day: restart with `docker compose restart`; stop with `docker compose down` (memory and settings stay in the volume); see its screen with `docker compose exec --user 1001 agent screen.sh`. Always pass --user 1001 to `docker compose exec`, or the command runs as root inside a container the agent can write to.
+7. Day to day: restart with `docker compose restart`; after changing .env, run `docker compose up -d` instead, because `restart` does not read .env again; stop with `docker compose down` (memory and settings stay in the volume; never `docker compose down -v`, which deletes them); see its screen with `docker compose exec --user 1001 agent screen.sh`. Always pass --user 1001 to `docker compose exec`, or the command runs as root inside a container the agent can write to.
 8. Updates: read https://github.com/pixan-ai/agent-kernel/blob/main/CHANGELOG.md, then `git pull` and `docker compose up -d --build`. To go back: `git checkout` the previous release tag (listed at https://github.com/pixan-ai/agent-kernel/releases) and the same build command.
 
 ## If the agent does not answer
