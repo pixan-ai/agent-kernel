@@ -22,6 +22,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- In a group, a message that starts with another agent's name or @username is not answered by the others, also when the names differ by one letter, and a wrong answer is not followed by an apology: being silent is the answer. Three agents in one group had answered a message for one of them, then two apologised (seen live, 2026-11-24). It is still an instruction, not a mechanism; GROUPS.md says what helps: names that cannot be confused, the @username, and one agent as the voice for messages to everyone.
 - Asked for its address, for a fellow agent, an agent now gives its Railway private address (`RAILWAY_PRIVATE_DOMAIN`). Two agents of one project had given an IP and a container id, which change at every deploy, or said they did not know (seen live, 2026-11-24). PEERS.md and the guide say where to find the address and how to ask for it.
 - The guide says how long until Railway shows Sleeping: the agent's `IDLE_SLEEP_MINUTES`, then about 10 minutes of Railway's own; about 13 minutes with the template.
 - The one click a Railway template cannot do, switching Serverless on, is now a numbered step in the guide and is said on the template's page and in the description of `IDLE_SLEEP_MINUTES`. A fourth way to have the template set it was tried and does not work (docs/SLEEP.md).

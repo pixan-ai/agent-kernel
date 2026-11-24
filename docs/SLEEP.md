@@ -49,3 +49,4 @@ Without Serverless the agent still stops Claude, but the host keeps the containe
 - The Serverless check (30 minutes asleep without a clock jump) on a real host: tested only with a simulated clock.
 - The keep-awake for agents with jobs, and the backup before sleeping, on a real host.
 - Hosts other than Railway.
+- An agent deleted while asleep leaves its webhook set in Telegram: a new agent with the same bot token may then hear nothing. Use a new bot, or delete the old agent while it is awake.

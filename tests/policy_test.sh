@@ -35,6 +35,9 @@ check "...and the managed instructions say that an answer exists only if it is s
 # know it (seen live, 2026-11-24). Railway gives each service its private address; the address is not always the service's name.
 check "the managed instructions give the agent its private address for fellow agents, and warn against the IP and the hostname" \
   grep -q 'RAILWAY_PRIVATE_DOMAIN.*hostname' "$(dirname "$POLICY")/CLAUDE.md"
+# In a group of three agents, two answered "Tast: …" (one of them is Toast), then both apologised: more noise (seen live, 2026-11-24).
+check "in a group, a message that starts with another name is for that one, even one letter away, and is not answered, not even with an apology" \
+  bash -c 'f="$1"; grep -q "starts with another name or @username" "$f" && grep -q "one letter away from yours" "$f" && grep -q "Not an apology" "$f"' _ "$(dirname "$POLICY")/CLAUDE.md"
 for expr in '.advisorModel == "opus"' '.allowManagedHooksOnly == true' '.allowManagedPermissionRulesOnly == true' '.channelsEnabled == true' '.disableClaudeAiConnectors == true' \
             '.permissions.denyInsteadOfPrompting == true' '.permissions.disableBypassPermissionsMode == "disable"' \
             '.skipDangerousModePermissionPrompt == null'; do

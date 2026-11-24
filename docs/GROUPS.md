@@ -24,6 +24,14 @@ Tell the agent in private: "join the group -1001234567890". It applies the chang
 - **The chat id changes when a group becomes a supergroup** (it takes the form `-100…`). The id in the web client's address bar can be the old one. Confirm with `getChat` (title and type) before blaming anything else.
 - Being a member is not being authorised, and the reverse: the plugin silently drops messages from a group that is not listed.
 
+## Several agents in one group
+
+Which agent a message is for is decided by each agent's judgment, from a written instruction: there is no mechanism. It cuts the mistakes, it does not end them (seen live, 2026-11-24: three agents, two answered a message for the third). What helps:
+
+- **Names that cannot be confused.** `Tast` and `Toast` differ by one letter, and one agent took the other's message. Give each bot a clearly different name (BotFather `/setname`; the @username cannot be changed).
+- **Address one agent by its @username, or reply to its message.** A message that starts with another agent's name or @username is not answered by the others, not even with an apology.
+- **One voice for messages to everyone.** By default every agent answers "hello everyone", briefly. To have one answer, tell the others in private "in the group -100… speak only when you are named" ("en el grupo -100… habla solo si te nombran"); each keeps it in its memory.
+
 ## Read before enabling
 
 - **Super-users.** Besides the owner, super-users may give the agent instructions in its groups. The owner or any existing super-user can name another ("make 123456789 a super-user", `config.sh admin ID`), and can ask an agent to name one on a fellow agent ([PEERS.md](PEERS.md)), so a team does not depend on one person. They get no private chat with the agent. The owner is told of each change. Trust is transitive: whoever you name can name others.
@@ -38,3 +46,4 @@ Tell the agent in private: "join the group -1001234567890". It applies the chang
 - On Railway (2026-11-11), reported by the owner: in a real group, two agents each read and answered ordinary members, super-users and each other.
 - On Railway (2026-11-17): an agent declined a fellow bot's request to write into its tools folder, saying only the owner or a super-user may ask.
 - Not verified: that a member who is not a super-user is refused when asking for a setting change or private information.
+- Not verified: with three agents in a group, that only the named one answers a message that starts with its name, and that nobody apologises.

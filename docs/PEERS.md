@@ -38,4 +38,4 @@ Set `PEERS` on the agent that looks, as `name=host` pairs separated by spaces, f
 
 - In CI, inside the image, with a real server and client: a listed key sees the screen; other commands, chained commands, shells, terminals and tunnels are refused; an unlisted key sees nothing.
 - On Railway (2026-11-10): one agent read the other's screen and status over the private network (`agent2.railway.internal`).
-- Not verified yet on Railway: `transcript` against a real session file, and names from `PEERS`.
+- Not verified yet on Railway: `transcript` against a real session file, and names from `PEERS`; an agent answering with `RAILWAY_PRIVATE_DOMAIN` when asked for its address.
