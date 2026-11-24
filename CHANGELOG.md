@@ -18,6 +18,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- Asked for its address, for a fellow agent, an agent now gives its Railway private address (`RAILWAY_PRIVATE_DOMAIN`). Two agents of one project had given an IP and a container id, which change at every deploy, or said they did not know (seen live, 2026-11-24). PEERS.md and the guide say where to find the address and how to ask for it.
 - The one click a Railway template cannot do, switching Serverless on, is now a numbered step in the guide and is said on the template's page and in the description of `IDLE_SLEEP_MINUTES`. A fourth way to have the template set it was tried and does not work (docs/SLEEP.md).
 - The scripts now have a budget: 247 lines of code, held by a test (it was "less than 300"). They went from 277 to 247 with no change in behaviour: statements were joined, no function was removed, and every test passes unchanged.
 - The Railway template asks for three values in order, each saying where to get it: `CLAUDE_KEY`, the owner's id, the bot token. Railway had listed the optional Claude fields out of sight.

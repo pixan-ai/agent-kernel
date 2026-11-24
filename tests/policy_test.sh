@@ -31,6 +31,10 @@ check "the agent's instructions are managed: next to the policy, out of its reac
 # answer, and a session that answered without searching wrote to a terminal nobody sees (seen live, 2026-11-22). Loaded upfront, it is there.
 check "the image loads MCP tools upfront, so the reply tool never has to be searched for (ENABLE_TOOL_SEARCH=false)" test "${ENABLE_TOOL_SEARCH:-}" = false
 check "...and the managed instructions say that an answer exists only if it is sent with the reply tool" grep -q "reply. tool.*terminal" "$(dirname "$POLICY")/CLAUDE.md"
+# Asked for their address, two agents of one project gave an IP and a container id, which change at every deploy, or said they did not
+# know it (seen live, 2026-11-24). Railway gives each service its private address; the address is not always the service's name.
+check "the managed instructions give the agent its private address for fellow agents, and warn against the IP and the hostname" \
+  grep -q 'RAILWAY_PRIVATE_DOMAIN.*hostname' "$(dirname "$POLICY")/CLAUDE.md"
 for expr in '.advisorModel == "opus"' '.allowManagedHooksOnly == true' '.allowManagedPermissionRulesOnly == true' '.channelsEnabled == true' '.disableClaudeAiConnectors == true' \
             '.permissions.denyInsteadOfPrompting == true' '.permissions.disableBypassPermissionsMode == "disable"' \
             '.skipDangerousModePermissionPrompt == null'; do
