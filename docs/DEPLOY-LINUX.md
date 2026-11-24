@@ -1,6 +1,6 @@
 # Deploy on your own Linux server
 
-The same repository runs on any Linux server with Docker, for example a company's own machine or VM. Nothing is published to it from outside: the server builds the image itself, and Claude Code is installed during that build with Anthropic's official installer.
+The same repository runs on any Linux server with Docker, for example a company's own machine or VM. To be walked through it by an AI assistant, paste the prompt in [SETUP-WITH-AI.md](SETUP-WITH-AI.md). Nothing is published to it from outside: the server builds the image itself, and Claude Code is installed during that build with Anthropic's official installer.
 
 ## What the server needs
 
