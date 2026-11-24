@@ -18,6 +18,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- The one click a Railway template cannot do, switching Serverless on, is now a numbered step in the guide and is said on the template's page and in the description of `IDLE_SLEEP_MINUTES`. A fourth way to have the template set it was tried and does not work (docs/SLEEP.md).
 - The scripts now have a budget: 247 lines of code, held by a test (it was "less than 300"). They went from 277 to 247 with no change in behaviour: statements were joined, no function was removed, and every test passes unchanged.
 - The Railway template asks for three values in order, each saying where to get it: `CLAUDE_KEY`, the owner's id, the bot token. Railway had listed the optional Claude fields out of sight.
 - CONTRIBUTING.md: a pull request's title says what changes for whoever runs an agent, since hosts show it; audit codes go in the description.
