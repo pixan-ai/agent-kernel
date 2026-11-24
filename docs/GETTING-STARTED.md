@@ -75,7 +75,7 @@ Write to the agent in any language: it answers in the one it is written to. Each
 |---|---|---|
 | "Send me a summary of … every day at 8" ("mándame cada día a las 8 un resumen de …") | It schedules a job; you get a notice | [CRON.md](CRON.md) |
 | "Join the group -100…" ("únete al grupo -100…") | It reads and answers everyone in that group, people and bots, no mention needed | [GROUPS.md](GROUPS.md) |
-| "Your fellow agent X is at …" / "What is X doing?" ("tu compañero X está en …" / "¿qué está haciendo X?") | It remembers a fellow agent and can look at its screen | [PEERS.md](PEERS.md) |
+| "Your fellow agent X is at …" / "What is X doing?" ("tu compañero X está en …" / "¿qué está haciendo X?") | It remembers a fellow agent and can look at its screen. Ask each agent "what is your address for fellow agents?" ("¿cuál es tu dirección para otros agentes?") | [PEERS.md](PEERS.md) |
 | "Remember that …" / "What do you remember about …?" ("recuerda que …" / "¿qué recuerdas de …?") | It keeps it in its memory. Every night it consolidates the day and starts a clean conversation | [MEMORY.md](MEMORY.md) |
 | "Every day at 9, post yesterday's highlights in the group -100…" ("cada día a las 9 publica en el grupo -100… lo más relevante de ayer") | The daily council: every agent of a team reports in one group, and they read each other | [MEMORY.md](MEMORY.md#the-daily-council) |
 | A PDF, a Word, Excel or PowerPoint file | It reads it, with no setup: every agent can from the start | [What the image contains](#what-the-image-contains) |

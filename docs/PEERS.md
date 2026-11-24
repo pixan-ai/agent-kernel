@@ -19,7 +19,7 @@ No shell, no terminal, no forwarding of any kind (`DisableForwarding`), no file 
 1. On any machine: `ssh-keygen -t ed25519 -N '' -f peer_key` creates `peer_key` (private) and `peer_key.pub` (public).
 2. On **B** (the one being looked at), set `PEER_PUBLIC_KEYS` to the content of `peer_key.pub` (one key per line for several peers).
 3. On **A** (the one looking), set `PEER_SSH_KEY` to the content of `peer_key`.
-4. Redeploy both. On A: `peer.sh look B-HOST`, where `B-HOST` is B's private address (on Railway, `<service>.railway.internal`).
+4. Redeploy both. On A: `peer.sh look B-HOST`, where `B-HOST` is B's private address. On Railway it is in B's variable `RAILWAY_PRIVATE_DOMAIN`, which is not always the service's name (a service `agent-kernel-ZG_U` got `agent-kernel-zgu.railway.internal`); ask B "what is your address for fellow agents?". Not its IP or hostname: both change at every deploy.
 
 For both to see each other, set both variables on both.
 
