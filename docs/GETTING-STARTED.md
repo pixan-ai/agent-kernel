@@ -23,7 +23,13 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 
 ### Railway (the quick way)
 
-**One click:** [deploy the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2 (your Claude key goes in `CLAUDE_KEY`, whichever kind it is), and message your bot when the build finishes (several minutes). It sets up everything below for you, and the agent sleeps when idle (see below) once you turn **Serverless** on in the service's **Settings** and redeploy: Railway does not let a template do that switch. To do it by hand instead:
+**One click**, in three steps:
+
+1. Open [the pixan-agent template](https://railway.com/deploy/pixan-agent), paste the three values from steps 1 and 2 (your Claude key goes in `CLAUDE_KEY`, whichever kind it is) and press **Deploy**. The first build takes several minutes.
+2. Turn on the one switch a template cannot set: click the service, open **Settings**, go down to **Deploy**, switch **Enable Serverless** on, and press **Deploy** at the top. With it the agent sleeps after a few quiet minutes and costs almost nothing until you write again. Without it the agent still works, but Railway bills it around the clock; it tells you so on Telegram after about half an hour asleep.
+3. Message your bot.
+
+The template sets up everything below for you. To do it by hand instead:
 
 1. New project → deploy from this repository.
 2. Service **Settings**: Dockerfile Path `Dockerfile`, Restart Policy **Always**.

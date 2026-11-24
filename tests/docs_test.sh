@@ -65,6 +65,10 @@ tmpl=$(sed -n '/^## The one-click template/,$p' docs/DEPLOY-RAILWAY.md)
 for v in TELEGRAM_BOT_TOKEN OWNER_TELEGRAM_ID CLAUDE_KEY TZ; do
   check "the Railway template sets $v, like the guide" bash -c 'grep -q "| \`$0\` |" <<<"$1" && grep -q "| \`$0\` |" docs/GETTING-STARTED.md' "$v" "$tmpl"
 done
+# A template cannot turn Serverless on (four ways tried, docs/SLEEP.md), so the one click left to the deployer must be said where they read.
+check "the template's page tells the deployer to turn Serverless on" grep -q "Enable Serverless" docs/railway-template-overview.md
+check "...the guide gives it as a numbered step of the one-click path" grep -qE '^[0-9]+\. .*Enable Serverless' docs/GETTING-STARTED.md
+check "...and so does the description of IDLE_SLEEP_MINUTES in the template" bash -c 'grep "^| \`IDLE_SLEEP_MINUTES\`" <<<"$0" | grep -q "Enable Serverless"' "$tmpl"
 check "...a volume at /data and Restart Policy Always" bash -c 'grep -q "mounted at \`/data\`" <<<"$0" && grep -q "Restart Policy \*\*Always\*\*" <<<"$0"' "$tmpl"
 check "Claude Code stays at its pinned version: neither the auto-updater nor \`claude update\` (audit of 2026-11-18, B9)" bash -c 'grep -q "DISABLE_AUTOUPDATER=1" Dockerfile && grep -q "DISABLE_UPDATES=1" Dockerfile'
 # denyInsteadOfPrompting (policy) needs Claude Code 2.1.319 or later; an older one ignores it (audit of 2026-11-18 v1, A1).
