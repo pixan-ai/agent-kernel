@@ -16,9 +16,14 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 - Sleep: an agent that could not sleep (no public address, a webhook Telegram refused, an address that does not reach it) only said so in the log, so it stayed awake and billed without anyone knowing (seen 2026-11-21). It now also tells the owner on Telegram, with the reason, once per start.
 - Sleep: with Serverless off the host keeps a sleeping agent running and billed, and the agent cannot read that setting. Asleep for 30 minutes without the clock jump a suspension leaves, and with no scheduled jobs, it now tells the owner to turn Serverless on, once per start.
 
+### Added
+
+- `docs/SETUP-WITH-AI.md`: a prompt to paste into Claude, Grok or another assistant, which walks a newcomer through the installation on Railway or on their own Linux server, one step at a time, never asking for a key in the chat. It carries the traps people met this week and quotes the agent's start-up errors; a docs test keeps those quotes in step with `bin/start.sh`.
+
 ### Changed
 
 - Asked for its address, for a fellow agent, an agent now gives its Railway private address (`RAILWAY_PRIVATE_DOMAIN`). Two agents of one project had given an IP and a container id, which change at every deploy, or said they did not know (seen live, 2026-11-24). PEERS.md and the guide say where to find the address and how to ask for it.
+- The guide says how long until Railway shows Sleeping: the agent's `IDLE_SLEEP_MINUTES`, then about 10 minutes of Railway's own; about 13 minutes with the template.
 - The one click a Railway template cannot do, switching Serverless on, is now a numbered step in the guide and is said on the template's page and in the description of `IDLE_SLEEP_MINUTES`. A fourth way to have the template set it was tried and does not work (docs/SLEEP.md).
 - The scripts now have a budget: 247 lines of code, held by a test (it was "less than 300"). They went from 277 to 247 with no change in behaviour: statements were joined, no function was removed, and every test passes unchanged.
 - The Railway template asks for three values in order, each saying where to get it: `CLAUDE_KEY`, the owner's id, the bot token. Railway had listed the optional Claude fields out of sight.

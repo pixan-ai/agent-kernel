@@ -82,6 +82,18 @@ check "every docker exec in the docs runs as the agent, never root (A3; any spel
 check "DEPLOY-RAILWAY.md warns that railway ssh opens a root shell (L6)" grep -q "railway ssh.*root" docs/DEPLOY-RAILWAY.md
 check "...and every mention of railway ssh says how to drop to the agent's user, or links to where it does (L6, L8)" bash -c '! grep -rh "railway ssh" docs README.md CONTRIBUTING.md | grep -v -e "setpriv --reuid=1001" -e "(DEPLOY-RAILWAY.md)"'
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
+# A prompt a newcomer gives to their own AI assistant to be walked through the setup (2026-11-24). It must say what the code does now.
+A=docs/SETUP-WITH-AI.md
+for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
+for w in CLAUDE_KEY OWNER_TELEGRAM_ID TELEGRAM_BOT_TOKEN sk-ant-oat01- sk-ant-api03- "Enable Serverless" "docker compose up -d --build"; do
+  check "the setup prompt names $w" grep -qF -- "$w" "$A"
+done
+check "...and forbids asking for a secret in the chat" grep -q "Never ask the user to paste" "$A"
+# Every start-up error that names a credential, as start.sh prints it today: the prompt must quote it, or it diagnoses an old agent.
+grep -oE 'echo "(missing |Telegram rejected )?(CLAUDE_KEY|OWNER_TELEGRAM_ID|TELEGRAM_BOT_TOKEN)[^:"(]*' bin/start.sh | sed 's/^echo "//; s/ *$//' | sort -u > /tmp/start-errors
+check "start.sh has credential errors to quote (the extraction works)" test "$(wc -l < /tmp/start-errors)" -ge 4
+while IFS= read -r e; do check "the setup prompt quotes the start-up error \"$e\"" grep -qF -- "$e" "$A"; done < /tmp/start-errors
+check "the guide says how long until Railway shows Sleeping" grep -q "about 13 minutes" docs/GETTING-STARTED.md
 # 247 is a budget, not a target: a 24/7 agent within 247 lines. A change that needs a line finds one to give back (CONTRIBUTING.md).
 check "README's \"within 247 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -le 247
 echo "$FAILS failed"; exit $((FAILS > 0))

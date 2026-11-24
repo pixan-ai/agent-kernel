@@ -1,6 +1,6 @@
 # Getting started: from nothing to an agent that answers
 
-For someone who has never run this. About 20 minutes. You need a Telegram account and a Claude subscription (or an Anthropic API key).
+For someone who has never run this. About 20 minutes. You need a Telegram account and a Claude subscription (or an Anthropic API key). Prefer to be walked through it? Paste the prompt in [SETUP-WITH-AI.md](SETUP-WITH-AI.md) into Claude, Grok or another assistant.
 
 After the installation everything else is done **by talking to the agent**: adding groups, scheduling jobs, pointing it at fellow agents. You come back to the host only to change a credential (and, on Railway, once to [let updates reach the agent by themselves](#updates-and-how-to-go-back)).
 
@@ -47,7 +47,7 @@ The template sets up everything below for you. To do it by hand instead:
 
 Details and notes: [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md). Cost: an agent that is always on uses about 0.3 to 0.7 GB of memory, billed by the minute. 
 
-**Sleep when idle.** On with the template (it sets `IDLE_SLEEP_MINUTES` and a public domain on port 8080; you turn Serverless on); off when you deploy by hand or on your own server, where the agent is always on. To pay only while it works, set `IDLE_SLEEP_MINUTES` (for example `10`), give the service a public address on port 8080 and turn Serverless on; the agent then stops after that many quiet minutes and wakes on the next message, a few seconds later. If a piece is missing, the agent tells you on Telegram. Remove the variable to go back to always on. Steps and limits: [SLEEP.md](SLEEP.md).
+**Sleep when idle.** On with the template (it sets `IDLE_SLEEP_MINUTES` and a public domain on port 8080; you turn Serverless on); off when you deploy by hand or on your own server, where the agent is always on. To pay only while it works, set `IDLE_SLEEP_MINUTES` (for example `10`), give the service a public address on port 8080 and turn Serverless on; the agent then stops after that many quiet minutes and wakes on the next message, a few seconds later. After your last message the agent stops after `IDLE_SLEEP_MINUTES`, and Railway shows **Sleeping** about 10 minutes later, when the container has been quiet that long: with the template's 3, about 13 minutes in all. If a piece is missing, the agent tells you on Telegram. Remove the variable to go back to always on. Steps and limits: [SLEEP.md](SLEEP.md).
 
 ### Your own server or computer (Docker)
 
