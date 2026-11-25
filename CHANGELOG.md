@@ -4,7 +4,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
-## [1.1.2] - 2026-11-25
+## [1.2.0] - 2026-11-25
 
 ### Fixed
 

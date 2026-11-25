@@ -7,7 +7,7 @@
 
 A **Claude Code-based 24/7 personal agent on Telegram** in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, within 247 lines of [Bash](https://www.gnu.org/software/bash/) and no custom agent code.
 
-> **Status: 1.1.** In daily use on Railway since November 2026. It has not had an independent security audit: what it protects and what it does not is in the [threat model](docs/THREAT-MODEL.md), and the evidence behind each claim in [docs/FINDINGS.md](docs/FINDINGS.md). What earlier fleets and this project taught us: [docs/LEARNINGS.md](docs/LEARNINGS.md).
+> **Status: 1.2.** In daily use on Railway since November 2026. It has not had an independent security audit: what it protects and what it does not is in the [threat model](docs/THREAT-MODEL.md), and the evidence behind each claim in [docs/FINDINGS.md](docs/FINDINGS.md). What earlier fleets and this project taught us: [docs/LEARNINGS.md](docs/LEARNINGS.md).
 
 ## Why this exists
 
