@@ -30,6 +30,8 @@ In `.env`:
 
 ## Day to day
 
+Something wrong? [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
 | To | Run, in the `agent-kernel` folder |
 |---|---|
 | See what it is doing | `docker compose logs -f` |

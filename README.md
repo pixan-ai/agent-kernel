@@ -23,7 +23,7 @@ Telegram ──► official plugin (MCP channel) ──► claude (interactive, 
 - No supervisor process: if `claude` exits, the container exits and the host restarts it. `watchdog.sh` covers what that cannot see: a Telegram channel that died while Claude kept running, a message left unanswered and a plan limit running out.
 - Behavior is controlled with `.md` files (`CLAUDE.md`) and one managed settings file.
 
-New here? Follow [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md): from nothing to an agent that answers, step by step. Or let your own AI assistant walk you through it: [docs/SETUP-WITH-AI.md](docs/SETUP-WITH-AI.md) has a prompt to paste into Claude or Grok.
+New here? Follow [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md): from nothing to an agent that answers, step by step. Or let your own AI assistant walk you through it: [docs/SETUP-WITH-AI.md](docs/SETUP-WITH-AI.md) has a prompt to paste into Claude or Grok. Something wrong: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Quick start (Docker)
 
