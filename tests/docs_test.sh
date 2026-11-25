@@ -134,6 +134,9 @@ for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md docs/DEPLOY-RAIL
 # Running agents on Telegram: the user guide has its own section (a supergroup from the start, privacy, names, the owner's account).
 check "the guide has a section on running the agent in Telegram" bash -c 'sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "supergroup" && sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "two-step verification"'
 check "the guide says how long until Railway shows Sleeping" grep -q "about 13 minutes" docs/GETTING-STARTED.md
+# One tagline everywhere the project describes itself (GitHub's About, the Railway template, the site copy it).
+TAG="Claude Code-based 24/7 personal agent in 247 lines of Bash"
+for f in README.md docs/railway-template-overview.md docs/DEPLOY-RAILWAY.md; do check "$f carries the tagline" bash -c 'tr -d "*" < "$1" | grep -qF "$2"' _ "$f" "$TAG"; done
 # 247 is a budget, not a target: a 24/7 agent within 247 lines. A change that needs a line finds one to give back (CONTRIBUTING.md).
 check "README's \"within 247 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -le 247
 echo "$FAILS failed"; exit $((FAILS > 0))
