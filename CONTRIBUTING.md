@@ -29,6 +29,8 @@ docker run --rm --network none --user 1001 --entrypoint bash -v "$PWD/tests:/tes
 docker run --rm --user 1001 --entrypoint bash -v "$PWD/tests:/tests:ro" agent-kernel /tests/stack_test.sh   # downloads the optional stack
 ```
 
+The tests that run inside the image start by emptying `/data`: run them only in a throwaway container as above, never with `docker exec` in a live agent, where they would delete its memory, settings and jobs.
+
 A change to `bin/` comes with a test in `tests/` that runs the script and checks what it does (exit code, files, output). Break the value the test guards and make sure it turns red.
 
 CI runs the same checks. Never commit `.env` or any real credential.

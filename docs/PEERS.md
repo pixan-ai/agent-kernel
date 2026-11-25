@@ -23,6 +23,29 @@ No shell, no terminal, no forwarding of any kind (`DisableForwarding`), no file 
 
 For both to see each other, set both variables on both.
 
+## Two agents on one Linux server
+
+Each agent's folder is its own Compose project, with its own network: two agents on one server cannot reach each other until they share one. A network joined by hand (`docker network connect`) is lost at the next `docker compose up -d`, which every update runs, and with it the name the other agent looks up. Declare it instead, in a `compose.override.yml` next to each agent's `compose.yml`. Compose reads that file by itself, and `git pull` never touches it (it is in `.gitignore`).
+
+1. Once per server: `docker network create agents`.
+2. In each agent's folder, a `compose.override.yml` with that agent's own name as its alias:
+
+   ```yaml
+   services:
+     agent:
+       networks:
+         default: {}
+         agents:
+           aliases: [junior]
+   networks:
+     agents:
+       external: true
+   ```
+
+3. `docker compose up -d` in each folder. The other agent's address is then its alias: `config.sh peer Junior=junior`, or "your fellow agent Junior is at junior".
+
+No port is published: the agents reach each other on the server's own Docker network.
+
 ## Names instead of addresses
 
 Set `PEERS` on the agent that looks, as `name=host` pairs separated by spaces, for example `Junior=agent2.railway.internal`. Then `peer.sh look junior` works (names are case-insensitive), and the agent can find a fellow agent when the owner names it.
@@ -38,4 +61,5 @@ Set `PEERS` on the agent that looks, as `name=host` pairs separated by spaces, f
 
 - In CI, inside the image, with a real server and client: a listed key sees the screen; other commands, chained commands, shells, terminals and tunnels are refused; an unlisted key sees nothing.
 - On Railway (2026-11-10): one agent read the other's screen and status over the private network (`agent2.railway.internal`).
+- On a Linux server (2026-11-24): two agents in two Compose projects read each other's screen and status, both ways, over a shared Docker network joined by hand with an alias; a chained command, a shell and an unlisted command were refused. Not verified yet: the same network declared in `compose.override.yml`, kept across an update.
 - Not verified yet on Railway: `transcript` against a real session file, and names from `PEERS`; an agent answering with `RAILWAY_PRIVATE_DOMAIN` when asked for its address.
