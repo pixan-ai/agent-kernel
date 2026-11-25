@@ -99,6 +99,10 @@ check "CONTRIBUTING warns that the image tests delete /data, so they never run i
 check "the guide makes a weekly review by the owner or a super-user required" grep -q "^## 8. Review your agents every week (required)" docs/GETTING-STARTED.md
 check "...and says where to look: notices, settings, installs, conversations and logs" bash -c 'f=docs/GETTING-STARTED.md; for w in "Setting changed" "What have you installed" "SSH_ORIGINAL_COMMAND=transcript" "docker compose logs" "Deploy Logs"; do sed -n "/^## 8\. Review/,/^## /p" "$f" | grep -qF "$w" || exit 1; done'
 check "the threat model lists the weekly review as a human control that finds problems late and prevents none" grep -q "weekly review.*finds.*late" docs/THREAT-MODEL.md
+# The code manual covers every file the agent runs, and its line table matches the code.
+for f in bin/* policy/*; do check "CODE.md explains $f" grep -q "^### .*\`$f\`" docs/CODE.md; done
+for f in bin/*.sh; do n=$(grep -cvE '^[[:space:]]*(#|$)' "$f"); check "CODE.md gives $f its $n lines" grep -q "^| \`$f\` | $n |" docs/CODE.md; done
+check "README links the code manual" grep -q "docs/CODE.md" README.md
 # The product manual explains every feature and points to where each is documented; the canvas says the project sells nothing.
 for d in MEMORY CRON GROUPS PEERS SLEEP BACKUP SETTINGS SETUP-WITH-AI THREAT-MODEL; do check "PRODUCT.md explains the feature documented in $d.md" grep -q "($d.md" docs/PRODUCT.md; done
 check "the business model canvas states there are no revenue streams" bash -c 'sed -n "/^## Revenue streams/,/^## /p" docs/BUSINESS-MODEL-CANVAS.md | grep -q "None"'
