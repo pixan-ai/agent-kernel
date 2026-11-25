@@ -47,7 +47,7 @@ done
 inbox_readable() { jq -e --arg d "${TELEGRAM_STATE_DIR:-/data/config/channels/telegram}/inbox" '.permissions.additionalDirectories | index($d) != null' "$POLICY" > /dev/null; }
 check "the agent may read the Telegram inbox (attachments)" inbox_readable
 for rule in 'Read(**/.env)' 'Read(**/.env.*)' 'Edit(//etc/claude-code/**)' 'Edit(//data/config/channels/**)' \
-            'Edit(//data/config/plugins/**)' 'Edit(//data/config/settings.json)' 'Bash(printenv)' 'Bash(env)'; do
+            'Edit(//data/config/plugins/**)' 'Edit(//data/config/settings.json)' 'Bash(printenv)' 'Bash(env)' 'Bash(*/proc/*environ*)'; do
   check "policy denies $rule" denies "$rule"
 done
 check "auto mode keeps the built-in rules and forbids leaking credentials" \
