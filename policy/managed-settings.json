@@ -24,7 +24,8 @@
       "Read(//proc/**)",
       "Bash(printenv)",
       "Bash(printenv *)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(*/proc/*environ*)"
     ],
     "allow": [
       "ToolSearch",
