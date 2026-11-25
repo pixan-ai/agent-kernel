@@ -30,6 +30,6 @@ Secrets are passed as environment variables at run time and are never baked into
 4. Verify without printing secrets: the start log says `oauth token: N chars, starts with sk-ant-oat01-: yes`, and the bot answers.
 5. Look at the issuer's usage page for the window of exposure.
 
-A subscription token carries no expiry you can read, so there is no date to watch ahead of time: the check above, repeated, is the only one there is. And if you watch credentials by file, watch the right one — a `CLAUDE_CODE_OAUTH_TOKEN` in the environment is what authenticates, and a healthy `~/.claude/.credentials.json` beside it is not a fallback.
+A subscription token carries no expiry you can read, so there is no date to watch ahead of time: the check above, repeated, is the only one there is. And if you watch credentials by file, watch the right one: a `CLAUDE_CODE_OAUTH_TOKEN` in the environment is what authenticates, and a healthy `~/.claude/.credentials.json` beside it is not a fallback.
 
 Never run `printenv` to check a value. A token copied from a phone can arrive truncated or with line breaks: `start.sh` removes whitespace and the log line above tells you the length.

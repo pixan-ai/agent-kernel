@@ -22,8 +22,11 @@ Copy the value with a copy button, not by selecting text: a truncated token give
 **Check the key before you deploy.** On your own computer:
 
 ```sh
-CLAUDE_CONFIG_DIR=$(mktemp -d) CLAUDE_CODE_OAUTH_TOKEN='sk-ant-oat01-…' claude -p hello
+read -rs K    # paste the key and press Enter: it is not shown, and it stays out of the shell history
+CLAUDE_CONFIG_DIR=$(mktemp -d) CLAUDE_CODE_OAUTH_TOKEN=$K claude -p hello; unset K
 ```
+
+(For a Console API key, `ANTHROPIC_API_KEY=$K` instead. On Windows, run it in WSL or Git Bash.)
 
 The empty configuration directory is the point: the key answers on its own, or not at all. Run it once without the variable first and it must say `Not logged in`; that is what proves the directory was empty and the answer came from the key. The start log's length check finds a truncated token, this finds a revoked or mistyped one, and both are cheaper than a silent agent.
 
@@ -322,5 +325,5 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 | "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
 | "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
 | "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
-| Another Claude Code on the same machine stopped working when you set the agent's key | In the environment, `CLAUDE_CODE_OAUTH_TOKEN` beats that machine's own login and does not fall back to it: a revoked or mistyped value gives `401` although `claude` is logged in there. Set the key for the agent only — its `.env` or its service — never host-wide |
+| Another Claude Code on the same machine stopped working when you set the agent's key | In the environment, `CLAUDE_CODE_OAUTH_TOKEN` beats that machine's own login and does not fall back to it: a revoked or mistyped value gives `401` although `claude` is logged in there. Set the key for the agent only (its `.env` or its service), never host-wide |
 | Something broke right after "🔄 Versions changed" | Go back to the previous version ([Updates, and how to go back](#updates-and-how-to-go-back)) and tell the project |
