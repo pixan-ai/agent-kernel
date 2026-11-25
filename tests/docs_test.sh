@@ -103,6 +103,14 @@ check "the threat model lists the weekly review as a human control that finds pr
 for f in docs/PRIVACY.md docs/FAQ.md docs/ROADMAP.md SUPPORT.md CODE_OF_CONDUCT.md docs/decisions/README.md; do check "README links $f" grep -qF "($f)" README.md; done
 for f in docs/decisions/0*.md; do check "the decisions index lists $(basename "$f")" grep -qF "($(basename "$f"))" docs/decisions/README.md; done
 check "SECURITY.md supports the current version" bash -c 'v=$(grep -m1 -oE "^## \[[0-9]+\.[0-9]+" CHANGELOG.md | tr -d "#[ "); grep -q "now $v\.x" SECURITY.md'
+# The code manual covers every file the agent runs, and its line table matches the code.
+for f in bin/* policy/*; do check "CODE.md explains $f" grep -q "^### .*\`$f\`" docs/CODE.md; done
+for f in bin/*.sh; do n=$(grep -cvE '^[[:space:]]*(#|$)' "$f"); check "CODE.md gives $f its $n lines" grep -q "^| \`$f\` | $n |" docs/CODE.md; done
+check "README links the code manual" grep -q "docs/CODE.md" README.md
+# The product manual explains every feature and points to where each is documented; the canvas says the project sells nothing.
+for d in MEMORY CRON GROUPS PEERS SLEEP BACKUP SETTINGS SETUP-WITH-AI THREAT-MODEL; do check "PRODUCT.md explains the feature documented in $d.md" grep -q "($d.md" docs/PRODUCT.md; done
+check "the business model canvas states there are no revenue streams" bash -c 'sed -n "/^## Revenue streams/,/^## /p" docs/BUSINESS-MODEL-CANVAS.md | grep -q "None"'
+check "README links the product manual" grep -q "docs/PRODUCT.md" README.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do
@@ -118,6 +126,13 @@ check "...and forbids asking for a secret in the chat" grep -q "Never ask the us
 grep -oE 'echo "(missing |Telegram rejected )?(CLAUDE_KEY|OWNER_TELEGRAM_ID|TELEGRAM_BOT_TOKEN)[^:"(]*' bin/start.sh | sed 's/^echo "//; s/ *$//' | sort -u > /tmp/start-errors
 check "start.sh has credential errors to quote (the extraction works)" test "$(wc -l < /tmp/start-errors)" -ge 4
 while IFS= read -r e; do check "the setup prompt quotes the start-up error \"$e\"" grep -qF -- "$e" "$A"; done < /tmp/start-errors
+# One place for "something is wrong": the troubleshooting guide quotes every start-up error, and says how to tell the causes of a silent agent apart.
+T=docs/TROUBLESHOOTING.md
+while IFS= read -r e; do check "TROUBLESHOOTING.md quotes the start-up error \"$e\"" grep -qF -- "$e" "$T"; done < /tmp/start-errors
+check "TROUBLESHOOTING.md says how to tell the causes of a silent agent apart, in order" grep -q "^## The agent does not answer" "$T"
+for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md docs/DEPLOY-RAILWAY.md; do check "$f links to the troubleshooting guide" grep -q "TROUBLESHOOTING.md" "$f"; done
+# Running agents on Telegram: the user guide has its own section (a supergroup from the start, privacy, names, the owner's account).
+check "the guide has a section on running the agent in Telegram" bash -c 'sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "supergroup" && sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "two-step verification"'
 check "the guide says how long until Railway shows Sleeping" grep -q "about 13 minutes" docs/GETTING-STARTED.md
 # 247 is a budget, not a target: a 24/7 agent within 247 lines. A change that needs a line finds one to give back (CONTRIBUTING.md).
 check "README's \"within 247 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -le 247
