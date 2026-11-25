@@ -4,6 +4,14 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- Project documents: `docs/PRIVACY.md` (where the data lives, who else sees it, how to delete it), `docs/FAQ.md`, `docs/ROADMAP.md` (planned, being looked at, will not do), `docs/decisions/` (one record per decision that shapes the project, five so far), `SUPPORT.md` and `CODE_OF_CONDUCT.md` (the Contributor Covenant). The README has a table of all the documentation.
+
+### Fixed
+
+- SECURITY.md said the supported release was 1.0.x; it is 1.2.x, and a test now ties it to the CHANGELOG.
+
 ### Changed
 
 - GETTING-STARTED.md: a weekly review of every agent by the owner or a super-user is required, and the guide says who, what and where: the notices, the installed tools and settings, the conversations, the log, and what to look for. The threat model lists it as a human control that finds problems late and prevents none.

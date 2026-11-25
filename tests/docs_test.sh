@@ -99,6 +99,10 @@ check "CONTRIBUTING warns that the image tests delete /data, so they never run i
 check "the guide makes a weekly review by the owner or a super-user required" grep -q "^## 8. Review your agents every week (required)" docs/GETTING-STARTED.md
 check "...and says where to look: notices, settings, installs, conversations and logs" bash -c 'f=docs/GETTING-STARTED.md; for w in "Setting changed" "What have you installed" "SSH_ORIGINAL_COMMAND=transcript" "docker compose logs" "Deploy Logs"; do sed -n "/^## 8\. Review/,/^## /p" "$f" | grep -qF "$w" || exit 1; done'
 check "the threat model lists the weekly review as a human control that finds problems late and prevents none" grep -q "weekly review.*finds.*late" docs/THREAT-MODEL.md
+# The project documents exist and the README points to each; every decision record is listed; SECURITY.md supports the current version.
+for f in docs/PRIVACY.md docs/FAQ.md docs/ROADMAP.md SUPPORT.md CODE_OF_CONDUCT.md docs/decisions/README.md; do check "README links $f" grep -qF "($f)" README.md; done
+for f in docs/decisions/0*.md; do check "the decisions index lists $(basename "$f")" grep -qF "($(basename "$f"))" docs/decisions/README.md; done
+check "SECURITY.md supports the current version" bash -c 'v=$(grep -m1 -oE "^## \[[0-9]+\.[0-9]+" CHANGELOG.md | tr -d "#[ "); grep -q "now $v\.x" SECURITY.md'
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do
