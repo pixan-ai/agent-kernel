@@ -15,7 +15,7 @@ If that option is not available to you, open a public issue that says only "I ha
 
 ## Supported versions
 
-Only the latest commit on `main` and the latest release (now 1.0.x) receive fixes. Releases: https://github.com/pixan-ai/agent-kernel/releases
+Only the latest commit on `main` and the latest release (now 1.2.x) receive fixes. Releases: https://github.com/pixan-ai/agent-kernel/releases
 
 ## Scope
 

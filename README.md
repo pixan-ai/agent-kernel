@@ -94,6 +94,21 @@ Known limits (read before trusting it):
 
 The full picture is in the [threat model](docs/THREAT-MODEL.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md). For what is published versus what runs an agent, see [Images](docs/PRODUCT-IMAGE.md).
 
+## Documentation
+
+| For | Read |
+|---|---|
+| Installing and using one agent | [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md), or [docs/SETUP-WITH-AI.md](docs/SETUP-WITH-AI.md) with your own AI assistant |
+| Something is wrong | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| Common questions | [docs/FAQ.md](docs/FAQ.md) |
+| What the product is, every feature | [docs/PRODUCT.md](docs/PRODUCT.md) |
+| How the code works | [docs/CODE.md](docs/CODE.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| What is protected and what is not | [docs/THREAT-MODEL.md](docs/THREAT-MODEL.md), [SECURITY.md](SECURITY.md) |
+| Where your data lives | [docs/PRIVACY.md](docs/PRIVACY.md) |
+| What is planned | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| Why things are the way they are | [docs/decisions/README.md](docs/decisions/README.md), [docs/LEARNINGS.md](docs/LEARNINGS.md) |
+| Getting help, and how to behave here | [SUPPORT.md](SUPPORT.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
+
 ## Repository layout
 
 ```

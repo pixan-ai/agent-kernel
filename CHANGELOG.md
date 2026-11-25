@@ -6,10 +6,15 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Added
 
+- Project documents: `docs/PRIVACY.md` (where the data lives, who else sees it, how to delete it), `docs/FAQ.md`, `docs/ROADMAP.md` (planned, being looked at, will not do), `docs/decisions/` (one record per decision that shapes the project, five so far), `SUPPORT.md` and `CODE_OF_CONDUCT.md` (the Contributor Covenant). The README has a table of all the documentation.
 - `docs/CODE.md`: the code manual: every script in `bin/` step by step, the files of the policy (each hook and what it is for), the Dockerfile and compose file, and which test covers what. A test keeps its line table equal to the code and fails when a file in `bin/` or `policy/` is not explained.
 - `docs/PRODUCT.md`: the product manual: why the project exists, who it is for, what makes it different, every feature explained and where it is documented, and what it costs to run. `docs/BUSINESS-MODEL-CANVAS.md`: how the project creates value and sustains itself; it sells nothing.
 - `docs/TROUBLESHOOTING.md`: one place for what to do when something is wrong: the start-up errors as the agent prints them (a test keeps them in step with `start.sh`), six steps to tell apart the causes of an agent that does not answer, every notice it sends its owner, and problems with groups, sleep, your own server and memory. The guide's table moved there.
 - GETTING-STARTED.md, "Running it in Telegram": the owner's account (two-step verification), the bot (one per agent, distinct names, Group Privacy, Bot-to-Bot), groups (a supergroup from the start), and who to make a super-user.
+
+### Fixed
+
+- SECURITY.md said the supported release was 1.0.x; it is 1.2.x, and a test now ties it to the CHANGELOG.
 
 ### Changed
 
