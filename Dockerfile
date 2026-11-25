@@ -21,8 +21,8 @@ RUN curl -fsSL -o /usr/local/bin/supercronic "https://github.com/aptible/supercr
 
 # uv (Astral) installs Python packages and tools quickly and in isolation. Pinned by version and checksum.
 # renovate: datasource=github-release-attachments depName=astral-sh/uv
-ARG UV_VERSION=0.13.9
-ARG UV_SHA256=a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5
+ARG UV_VERSION=0.13.10
+ARG UV_SHA256=bf65ac1a0af10f92c522d91ac096c7c0a39657647b155577e7836c2cbbb4526c
 RUN curl -fsSL -o /tmp/uv.tgz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
  && echo "${UV_SHA256}  /tmp/uv.tgz" | sha256sum -c - && tar -xzf /tmp/uv.tgz -C /usr/local/bin --strip-components=1 --no-same-owner && rm /tmp/uv.tgz
 
