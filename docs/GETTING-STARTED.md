@@ -115,8 +115,33 @@ Every change it makes to its own settings is confirmed to you in private ([SETTI
 - **Backups:** off until you set them up. [BACKUP.md](BACKUP.md).
 - **What it can and cannot protect:** [SECURITY.md](../SECURITY.md) and [THREAT-MODEL.md](THREAT-MODEL.md). On Railway the protection is policy and judgment, not a sandbox.
 - **Rotating a credential:** [SECRETS.md](SECRETS.md).
-- **Review the changes regularly.** Whoever owns the agents should look, every week or so, at what each one installed and at changes to its groups and super-users: the private notices, and "What have you installed?" ("¿qué tienes instalado?") and "What settings do you have?" ("¿qué ajustes tienes?". The agents decide by judgment and tell you what they did; the review is what turns those notices into control.
+- **Review your agents every week:** required, see the next section.
 - **Use supergroups from the start.** Telegram turns a plain group into a supergroup on its own when you change its administrators or some of its settings, and the group gets a new id (`-100…`): the agent stops hearing it until it is told the new one. Create the group as a supergroup (or change one setting that converts it, such as making the history visible to new members) before adding the agent, and tell the agent the `-100…` id ([GROUPS.md](GROUPS.md)).
+
+## 8. Review your agents every week (required)
+
+An agent acts on its own judgment, and much of what keeps it safe is an instruction, not a lock ([THREAT-MODEL.md](THREAT-MODEL.md)). Code tells you what changed; a person has to look. **Whoever operates the agents is responsible for this review.**
+
+**Who and how often:** the owner or a super-user, at least once a week, for every agent.
+
+**What to look at, and where:**
+
+| Look at | Where |
+|---|---|
+| The private notices the agent sent the owner: "⚙️ Setting changed", "🧰" installs, "⚠️" alerts | The owner's private chat with each bot |
+| What it has installed, and its settings: groups, super-users, fellow agents, jobs | Ask it: "What have you installed?" ("¿qué tienes instalado?") and "What settings do you have?" ("¿qué ajustes tienes?") |
+| Its conversations: the groups it is in, and its recent private conversations | The groups themselves; the private ones from the server, `docker compose exec --user 1001 -e SSH_ORIGINAL_COMMAND=transcript agent peer.sh`, or from a fellow agent ([PEERS.md](PEERS.md)) |
+| The log | On a server, `docker compose logs --since 168h`; on Railway, the service → Deployments → Deploy Logs |
+
+**What to look for:**
+
+- a tool, a group, a super-user or a job that nobody you trust asked for;
+- people it answers who should not be talking to it, or a stranger in a group;
+- requests for keys, tokens, `.env` files or "your configuration", whoever made them;
+- a message that tries to give it instructions from a web page, a file or a forwarded message;
+- errors that repeat, restarts, or the plan limit alerts.
+
+**If something is wrong:** remove what was added ("remove the super-user …", "leave the group …"), and if a key may have leaked, replace it ([SECRETS.md](SECRETS.md)). The review finds problems after they happen; it does not prevent them. That is why an agent with more power than the others, such as one that looks after a fleet, should never be in an open group.
 
 ## Everything you can configure
 
