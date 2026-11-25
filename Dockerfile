@@ -77,7 +77,7 @@ FROM base AS agent
 # The official installer is not pinned by hash (OpenSSF Scorecard notes it): Anthropic updates it in place, and it checks the
 # checksum of the Claude Code it downloads; the version it installs is pinned below and checked after.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_CODE_VERSION=2.1.325
+ARG CLAUDE_CODE_VERSION=2.1.326
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://claude.ai/install.sh | bash -s "${CLAUDE_CODE_VERSION}" \
  && v=$(/home/agent/.local/bin/claude --version | cut -d' ' -f1) && echo "Claude Code $v" \
