@@ -18,6 +18,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- One tagline: "Claude Code-based 24/7 personal agent in 247 lines of Bash", in the README, the Railway template's overview and its suggested description; a test keeps the three equal. GitHub's About and the website are set by hand to the same words.
 - PEERS.md: the network declared in `compose.override.yml` was verified on a Linux server to keep two agents and their aliases across a recreation of the containers.
 - GETTING-STARTED.md: a weekly review of every agent by the owner or a super-user is required, and the guide says who, what and where: the notices, the installed tools and settings, the conversations, the log, and what to look for. The threat model lists it as a human control that finds problems late and prevents none.
 - PEERS.md: two agents on one Linux server see each other over a Docker network declared in a `compose.override.yml`, so the next `docker compose up -d` keeps it; a network joined by hand was lost at every update, and with it the name the other agent looks up (lab, 2026-11-24). DEPLOY-LINUX.md no longer says to leave the peer view off. `compose.override.yml` is git-ignored.
