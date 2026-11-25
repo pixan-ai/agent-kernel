@@ -67,4 +67,6 @@ Railway does not allow the user namespaces that Claude Code's sandbox and `CLAUD
 docker compose exec --user 1001 agent unshare -U true && echo "namespaces: yes"
 ```
 
+With Docker's default seccomp profile this fails ("Operation not permitted"), also on a server that allows user namespaces (measured on Ubuntu 24.04 with Docker 29, 2026-11-24). Then the agent is protected as on Railway: by the policy and the classifier.
+
 Docker's default security profile may refuse this; changing it is a decision for the server's administrator. Turning the sandbox on and measuring that it works is not done or documented here yet: until it is, treat the agent on a server exactly as on Railway (see the threat model).
