@@ -143,6 +143,35 @@ An agent acts on its own judgment, and much of what keeps it safe is an instruct
 
 **If something is wrong:** remove what was added ("remove the super-user …", "leave the group …"), and if a key may have leaked, replace it ([SECRETS.md](SECRETS.md)). The review finds problems after they happen; it does not prevent them. That is why an agent with more power than the others, such as one that looks after a fleet, should never be in an open group.
 
+## 9. Running it in Telegram
+
+The agent lives in Telegram, so part of running it well is setting up Telegram well. These apply to one agent or many.
+
+**Your own account**
+
+- Turn on **two-step verification** (Settings → Privacy and Security → Two-Step Verification). Whoever takes over your Telegram account becomes the agent's owner: it trusts your id.
+- Your id is fixed in `OWNER_TELEGRAM_ID`; your @username can change without affecting the agent.
+
+**The bot (in @BotFather)**
+
+- One bot per agent. A token used by two programs makes both lose messages.
+- A name that cannot be confused with your other bots' (`/setname` changes the display name; the @username cannot change). Names one letter apart make agents answer for each other.
+- For groups: **Group Privacy off** (`/setprivacy` → Disable), so it reads every message, not only commands and mentions. Turn it off before adding the bot to a group, or remove the bot and add it again.
+- For agents that must read each other in a group: **Bot-to-Bot Communication** on, for each bot. Only where you want it: two agents that read each other can talk in a loop, and the agents are told never to keep a bot-to-bot exchange going on their own.
+- Never share the token, never paste it in a chat. If it leaks, `/revoke` in @BotFather and set the new one on the host.
+
+**Groups**
+
+- **Create a supergroup from the start.** Telegram turns a plain group into a supergroup on its own when you change its administrators or some of its settings, and the group gets a new id (`-100…`): the agent stops hearing it until it is told the new one. Create it as a supergroup, or change one setting that converts it (such as making the history visible to new members), before adding the agent.
+- Add the bot as a member, then tell the agent in private "join the group -100…". It answers everyone there, people and bots, so only add it to groups whose members you trust ([GROUPS.md](GROUPS.md)).
+- Make the bot an **administrator** only if it needs to (pin messages, for example); an admin bot also reads every message.
+- Address one agent by its **@username**, or reply to its message. With several agents in a group, decide which one answers messages to everyone ([GROUPS.md](GROUPS.md#several-agents-in-one-group)).
+
+**People**
+
+- **Super-users** can give the agent instructions in its groups, including installing tools: name only people you trust with the agent itself ("make 123456789 a super-user").
+- Everyone else in a group can ask for ordinary work, and can try to talk the agent round. That is why the weekly review in section 8 is required.
+
 ## Everything you can configure
 
 Three places, and nothing else. What is not listed here is fixed on purpose (the 4:00 recycle, the limits of the policy, the size of the logs).
@@ -334,21 +363,4 @@ After every change you get a private notice: "🔄 Versions changed: Claude Code
 
 ## If something is wrong
 
-| Symptom | Likely cause |
-|---|---|
-| "typing…" and no answer | Claude credential truncated or expired (see the start log). On an image older than 2026-11-23, also a session that answered in its terminal instead of sending: update, or restart the agent ([LEARNINGS.md](LEARNINGS.md), "Telegram") |
-| No reaction at all | Wrong bot token, or variables not deployed. The log says `Telegram rejected TELEGRAM_BOT_TOKEN` for a bad token |
-| Silent in a group | The bot was added before privacy mode was disabled, or the group id changed when it became a supergroup ([GROUPS.md](GROUPS.md)) |
-| It does not remember something from yesterday | The nightly memory left it out. Ask "What do you remember about …?", and say "Remember that …" for what must stay ([MEMORY.md](MEMORY.md)) |
-| A job's answer came to you instead of the group | The agent is no longer in that group; tell it to join again |
-| It refuses to send a file | The file is outside its workspace; ask it to copy what you need there, if it is not a credential |
-| The agent never starts; the log says `OWNER_TELEGRAM_ID must be your numeric Telegram id` | The owner id is a username or has a typo: use the number @userinfobot gives |
-| The agent never starts; the log says `TELEGRAM_BOT_TOKEN does not look like a token from @BotFather` | The token was mistyped or pasted with a space inside: copy it again with @BotFather's copy button |
-| The agent never starts; the log says `CLAUDE_KEY does not look like a Claude key` | Paste the whole key again: a subscription token starts with `sk-ant-oat01-`, a Console API key with `sk-ant-api03-` |
-| "⚠️ /data is not a volume" | The service has no volume at `/data`: memory, settings and jobs are lost at every redeploy. Add the volume |
-| "⚠️ I am asleep, but the host keeps me running and billed" | Serverless is off: in the service's **Settings**, turn **Serverless** on, then redeploy ([SLEEP.md](SLEEP.md)) |
-| "⚠️ IDLE_SLEEP_MINUTES is set, but I cannot sleep: …", or it never sleeps although sleep is on | The message and the log say `not sleeping: Telegram did not accept the webhook`, or `… does not reach this service on port 8080`: the public address is missing, or does not point to the port the agent listens on ([SLEEP.md](SLEEP.md)) |
-| "⚠️ Claude plan limit: weekly 86% used" | The subscription is nearly used up; past 100% the agent stops answering until it resets. Several agents on one subscription share the limit |
-| "My Telegram channel was down … Restarting" | The watchdog saw the plugin gone and restarted Claude; one message is normal, a stream of them is a bug to report |
-| Another Claude Code on the same machine stopped working when you set the agent's key | In the environment, `CLAUDE_CODE_OAUTH_TOKEN` beats that machine's own login and does not fall back to it: a revoked or mistyped value gives `401` although `claude` is logged in there. Set the key for the agent only (its `.env` or its service), never host-wide |
-| Something broke right after "🔄 Versions changed" | Go back to the previous version ([Updates, and how to go back](#updates-and-how-to-go-back)) and tell the project |
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md): the start-up errors, how to tell apart the causes of an agent that does not answer, the notices it sends you, and problems with groups, sleep and your own server.
