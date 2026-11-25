@@ -103,6 +103,10 @@ check "the threat model lists the weekly review as a human control that finds pr
 for f in bin/* policy/*; do check "CODE.md explains $f" grep -q "^### .*\`$f\`" docs/CODE.md; done
 for f in bin/*.sh; do n=$(grep -cvE '^[[:space:]]*(#|$)' "$f"); check "CODE.md gives $f its $n lines" grep -q "^| \`$f\` | $n |" docs/CODE.md; done
 check "README links the code manual" grep -q "docs/CODE.md" README.md
+# The product manual explains every feature and points to where each is documented; the canvas says the project sells nothing.
+for d in MEMORY CRON GROUPS PEERS SLEEP BACKUP SETTINGS SETUP-WITH-AI THREAT-MODEL; do check "PRODUCT.md explains the feature documented in $d.md" grep -q "($d.md" docs/PRODUCT.md; done
+check "the business model canvas states there are no revenue streams" bash -c 'sed -n "/^## Revenue streams/,/^## /p" docs/BUSINESS-MODEL-CANVAS.md | grep -q "None"'
+check "README links the product manual" grep -q "docs/PRODUCT.md" README.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do
