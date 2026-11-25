@@ -88,6 +88,9 @@ A=docs/SETUP-WITH-AI.md
 V=$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+' CHANGELOG.md | tr -d '#[ ')
 for f in README.md docs/THREAT-MODEL.md; do check "$f says Status: $V, the latest version in the CHANGELOG" grep -q "Status: $V\." "$f"; done
 check "README shows the OpenSSF Scorecard badge, linked to the full report" grep -q "api.scorecard.dev/projects/github.com/pixan-ai/agent-kernel/badge.*scorecard.dev/viewer" README.md
+# A key typed on a command line stays in the shell history: the docs ask for it with read -rs instead.
+check "no command in the docs carries a Claude key on its command line" bash -c '! grep -rnE "(OAUTH_TOKEN|API_KEY|CLAUDE_KEY)=.?sk-ant" README.md docs --include=*.md --exclude-dir=history'
+check "the guide checks the key before deploying, asking for it without showing it" grep -q "read -rs" docs/GETTING-STARTED.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do
