@@ -4,8 +4,8 @@ What is planned, what is being looked at, and what the project will not do. It c
 
 ## Planned
 
-- **A supervisor agent for fleets on a Linux server.** One agent, chosen by the owner with `ENABLE_SUPERVISOR`, creates the fleet's other agents (bot included, through Telegram's Managed Bots) and supervises them. It is built from host configuration (a systemd template and a narrow channel the owner sets up) and instructions, with no new code in the agent. Being measured on a lab server.
-- **A fleet guide** for teams and companies: installation, the supervisor, keys, groups, the weekly review and privacy.
+- **The supervisor, end to end:** verify on a real server that it creates an agent by itself from a chat request, and the update path for a fleet.
+- **A way to give one fleet agent its own Claude key** without leaving the supervisor's flow.
 
 ## Being looked at
 

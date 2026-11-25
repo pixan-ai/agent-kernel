@@ -1,0 +1,20 @@
+# Installed as /etc/agent-launchpad/compose.launchpad.yml, added to the repo's compose.yml for every fleet agent.
+# The agent's own file (written by the supervisor) gives its bot token; environment: wins over it, so the owner,
+# the Claude key and Claude's flags are always the host's.
+services:
+  agent:
+    env_file:
+      - ${FLEET_DIR:-/srv/agent-fleet}/${AGENT:?}.env
+    environment:
+      OWNER_TELEGRAM_ID: ${OWNER_TELEGRAM_ID:?set in fixed.env}
+      CLAUDE_KEY: ${CLAUDE_KEY:?set in fixed.env}
+      CLAUDE_FLAGS: ""
+      PEER_PUBLIC_KEYS: ${FLEET_PEER_PUBLIC_KEYS:-}
+      PEER_SSH_KEY: ${FLEET_PEER_SSH_KEY:-}
+    networks:
+      default: {}
+      agents:
+        aliases: ["${AGENT}"]
+networks:
+  agents:
+    external: true

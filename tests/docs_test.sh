@@ -100,11 +100,11 @@ check "the guide makes a weekly review by the owner or a super-user required" gr
 check "...and says where to look: notices, settings, installs, conversations and logs" bash -c 'f=docs/GETTING-STARTED.md; for w in "Setting changed" "What have you installed" "SSH_ORIGINAL_COMMAND=transcript" "docker compose logs" "Deploy Logs"; do sed -n "/^## 8\. Review/,/^## /p" "$f" | grep -qF "$w" || exit 1; done'
 check "the threat model lists the weekly review as a human control that finds problems late and prevents none" grep -q "weekly review.*finds.*late" docs/THREAT-MODEL.md
 # The project documents exist and the README points to each; every decision record is listed; SECURITY.md supports the current version.
-for f in docs/PRIVACY.md docs/FAQ.md docs/ROADMAP.md SUPPORT.md CODE_OF_CONDUCT.md docs/decisions/README.md; do check "README links $f" grep -qF "($f)" README.md; done
+for f in docs/PRIVACY.md docs/FAQ.md docs/ROADMAP.md SUPPORT.md CODE_OF_CONDUCT.md docs/decisions/README.md docs/FLEET.md; do check "README links $f" grep -qF "($f)" README.md; done
 for f in docs/decisions/0*.md; do check "the decisions index lists $(basename "$f")" grep -qF "($(basename "$f"))" docs/decisions/README.md; done
 check "SECURITY.md supports the current version" bash -c 'v=$(grep -m1 -oE "^## \[[0-9]+\.[0-9]+" CHANGELOG.md | tr -d "#[ "); grep -q "now $v\.x" SECURITY.md'
 # The code manual covers every file the agent runs, and its line table matches the code.
-for f in bin/* policy/*; do check "CODE.md explains $f" grep -q "^### .*\`$f\`" docs/CODE.md; done
+for f in bin/* policy/* host/launchpad/*; do check "CODE.md explains $f" grep -q "^### .*\`$f\`" docs/CODE.md; done
 for f in bin/*.sh; do n=$(grep -cvE '^[[:space:]]*(#|$)' "$f"); check "CODE.md gives $f its $n lines" grep -q "^| \`$f\` | $n |" docs/CODE.md; done
 check "README links the code manual" grep -q "docs/CODE.md" README.md
 # The product manual explains every feature and points to where each is documented; the canvas says the project sells nothing.

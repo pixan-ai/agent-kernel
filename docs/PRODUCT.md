@@ -1,6 +1,6 @@
 # Product manual
 
-What agent-kernel is, why it exists, who it is for, and every feature explained. For installing it, see [GETTING-STARTED.md](GETTING-STARTED.md); for running a fleet of agents, the fleet guide (in preparation); for how it works inside, [ARCHITECTURE.md](ARCHITECTURE.md).
+What agent-kernel is, why it exists, who it is for, and every feature explained. For installing it, see [GETTING-STARTED.md](GETTING-STARTED.md); for running a fleet of agents, [FLEET.md](FLEET.md); for how it works inside, [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## In one paragraph
 
@@ -81,6 +81,10 @@ Opt-in. Every night the memory, conversations, workspace, settings and jobs are 
 
 One click on Railway with a template, or Docker Compose on any amd64 Linux server. A prompt for your own AI assistant walks a newcomer through either path without ever asking for a key in the chat. Details: [SETUP-WITH-AI.md](SETUP-WITH-AI.md), [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md), [DEPLOY-LINUX.md](DEPLOY-LINUX.md).
 
+### Fleets and a supervisor
+
+On a Linux server, one agent chosen by the owner can create the fleet's other agents when asked: the owner confirms a new bot in Telegram, and the supervisor gets its token, starts it and supervises it. The server fixes each new agent's owner and Claude key, and only lets the supervisor start agents, not stop them. It is built from host configuration and instructions, with no new code in the agent. Details: [FLEET.md](FLEET.md).
+
 ### Security
 
 A root-owned managed policy that the agent cannot change, deny rules for credentials, Claude Code's permission classifier, hooks that tell the owner about every change to the agent's tools and settings, and a container that drops to an unprivileged user. It is not a sandbox, and the documentation says exactly where the protection is code and where it is the model's judgment. A weekly human review is required. Details: [THREAT-MODEL.md](THREAT-MODEL.md), [SECURITY.md](../SECURITY.md).
@@ -95,8 +99,7 @@ The software is free. The person running it pays their own providers directly:
 
 ## What is next
 
-- A supervisor agent that creates and supervises the other agents of a fleet on a Linux server, set up by the owner and enabled with `ENABLE_SUPERVISOR`.
-- A fleet guide for teams and companies.
+- More hosts for the one-click path, and ARM images. See the [roadmap](ROADMAP.md).
 - See the [CHANGELOG](../CHANGELOG.md) for what changed and why.
 
 The business model canvas is in [BUSINESS-MODEL-CANVAS.md](BUSINESS-MODEL-CANVAS.md).

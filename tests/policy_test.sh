@@ -33,6 +33,9 @@ check "the image loads MCP tools upfront, so the reply tool never has to be sear
 check "...and the managed instructions say that an answer exists only if it is sent with the reply tool" grep -q "reply. tool.*terminal" "$(dirname "$POLICY")/CLAUDE.md"
 # Asked for their address, two agents of one project gave an IP and a container id, which change at every deploy, or said they did not
 # know it (seen live, 2026-11-24). Railway gives each service its private address; the address is not always the service's name.
+# A fleet supervisor (docs/FLEET.md) follows the steps the lab measured on 2026-11-25: only the owner in private, the creation message
+# from the owner and recent, the token never shown, the start judged by its exit code.
+check "a supervisor creates agents only for its owner, in private, with the steps measured in the lab" bash -c 'f="$1"; sed -n "/^## Supervisor/,/^## /p" "$f" > /tmp/sup; grep -q "ENABLE_SUPERVISOR" /tmp/sup && grep -q "only when your owner asks you in private" /tmp/sup && grep -q "managed_bot_created" /tmp/sup && grep -q "from.id" /tmp/sup && grep -q "Never print, send or summarise it" /tmp/sup && grep -q "Only exit code 0 means it started" /tmp/sup' _ "$(dirname "$POLICY")/CLAUDE.md"
 check "the managed instructions give the agent its private address for fellow agents, and warn against the IP and the hostname" \
   grep -q 'RAILWAY_PRIVATE_DOMAIN.*hostname' "$(dirname "$POLICY")/CLAUDE.md"
 # In a group of three agents, two answered "Tast: …" (one of them is Toast), then both apologised: more noise (seen live, 2026-11-24).

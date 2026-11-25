@@ -8,4 +8,4 @@ One short record per decision that shapes the project: what was decided, why, an
 | [0002](0002-a-budget-of-247-lines.md) | The agent's own code stays within 247 lines of Bash | Accepted |
 | [0003](0003-group-silence-is-an-instruction.md) | In groups, who answers is an instruction, not a mechanism | Accepted |
 | [0004](0004-a-required-weekly-review.md) | A weekly human review of every agent is required | Accepted |
-| [0005](0005-a-supervisor-built-from-host-configuration.md) | A supervisor that creates agents, built from host configuration and instructions | Proposed |
+| [0005](0005-a-supervisor-built-from-host-configuration.md) | A supervisor that creates agents, built from host configuration and instructions | Accepted |
