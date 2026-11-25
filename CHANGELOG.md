@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- `docs/PRODUCT.md`: the product manual: why the project exists, who it is for, what makes it different, every feature explained and where it is documented, and what it costs to run. `docs/BUSINESS-MODEL-CANVAS.md`: how the project creates value and sustains itself; it sells nothing.
+
 ### Changed
 
 - GETTING-STARTED.md: a weekly review of every agent by the owner or a super-user is required, and the guide says who, what and where: the notices, the installed tools and settings, the conversations, the log, and what to look for. The threat model lists it as a human control that finds problems late and prevents none.
