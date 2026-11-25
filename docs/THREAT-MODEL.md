@@ -49,6 +49,10 @@ Status: 1.2. No independent security audit; the external reviews of 2026-11-17, 
 - **What is lost.** Nothing is prevented by code: a persistent member can try to talk the agent round, and the owner learns after the fact. Only the first changed file is named; a deletion is not reported; a change made in the same command as a `config.sh` call is not reported. The hook and the agent are one user, so the agent can also move the mark.
 - **Why.** A hook that refused installs by matching command text was removed on 2026-11-18: every audit found another spelling, and the refusals seen live came from the agent and from Claude Code.
 
+## The human review
+
+Much of what stands between a persuaded agent and harm is an instruction, judged by the model, and the owner is told after the fact. So the guide requires a **weekly review** by the owner or a super-user: the notices, the installed tools and settings, the conversations and the log ([GETTING-STARTED.md](GETTING-STARTED.md#8-review-your-agents-every-week-required)). The weekly review is a human control: it finds problems late and prevents none. An agent persuaded on Monday can act before Friday's review. Keep the agents with the most power out of open groups.
+
 ## What this project does not claim
 
 - It is **not a sandbox**: a shell command can do what the container's user can do.
