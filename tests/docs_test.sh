@@ -114,6 +114,13 @@ check "...and forbids asking for a secret in the chat" grep -q "Never ask the us
 grep -oE 'echo "(missing |Telegram rejected )?(CLAUDE_KEY|OWNER_TELEGRAM_ID|TELEGRAM_BOT_TOKEN)[^:"(]*' bin/start.sh | sed 's/^echo "//; s/ *$//' | sort -u > /tmp/start-errors
 check "start.sh has credential errors to quote (the extraction works)" test "$(wc -l < /tmp/start-errors)" -ge 4
 while IFS= read -r e; do check "the setup prompt quotes the start-up error \"$e\"" grep -qF -- "$e" "$A"; done < /tmp/start-errors
+# One place for "something is wrong": the troubleshooting guide quotes every start-up error, and says how to tell the causes of a silent agent apart.
+T=docs/TROUBLESHOOTING.md
+while IFS= read -r e; do check "TROUBLESHOOTING.md quotes the start-up error \"$e\"" grep -qF -- "$e" "$T"; done < /tmp/start-errors
+check "TROUBLESHOOTING.md says how to tell the causes of a silent agent apart, in order" grep -q "^## The agent does not answer" "$T"
+for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md docs/DEPLOY-RAILWAY.md; do check "$f links to the troubleshooting guide" grep -q "TROUBLESHOOTING.md" "$f"; done
+# Running agents on Telegram: the user guide has its own section (a supergroup from the start, privacy, names, the owner's account).
+check "the guide has a section on running the agent in Telegram" bash -c 'sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "supergroup" && sed -n "/^## 9\. Running it in Telegram/,/^## /p" docs/GETTING-STARTED.md | grep -q "two-step verification"'
 check "the guide says how long until Railway shows Sleeping" grep -q "about 13 minutes" docs/GETTING-STARTED.md
 # 247 is a budget, not a target: a 24/7 agent within 247 lines. A change that needs a line finds one to give back (CONTRIBUTING.md).
 check "README's \"within 247 lines of Bash\" holds: $lines lines of code in bin/*.sh" test "$lines" -le 247

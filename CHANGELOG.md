@@ -4,8 +4,14 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- `docs/TROUBLESHOOTING.md`: one place for what to do when something is wrong: the start-up errors as the agent prints them (a test keeps them in step with `start.sh`), six steps to tell apart the causes of an agent that does not answer, every notice it sends its owner, and problems with groups, sleep, your own server and memory. The guide's table moved there.
+- GETTING-STARTED.md, "Running it in Telegram": the owner's account (two-step verification), the bot (one per agent, distinct names, Group Privacy, Bot-to-Bot), groups (a supergroup from the start), and who to make a super-user.
+
 ### Changed
 
+- PEERS.md: the network declared in `compose.override.yml` was verified on a Linux server to keep two agents and their aliases across a recreation of the containers.
 - GETTING-STARTED.md: a weekly review of every agent by the owner or a super-user is required, and the guide says who, what and where: the notices, the installed tools and settings, the conversations, the log, and what to look for. The threat model lists it as a human control that finds problems late and prevents none.
 - PEERS.md: two agents on one Linux server see each other over a Docker network declared in a `compose.override.yml`, so the next `docker compose up -d` keeps it; a network joined by hand was lost at every update, and with it the name the other agent looks up (lab, 2026-11-24). DEPLOY-LINUX.md no longer says to leave the peer view off. `compose.override.yml` is git-ignored.
 - CONTRIBUTING.md: the tests that run inside the image empty `/data` first; never run them in a live agent.
