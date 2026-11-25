@@ -1,0 +1,3 @@
+# Installed as /etc/ssh/authorized_keys.d/launchpad (root, 644). One line: the supervisor's public key (the .pub of its PEER_SSH_KEY),
+# accepted only from Docker's networks, with no terminal or forwarding, and only to run the start command.
+from="172.16.0.0/12",restrict,command="/usr/local/sbin/agent-launchpad-start" ssh-ed25519 AAAA...replace-with-the-supervisor-public-key supervisor

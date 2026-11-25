@@ -54,4 +54,4 @@ In a group, the agent reads every message (with Group Privacy off) and everythin
 
 ## For companies
 
-An agent that serves people other than its owner handles their messages: tell them, and check what your own rules require (consent, retention, where data may be stored). Use a Console API key in the company's name, so the data is under the company's agreement with Anthropic. The fleet guide (in preparation) will cover this in detail.
+An agent that serves people other than its owner handles their messages: tell them, and check what your own rules require (consent, retention, where data may be stored). Use a Console API key in the company's name, so the data is under the company's agreement with Anthropic. The [fleet guide](FLEET.md) covers running several agents.

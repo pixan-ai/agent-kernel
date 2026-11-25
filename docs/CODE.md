@@ -151,6 +151,38 @@ One line: turns the terminal recording in `/data/tui.log` into readable text and
 
 The jobs every agent runs, from the image: the 4:00 recycle (Claude restarts, dreams and starts clean), `watchdog.sh` every five minutes, and the 3:30 backup. `config.sh` appends the agent's own jobs below them.
 
+## Host configuration for a fleet
+
+`host/launchpad/` is optional and runs on the owner's Linux server, not in the agent: it lets a supervisor agent start new agents (see [FLEET.md](FLEET.md)). It is configuration for standard tools (OpenSSH, sudo, systemd, Docker Compose) plus one small wrapper, held to **100 lines** by `tests/launchpad_test.sh`, counted apart from `bin/`.
+
+### `host/launchpad/agent-launchpad-start`
+
+The only command the supervisor's key may run. The requested name arrives in `SSH_ORIGINAL_COMMAND`; it is treated as data: only lowercase letters, digits and `-`, starting with a letter, 2 to 31 characters. Then it asks `sudo` to start exactly `agent-launchpad@NAME.service`.
+
+### `host/launchpad/sudoers`
+
+The second fence: the `launchpad` user may run `systemctl start` on a well-formed `agent-launchpad@NAME.service`, with an anchored regular expression, and nothing else: not stop, restart, another unit or several units.
+
+### `host/launchpad/sshd_config.conf` and `host/launchpad/authorized_keys`
+
+The `launchpad` user's keys are in a root-owned file it cannot change. The one key, the supervisor's, is accepted only from Docker's networks (`from=`), with no terminal or forwarding (`restrict`), and only to run the wrapper (`command=`).
+
+### `host/launchpad/agent-launchpad@.service`
+
+The systemd template that starts agent NAME. `AssertPathExists` makes the start fail when the agent's file is missing; a `Condition` would exit 0 and look like a start. Compose interpolates only from root's `fixed.env` (`--env-file`), in a dedicated clone with an empty `.env`: a running agent's folder would give the new agent that agent's `.env`. Stopping keeps the volume.
+
+### `host/launchpad/compose.launchpad.yml`
+
+Added to the repo's `compose.yml` for every fleet agent. The agent's own file, written by the supervisor, gives its bot token; `environment:` wins over it, so the owner, the Claude key, Claude's flags and the fleet's peer keys are always the host's. Each agent joins the fleet network with its name as alias, and gets its own volume from its project name.
+
+### `host/launchpad/fixed.env.example`
+
+What every fleet agent gets from the host: the owner, one Claude key for the fleet, the time zone, and the fleet's peer keys.
+
+### `host/launchpad/supervisor.override.yml`
+
+Copied into the supervisor's folder as `compose.override.yml`: it turns on `ENABLE_SUPERVISOR`, mounts the fleet folder at `/fleet`, and lets the supervisor reach the host's SSH (`host-gateway`). Only the supervisor gets these.
+
 ## The policy
 
 `policy/` is copied to `/etc/claude-code/`, owned by root: the agent cannot change it, and Claude Code gives it the highest precedence.

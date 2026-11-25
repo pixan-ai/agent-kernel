@@ -1,0 +1,4 @@
+# Installed as /etc/sudoers.d/agent-launchpad (root, 440), checked with visudo -cf first. Needs sudo 1.9.10 or later (regular expressions).
+# The launchpad user may start a fleet agent, nothing else: not stop it, not restart it, not another unit.
+Defaults:launchpad !requiretty
+launchpad ALL=(root) NOPASSWD: /usr/bin/systemctl ^start agent-launchpad@[a-z][a-z0-9-]{1,30}\.service$

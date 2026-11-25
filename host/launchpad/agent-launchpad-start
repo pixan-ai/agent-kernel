@@ -1,0 +1,10 @@
+#!/bin/sh
+# Installed root-owned as /usr/local/sbin/agent-launchpad-start; the only command the supervisor's key may run (docs/FLEET.md).
+# The requested name arrives in SSH_ORIGINAL_COMMAND. It is data, never shell: checked here, then passed quoted. The sudo rule
+# checks it again, so a mistake in one fence is caught by the other (lab, 2026-11-25).
+set -u
+N=${SSH_ORIGINAL_COMMAND:-}
+case "$N" in *[!a-z0-9-]* | '') echo "refused: a name is lowercase letters, digits and -" >&2; exit 2 ;; esac
+case "$N" in [a-z]?*) ;; *) echo "refused: a name starts with a letter and has 2 to 31 characters" >&2; exit 2 ;; esac
+[ ${#N} -le 31 ] || { echo "refused: a name has 2 to 31 characters" >&2; exit 2; }
+exec /usr/bin/sudo -n /usr/bin/systemctl start "agent-launchpad@$N.service"

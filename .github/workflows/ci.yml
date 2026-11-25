@@ -25,11 +25,13 @@ jobs:
         with:
           persist-credentials: false
       - name: ShellCheck
-        run: shellcheck bin/*.sh tests/*.sh
+        run: shellcheck bin/*.sh tests/*.sh host/launchpad/agent-launchpad-start
       - name: ShellCheck on the policy's hook commands
         run: jq -r '.. | objects | select(has("command")) | .command' policy/managed-settings.json | while IFS= read -r c; do printf '%s\n' "$c" | shellcheck -s sh - || exit 1; done
       - name: Docs match the code
         run: bash tests/docs_test.sh
+      - name: Launchpad host configuration (docs/FLEET.md)
+        run: bash tests/launchpad_test.sh
       - name: Workflows are pinned and least-privilege
         run: bash tests/workflows_test.sh
       - name: Policy is valid JSON

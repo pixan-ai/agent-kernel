@@ -100,6 +100,7 @@ The full picture is in the [threat model](docs/THREAT-MODEL.md). Report vulnerab
 |---|---|
 | Installing and using one agent | [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md), or [docs/SETUP-WITH-AI.md](docs/SETUP-WITH-AI.md) with your own AI assistant |
 | Something is wrong | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| Several agents for a team or a company, with a supervisor | [docs/FLEET.md](docs/FLEET.md) |
 | Common questions | [docs/FAQ.md](docs/FAQ.md) |
 | What the product is, every feature | [docs/PRODUCT.md](docs/PRODUCT.md) |
 | How the code works | [docs/CODE.md](docs/CODE.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
@@ -130,6 +131,7 @@ bin/installs.sh               records what the agent installs and tells the owne
 bin/system.cron               the image's own scheduled jobs (daily recycle, watchdog, nightly backup)
 policy/managed-settings.json  the managed policy and hooks
 policy/CLAUDE.md              what the agent is told about its limits (managed: root-owned, updated with the image)
+host/launchpad/               optional host configuration for a fleet on a Linux server: lets a supervisor agent start new agents (see docs/FLEET.md), within 100 lines, counted apart from bin/
 tests/                        acceptance tests (run inside the built image) and docs-vs-code checks
 docs/                         guide, architecture, threat model, findings, deployment, secrets, releasing
 THIRD-PARTY.md                the third-party software in the image and its licenses

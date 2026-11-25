@@ -1,0 +1,21 @@
+# Installed as /etc/systemd/system/agent-launchpad@.service. Starts the fleet agent NAME (systemctl start agent-launchpad@NAME).
+# The project is a dedicated clone with an empty .env, never a running agent's folder: Compose would read that agent's .env.
+# Interpolation comes only from root's fixed.env (--env-file), and the unit's environment wins over everything else.
+[Unit]
+Description=agent-kernel fleet agent %i
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+# Without the agent's file the start fails with a non-zero exit (a Condition would exit 0 and look like a start).
+AssertPathExists=/srv/agent-fleet/%i.env
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/agent-launchpad
+EnvironmentFile=/etc/agent-launchpad/fixed.env
+Environment=AGENT=%i
+ExecStart=/usr/bin/docker compose -p agent-%i --env-file /etc/agent-launchpad/fixed.env -f /opt/agent-launchpad/compose.yml -f /etc/agent-launchpad/compose.launchpad.yml up -d --build
+ExecStop=/usr/bin/docker compose -p agent-%i --env-file /etc/agent-launchpad/fixed.env -f /opt/agent-launchpad/compose.yml -f /etc/agent-launchpad/compose.launchpad.yml stop
+
+[Install]
+WantedBy=multi-user.target

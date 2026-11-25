@@ -1,0 +1,17 @@
+# Copy into the supervisor's folder as compose.override.yml (next to its compose.yml), then docker compose up -d.
+# Only the supervisor gets the fleet folder and the way to the host's SSH; its .env also holds MANAGER_BOT_TOKEN.
+services:
+  agent:
+    environment:
+      ENABLE_SUPERVISOR: "true"
+    volumes:
+      - /srv/agent-fleet:/fleet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default: {}
+      agents:
+        aliases: [supervisor]
+networks:
+  agents:
+    external: true
