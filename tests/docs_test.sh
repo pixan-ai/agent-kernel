@@ -84,6 +84,7 @@ check "...and every mention of railway ssh says how to drop to the agent's user,
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 # A prompt a newcomer gives to their own AI assistant to be walked through the setup (2026-11-24). It must say what the code does now.
 A=docs/SETUP-WITH-AI.md
+check "README shows the OpenSSF Scorecard badge, linked to the full report" grep -q "api.scorecard.dev/projects/github.com/pixan-ai/agent-kernel/badge.*scorecard.dev/viewer" README.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do

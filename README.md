@@ -3,6 +3,7 @@
 [![CI](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml/badge.svg)](https://github.com/pixan-ai/agent-kernel/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16964/badge)](https://www.bestpractices.dev/projects/16964)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pixan-ai/agent-kernel/badge)](https://scorecard.dev/viewer/?uri=github.com/pixan-ai/agent-kernel)
 
 A **Claude Code-based 24/7 personal agent on Telegram** in one container, using only official components: the Claude Code harness, the official Telegram channel plugin and a managed policy file. Memory, scheduled jobs, groups and fellow agents, within 247 lines of [Bash](https://www.gnu.org/software/bash/) and no custom agent code.
 
