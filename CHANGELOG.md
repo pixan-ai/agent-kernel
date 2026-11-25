@@ -4,6 +4,12 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Changed
+
+- PEERS.md: two agents on one Linux server see each other over a Docker network declared in a `compose.override.yml`, so the next `docker compose up -d` keeps it; a network joined by hand was lost at every update, and with it the name the other agent looks up (lab, 2026-11-24). DEPLOY-LINUX.md no longer says to leave the peer view off. `compose.override.yml` is git-ignored.
+- CONTRIBUTING.md: the tests that run inside the image empty `/data` first; never run them in a live agent.
+- THREAT-MODEL.md: on a Linux server, an agent refused to read `/proc/self/environ` before calling any tool, so the deny rule from 1.2.0 was not exercised.
+
 ## [1.2.0] - 2026-11-25
 
 ### Fixed

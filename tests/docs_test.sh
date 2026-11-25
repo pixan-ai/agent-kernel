@@ -91,6 +91,10 @@ check "README shows the OpenSSF Scorecard badge, linked to the full report" grep
 # A key typed on a command line stays in the shell history: the docs ask for it with read -rs instead.
 check "no command in the docs carries a Claude key on its command line" bash -c '! grep -rnE "(OAUTH_TOKEN|API_KEY|CLAUDE_KEY)=.?sk-ant" README.md docs --include=*.md --exclude-dir=history'
 check "the guide checks the key before deploying, asking for it without showing it" grep -q "read -rs" docs/GETTING-STARTED.md
+# On one Linux server, a network joined by hand is lost at every `docker compose up -d`, and with it the name a fellow agent looks up (lab, 2026-11-24).
+check "PEERS.md declares the shared network in a compose override, so an update keeps it" bash -c 'grep -q "compose.override.yml" docs/PEERS.md && grep -q "external: true" docs/PEERS.md && grep -q "aliases:" docs/PEERS.md'
+check "compose.override.yml is git-ignored, so git pull never touches a server's own override" grep -qx "compose.override.yml" .gitignore
+check "CONTRIBUTING warns that the image tests delete /data, so they never run in a live agent" grep -q "never .*live agent" CONTRIBUTING.md
 for f in README.md docs/GETTING-STARTED.md docs/DEPLOY-LINUX.md; do check "$f links to the setup prompt" grep -q "SETUP-WITH-AI.md" "$f"; done
 # A new variable in .env (an agent's own tool, seen live 2026-11-24) never reaches a container that is only restarted; and -v deletes the volume.
 for f in docs/DEPLOY-LINUX.md docs/SETUP-WITH-AI.md; do

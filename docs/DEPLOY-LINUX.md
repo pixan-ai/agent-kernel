@@ -5,7 +5,7 @@ The same repository runs on any Linux server with Docker, for example a company'
 ## What the server needs
 
 - Linux on **amd64** (x86-64), with Docker and the Compose plugin. Docker should start at boot: `sudo systemctl enable --now docker`.
-- **Outgoing** internet to Telegram, Anthropic and GitHub. **No incoming port**: the agent asks Telegram for messages; nothing connects to it. (The optional sleep and the peer view do need an incoming address; leave them off here.)
+- **Outgoing** internet to Telegram, Anthropic and GitHub. **No incoming port**: the agent asks Telegram for messages; nothing connects to it. (The optional sleep needs an incoming address; leave it off here. Agents on the same server can look at each other over a Docker network, with no published port: [PEERS.md](PEERS.md#two-agents-on-one-linux-server).)
 - About 4 GB of memory for the agent (the cap in `compose.yml`, `MEM_LIMIT`) and disk for its volume.
 
 ## Install
