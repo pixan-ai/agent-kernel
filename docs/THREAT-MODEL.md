@@ -1,6 +1,6 @@
 # Threat model
 
-Status: 1.1. No independent security audit; the external reviews of 2026-11-17, 2026-11-18 and 2026-11-21 were addressed. Evidence labels as in [FINDINGS.md](FINDINGS.md): **Lab** (observed), **Docs**, **Code**, **Open** (not verified).
+Status: 1.2. No independent security audit; the external reviews of 2026-11-17, 2026-11-18 and 2026-11-21 were addressed. Evidence labels as in [FINDINGS.md](FINDINGS.md): **Lab** (observed), **Docs**, **Code**, **Open** (not verified).
 
 ## What is protected
 

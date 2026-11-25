@@ -16,7 +16,7 @@ Without the variable, only `ghcr.io` gets the image. GitHub's attestation is sto
 
 ## Cut a release
 
-1. In a pull request, move "Unreleased" in [CHANGELOG.md](../CHANGELOG.md) under the new version.
+1. In a pull request, move "Unreleased" in [CHANGELOG.md](../CHANGELOG.md) under the new version, and set the same version in the "Status" line of [README.md](../README.md) and of [THREAT-MODEL.md](THREAT-MODEL.md) (a test compares the three). The number follows Semantic Versioning: a fix only, the third number; something new that keeps working as before (a variable, a setting), the second; a change that breaks an existing installation, the first.
 2. Tag the merge commit and push the tag:
 
    ```bash

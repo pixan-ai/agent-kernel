@@ -84,6 +84,10 @@ check "...and every mention of railway ssh says how to drop to the agent's user,
 lines=$(cat bin/*.sh | grep -cvE '^[[:space:]]*(#|$)')
 # A prompt a newcomer gives to their own AI assistant to be walked through the setup (2026-11-24). It must say what the code does now.
 A=docs/SETUP-WITH-AI.md
+# A release moves the version in three places; the CHANGELOG leads and the other two must follow (docs/RELEASING.md).
+V=$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+' CHANGELOG.md | tr -d '#[ ')
+for f in README.md docs/THREAT-MODEL.md; do check "$f says Status: $V, the latest version in the CHANGELOG" grep -q "Status: $V\." "$f"; done
+check "README shows the OpenSSF Scorecard badge, linked to the full report" grep -q "api.scorecard.dev/projects/github.com/pixan-ai/agent-kernel/badge.*scorecard.dev/viewer" README.md
 # A key typed on a command line stays in the shell history: the docs ask for it with read -rs instead.
 check "no command in the docs carries a Claude key on its command line" bash -c '! grep -rnE "(OAUTH_TOKEN|API_KEY|CLAUDE_KEY)=.?sk-ant" README.md docs --include=*.md --exclude-dir=history'
 check "the guide checks the key before deploying, asking for it without showing it" grep -q "read -rs" docs/GETTING-STARTED.md

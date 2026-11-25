@@ -4,6 +4,8 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-25
+
 ### Fixed
 
 - **Security:** the policy denied `printenv`, `env` and reading `/proc` as a file, but a shell command such as `cat /proc/self/environ` matched none of them, and Claude's own process environment holds the Claude credential (measured on a Linux server, 2026-11-24). A new deny rule refuses any shell command that names `/proc/…/environ`. It matches the command's text, so it is a net and not a wall; the threat model says so, and that Docker's default seccomp profile blocks the user namespaces the stronger isolation needs.
@@ -23,6 +25,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Changed
 
+- README: the OpenSSF Scorecard badge, linked to the full report, next to the Best Practices badge.
 - The guide checks the Claude key before deploying: one command, in an empty configuration directory, that asks for the key without showing it. A revoked or mistyped key was only found once the agent stayed mute; the start log's length check finds a truncated one only. The guide also says to write down which account a subscription token came from (the token does not say), and that a key set for a whole machine takes over every Claude Code on it and does not fall back to its login. SECRETS.md and LEARNINGS.md carry what was measured.
 - DEPLOY-LINUX.md and the setup prompt: after changing `.env`, run `docker compose up -d`; `docker compose restart` does not read `.env` again, so a new variable never reached the agent (an agent told its owner to "restart" after adding one, seen live 2026-11-24). They also warn that `docker compose down -v` deletes the agent's memory, settings and tools, and DEPLOY-LINUX.md shows how to read the agent's recent conversation and status on the server.
 - In a group, a message that starts with another agent's name or @username is not answered by the others, also when the names differ by one letter, and a wrong answer is not followed by an apology: being silent is the answer. Three agents in one group had answered a message for one of them, then two apologised (seen live, 2026-11-24). It is still an instruction, not a mechanism; GROUPS.md says what helps: names that cannot be confused, the @username, and one agent as the voice for messages to everyone.
