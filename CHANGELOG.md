@@ -4,6 +4,10 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+
+- `docs/CODE.md`: the code manual: every script in `bin/` step by step, the files of the policy (each hook and what it is for), the Dockerfile and compose file, and which test covers what. A test keeps its line table equal to the code and fails when a file in `bin/` or `policy/` is not explained.
+
 ### Changed
 
 - GETTING-STARTED.md: a weekly review of every agent by the owner or a super-user is required, and the guide says who, what and where: the notices, the installed tools and settings, the conversations, the log, and what to look for. The threat model lists it as a human control that finds problems late and prevents none.
