@@ -23,7 +23,7 @@ Use: `whisper-ctranslate2 --model_directory /data/tools/models/whisper-small --c
 `ffmpeg`, the static build that `imageio-ffmpeg` carries: video frames, cuts, conversions.
 
 ```sh
-uv pip install imageio-ffmpeg==0.8.1
+uv pip install imageio-ffmpeg==0.8.2
 ln -sf "$(/data/tools/venv/bin/python -c 'import imageio_ffmpeg as m; print(m.get_ffmpeg_exe())')" /data/bin/ffmpeg
 ```
 
