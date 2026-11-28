@@ -15,6 +15,7 @@ All notable changes to this project. Format: [Keep a Changelog](https://keepacha
 
 ### Fixed
 
+- **The bug report asks for the log lines around the problem, no longer for the agent's screen**, which shows its private conversations. The log never prints a key or a token (`SUPPORT.md`). Found while writing the project's book.
 - SECURITY.md said the supported release was 1.0.x; it is 1.2.x, and a test now ties it to the CHANGELOG.
 
 ### Changed
