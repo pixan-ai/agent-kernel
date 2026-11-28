@@ -23,6 +23,6 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Output of bin/screen.sh
-      description: Remove tokens, keys and chat ids before pasting.
+      label: The log lines around the problem
+      description: From the service's log (docs/TROUBLESHOOTING.md says where). The log never prints a key or a token. Do not paste the agent's screen or its conversations, or the contents of .env.
       render: shell

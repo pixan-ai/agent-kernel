@@ -59,6 +59,7 @@ check "...and README links Anthropic's legal page" grep -q "code.claude.com/docs
 # Third-party licences go into the image, and name the versions the Dockerfile pins (audit of 2026-11-17, A4).
 check "the image carries LICENSE and THIRD-PARTY.md" bash -c 'grep -qx "COPY LICENSE THIRD-PARTY.md /usr/share/doc/agent-kernel/" Dockerfile && grep -qx "!THIRD-PARTY.md" .dockerignore'
 check "THIRD-PARTY.md names no version of what moves on its own (Renovate, Debian), so it never goes stale (v1 audit, B4)" bash -c '! grep -qE "(supercronic|uv|Typst|Bun|pandoc.|poppler-utils.) [0-9]|Debian 13\.[0-9]" THIRD-PARTY.md'
+check "the bug report asks for log lines, never the screen, which shows private conversations (SUPPORT.md)" bash -c 'grep -q "log lines" .github/ISSUE_TEMPLATE/bug_report.yml && ! grep -q "screen.sh" .github/ISSUE_TEMPLATE/bug_report.yml'
 check "no GPL FFmpeg in the image: voice and video are in the optional stack, which the agent is pointed to (decided 2026-11-18)" bash -c '! grep -v "^#" Dockerfile | grep -qiE "whisper|imageio|ffmpeg" && grep -q "/etc/claude-code/stack.md" policy/CLAUDE.md && grep -q "whisper-ctranslate2==" policy/stack.md && grep -q "imageio-ffmpeg==" policy/stack.md'
 # The Railway template's settings are kept in the repository: the same variables as the guide, the volume, the uid.
 tmpl=$(sed -n '/^## The one-click template/,$p' docs/DEPLOY-RAILWAY.md)
